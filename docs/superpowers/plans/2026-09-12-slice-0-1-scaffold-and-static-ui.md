@@ -361,7 +361,7 @@ app.on('activate', () => {
 
 - [ ] **Step 5: Write `src/preload/index.ts`**
 
-For now this exposes only a platform probe — real channels arrive in Task 12 and get handlers in Slice 2+.
+For now this exposes only a platform probe — real channels arrive in Task 10 and get handlers in Slice 2+.
 
 ```ts
 import { contextBridge } from 'electron';
@@ -370,6 +370,21 @@ import { contextBridge } from 'electron';
 contextBridge.exposeInMainWorld('api', {
   platform: process.platform,
 });
+```
+
+- [ ] **Step 5b: Write a placeholder renderer entry at `src/renderer/index.ts`**
+
+Step 1 deleted `src/renderer.ts`, which `index.html` still points at. Without a replacement, this task's own `npm start` check would load a broken renderer. React arrives in Task 3, which replaces both this file and the script tag.
+
+```ts
+// Placeholder renderer entry. Task 3 replaces this with the React root.
+document.body.textContent = 'Issue Desk';
+```
+
+Then repoint the script tag in `index.html`:
+
+```html
+    <script type="module" src="/src/renderer/index.ts"></script>
 ```
 
 - [ ] **Step 6: Point Forge at the new paths**
