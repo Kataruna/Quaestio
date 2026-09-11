@@ -1,0 +1,31 @@
+:root{
+/* --- base: lime --- */
+--lime-100:#F1FBD9;--lime-200:#E2F8AC;--lime-300:#D4F57D;--lime-400:#C7F24C;--lime-500:#B6E230;--lime-600:#9CC81C;--lime-700:#6E8F14;
+/* --- base: citron (secondary accent, clinical surfaces) --- */
+--citron-200:#FBF7B8;--citron-300:#F7F07A;--citron-400:#F2E93B;--citron-500:#DCD21F;
+/* --- base: ink (near-black chrome) --- */
+--ink-900:#0E0F10;--ink-800:#16181A;--ink-700:#232629;--ink-600:#3A3E42;
+/* --- base: neutral (warm greys) --- */
+--neutral-0:#FFFFFF;--neutral-25:#FBFBF9;--neutral-50:#F4F4F1;--neutral-100:#EEEEEA;--neutral-200:#E4E4DE;--neutral-300:#D6D6CF;--neutral-400:#B4B5AE;--neutral-500:#8A8D8F;--neutral-600:#6E7174;--neutral-700:#4A4D50;
+/* --- base: semantic hues --- */
+--red-400:#F0433A;--red-100:#FDE4E2;
+--orange-400:#FB8C3A;--orange-100:#FEEBDA;
+--yellow-400:#F5C93B;--yellow-100:#FDF2D6;
+--green-400:#59C24C;--green-100:#E1F5DE;
+--blue-400:#3D7BF7;--blue-100:#E0EAFE;
+
+/* --- semantic: text --- */
+--text-strong:var(--ink-800);--text-body:var(--ink-700);--text-muted:var(--neutral-600);--text-faint:var(--neutral-400);--text-on-ink:var(--neutral-0);--text-on-accent:var(--ink-900);--text-link:var(--ink-800);
+/* --- semantic: surfaces --- */
+--surface-app:var(--neutral-50);--surface-card:var(--neutral-0);--surface-sunken:var(--neutral-100);--surface-chip:var(--neutral-0);--surface-chip-idle:var(--neutral-100);--surface-ink:var(--ink-900);--surface-accent:var(--lime-400);--surface-accent-soft:var(--lime-100);--surface-overlay:rgba(14,15,16,.55);
+/* --- semantic: lines --- */
+--line-hairline:var(--neutral-200);--line-strong:var(--neutral-300);--line-on-ink:rgba(255,255,255,.14);
+/* --- semantic: status --- */
+--status-hot:var(--red-400);--status-hot-bg:var(--red-100);
+--status-warm:var(--orange-400);--status-warm-bg:var(--orange-100);
+--status-due:var(--yellow-400);--status-due-bg:var(--yellow-100);
+--status-won:var(--green-400);--status-won-bg:var(--green-100);
+--status-info:var(--blue-400);--status-info-bg:var(--blue-100);
+/* --- semantic: focus --- */
+--focus-ring:var(--lime-500);
+}

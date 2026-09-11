@@ -1,0 +1,28 @@
+:root{
+--font-display:"Outfit",system-ui,sans-serif;
+--font-sans:"Plus Jakarta Sans",system-ui,sans-serif;
+--font-mono:"DM Mono",ui-monospace,monospace;
+
+--size-display-xl:52px;--size-display-l:40px;--size-display-m:32px;--size-stat:38px;
+--size-title-l:22px;--size-title-m:18px;--size-title-s:16px;
+--size-body:14px;--size-body-s:13px;--size-label:12px;--size-micro:11px;--size-nano:10px;
+
+--lh-tight:1.05;/* @kind font */
+--lh-snug:1.2;/* @kind font */
+--lh-normal:1.45;/* @kind font */
+--lh-loose:1.6;/* @kind font */
+
+--weight-light:300;--weight-regular:400;--weight-medium:500;--weight-semibold:600;--weight-bold:700;/* @kind font */
+
+--track-wordmark:.14em;--track-caps:.06em;--track-tight:-.02em;--track-normal:0;/* @kind font */
+
+/* semantic roles */
+--type-wordmark:var(--weight-semibold) var(--size-display-l)/var(--lh-tight) var(--font-display);
+--type-page-title:var(--weight-semibold) var(--size-display-m)/var(--lh-snug) var(--font-display);
+--type-stat:var(--weight-medium) var(--size-stat)/var(--lh-tight) var(--font-display);
+--type-section:var(--weight-semibold) var(--size-title-m)/var(--lh-snug) var(--font-display);
+--type-card-title:var(--weight-semibold) var(--size-title-s)/var(--lh-snug) var(--font-display);
+--type-body:var(--weight-regular) var(--size-body)/var(--lh-normal) var(--font-sans);
+--type-label:var(--weight-medium) var(--size-label)/var(--lh-normal) var(--font-sans);
+--type-micro:var(--weight-medium) var(--size-micro)/var(--lh-normal) var(--font-sans);
+}

@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics>
+<meta name="design_doc_mode" content="canvas">
+<link rel="stylesheet" href="_ds/soft-nature-design-system-879b9ab6-cd50-4832-ade1-a3609afde34f/tokens/fonts.css">
+<link rel="stylesheet" href="_ds/soft-nature-design-system-879b9ab6-cd50-4832-ade1-a3609afde34f/tokens/colors.css">
+<link rel="stylesheet" href="_ds/soft-nature-design-system-879b9ab6-cd50-4832-ade1-a3609afde34f/tokens/typography.css">
+<link rel="stylesheet" href="_ds/soft-nature-design-system-879b9ab6-cd50-4832-ade1-a3609afde34f/tokens/spacing.css">
+<link rel="stylesheet" href="_ds/soft-nature-design-system-879b9ab6-cd50-4832-ade1-a3609afde34f/tokens/radius.css">
+<link rel="stylesheet" href="_ds/soft-nature-design-system-879b9ab6-cd50-4832-ade1-a3609afde34f/tokens/elevation.css">
+<link rel="stylesheet" href="_ds/soft-nature-design-system-879b9ab6-cd50-4832-ade1-a3609afde34f/tokens/motion.css">
+<link rel="stylesheet" href="_ds/soft-nature-design-system-879b9ab6-cd50-4832-ade1-a3609afde34f/tokens/base.css">
+<link rel="stylesheet" href="_ds/soft-nature-design-system-879b9ab6-cd50-4832-ade1-a3609afde34f/styles.css">
+<script src="_ds/soft-nature-design-system-879b9ab6-cd50-4832-ade1-a3609afde34f/_ds_bundle.js"></script>
+<style>
+body{margin:0;background:#EAEAE5;font-family:"Plus Jakarta Sans",system-ui,sans-serif}
+a{color:var(--ink-800);text-decoration:none}a:hover{color:var(--lime-700)}
+.dv-turn{padding:44px 48px 36px;border-bottom:1px solid rgba(0,0,0,.08);scroll-margin-top:16px}
+.dv-thd{display:flex;align-items:baseline;gap:10px;margin:0 0 22px}
+.dv-tid{font:600 10px ui-monospace,Menlo,monospace;padding:3px 7px;background:#0E0F10;color:#fff;border-radius:4px}
+.dv-tname{font:600 13px/1.2 "Plus Jakarta Sans",system-ui,sans-serif;color:#0E0F10}
+.dv-opts{display:flex;flex-wrap:wrap;gap:34px;align-items:flex-start}
+.dv-opt{flex:none;display:flex;flex-direction:column;gap:9px;scroll-margin-top:16px}
+.dv-oid{font:600 10.5px ui-monospace,Menlo,monospace;padding:3px 7px;background:rgba(0,0,0,.08);color:#0E0F10;border-radius:5px}
+.dv-olabel{display:flex;align-items:baseline;gap:8px;font:400 11px/1.3 "Plus Jakarta Sans",system-ui,sans-serif;color:rgba(0,0,0,.55)}
+.dv-opt:target .dv-oid{background:#C7F24C}
+.dv-next{margin:24px 0 0;font:12px/1.5 "Plus Jakarta Sans",system-ui,sans-serif;color:rgba(0,0,0,.5)}
+.win{background:var(--surface-app);border-radius:16px;box-shadow:0 18px 48px rgba(14,15,16,.14);overflow:hidden}
+</style>
+</helmet>
+
+<section class="dv-turn" id="t1">
+<div class="dv-thd"><a class="dv-tid" href="#t1">1</a><span class="dv-tname">Atlas — GitHub issue tracker, first pass</span></div>
+<div class="dv-opts">
+
+<div class="dv-opt" id="1a">
+<div class="dv-olabel"><a class="dv-oid" href="#1a">1a</a>Main board — repo tabs, columns by type, folder cards</div>
+<div class="win" style="width:1120px">
+  <div style="height:44px;background:var(--surface-ink);display:flex;align-items:center;gap:14px;padding:0 16px">
+    <span style="display:flex;gap:7px"><span style="width:11px;height:11px;border-radius:99px;background:#F0433A"></span><span style="width:11px;height:11px;border-radius:99px;background:#F5C93B"></span><span style="width:11px;height:11px;border-radius:99px;background:#59C24C"></span></span>
+    <span style="font:600 11px/1 Outfit,sans-serif;letter-spacing:.14em;color:#fff;margin-left:8px">ATLAS</span>
+    <span style="margin-left:auto;display:flex;align-items:center;gap:10px">
+      <span style="display:inline-flex;align-items:center;gap:7px;padding:5px 12px;border-radius:99px;background:rgba(255,255,255,.1);font:500 11px/1 'Plus Jakarta Sans',sans-serif;color:rgba(255,255,255,.82)"><span style="width:6px;height:6px;border-radius:99px;background:#C7F24C"></span>Synced 2 min ago</span>
+      <x-import component-from-global-scope="SoftNatureDesignSystem_879b9a.IconButton" icon="refresh-cw" size="sm" variant="quiet" style="color:rgba(255,255,255,.7)" hint-size="28px,28px"></x-import>
+    </span>
+  </div>
+
+  <div style="display:flex;align-items:flex-end;gap:4px;padding:10px 16px 0;background:var(--surface-sunken)">
+    <div style="display:flex;align-items:center;gap:9px;padding:10px 16px 11px;background:var(--surface-card);border-radius:12px 12px 0 0;box-shadow:0 -1px 4px rgba(14,15,16,.05)">
+      <span style="width:7px;height:7px;border-radius:99px;background:#C7F24C"></span>
+      <span style="font:var(--weight-semibold) 13px/1 var(--font-display);color:var(--text-strong)">acme/atlas-web</span>
+      <span style="font:var(--type-micro);color:var(--text-faint)">18</span>
+      <span style="font:12px/1 sans-serif;color:var(--text-faint)">×</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:9px;padding:9px 16px 10px;border-radius:12px 12px 0 0;background:rgba(255,255,255,.45)">
+      <span style="font:var(--weight-medium) 13px/1 var(--font-display);color:var(--text-muted)">acme/design-system</span>
+      <span style="font:var(--type-micro);color:var(--text-faint)">7</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:9px;padding:9px 16px 10px;border-radius:12px 12px 0 0;background:rgba(255,255,255,.45)">
+      <span style="font:var(--weight-medium) 13px/1 var(--font-display);color:var(--text-muted)">acme/cli-tools</span>
+      <span style="font:var(--type-micro);color:var(--text-faint)">3</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:9px;padding:9px 16px 10px;border-radius:12px 12px 0 0;background:rgba(255,255,255,.45)">
+      <span style="font:var(--weight-medium) 13px/1 var(--font-display);color:var(--text-muted)">acme/docs-site</span>
+      <span style="font:var(--type-micro);color:var(--text-faint)">12</span>
+    </div>
+    <span style="display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;margin:0 0 8px 6px;border-radius:99px;background:var(--surface-card);box-shadow:var(--shadow-xs);font:400 15px/1 var(--font-sans);color:var(--text-muted)">+</span>
+  </div>
+
+  <div style="display:flex;background:var(--surface-app);padding:18px 20px 26px;gap:16px">
+    <x-import component-from-global-scope="SoftNatureDesignSystem_879b9a.SidebarRail" items="{{ railItems }}" active-id="board" hint-size="56px,240px"></x-import>
+    <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:18px">
+
+      <div style="display:flex;align-items:center;gap:12px">
+        <div>
+          <div style="font:var(--type-page-title);letter-spacing:var(--track-tight);color:var(--text-strong)">atlas-web</div>
+          <div style="font:var(--type-micro);color:var(--text-muted);margin-top:3px">18 open issues · main · last commit 4h ago</div>
+        </div>
+        <span style="margin-left:auto;display:flex;align-items:center;gap:10px">
+          <x-import component-from-global-scope="SoftNatureDesignSystem_879b9a.SearchField" placeholder="Search issues" style="width:210px" hint-size="210px,36px"></x-import>
+          <x-import component-from-global-scope="SoftNatureDesignSystem_879b9a.SelectPill" value="Priority" options="{{ sortOptions }}" hint-size="auto,34px"></x-import>
+          <x-import component-from-global-scope="SoftNatureDesignSystem_879b9a.SelectPill" value="Assignee: All" options="{{ assigneeOptions }}" hint-size="auto,34px"></x-import>
+          <x-import component-from-global-scope="SoftNatureDesignSystem_879b9a.Button" variant="primary" icon-left="plus" size="sm" hint-size="auto,34px">New Task</x-import>
+        </span>
+      </div>
+
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;align-items:start">
+
+        <div style="display:flex;flex-direction:column;gap:22px">
+          <div style="display:flex;align-items:center;gap:8px">
+            <span style="width:8px;height:8px;border-radius:99px;background:var(--status-hot)"></span>
+            <span style="font:var(--type-section);letter-spacing:var(--track-tight);color:var(--text-strong)">Bug</span>
+            <span style="font:var(--type-label);color:var(--text-strong);border-bottom:1.5px solid var(--lime-400);padding-bottom:2px">6</span>
+          </div>
+
+          <article style="position:relative;background:var(--surface-card);border-radius:4px 22px 22px 22px;box-shadow:var(--elevation-card);padding:16px">
+            <span style="position:absolute;top:-13px;left:0;height:15px;padding:0 14px;display:inline-flex;align-items:center;gap:6px;background:var(--surface-card);border-radius:7px 7px 0 0;font:var(--weight-bold) 9px/1 var(--font-sans);letter-spacing:.07em;text-transform:uppercase;color:var(--text-muted)"><span style="width:5px;height:5px;border-radius:99px;background:var(--status-hot)"></span>Bug</span>
+            <div style="display:flex;align-items:center;gap:8px">
+              <x-import component-from-global-scope="SoftNatureDesignSystem_879b9a.Avatar" name="Sarah Kwan" size="xs" hint-size="22px,22px"></x-import>
+              <span style="font:var(--type-micro);color:var(--text-muted)">sarah-kwan</span>
+              <span style="font:var(--weight-medium) 11px/1 var(--font-mono);color:var(--text-faint)">#482</span>
+              <span style="margin-left:auto"><x-import component-from-global-scope="SoftNatureDesignSystem_879b9a.Badge" tone="hot" dot="{{ true }}" hint-size="auto,20px">P1</x-import></span>
+            </div>
+            <h3 style="margin:11px 0 6px;font:var(--type-card-title);letter-spacing:var(--track-tight);color:var(--text-strong);text-wrap:pretty">Token refresh loop on expired session</h3>
+            <p style="margin:0;font:var(--type-body);color:var(--text-muted);text-wrap:pretty">Client retries the refresh endpoint indefinitely when the server returns 401 on an expired grant.</p>
+            <div style="display:flex;align-items:center;gap:10px;margin-top:14px">
+              <span style="font:var(--type-micro);color:var(--text-muted)">Due 28 March</span>
+              <span style="margin-left:auto;display:flex;align-items:center;gap:7px">
+                <span style="font:var(--type-micro);color:var(--text-faint)">1/4</span>
+                <x-import component-from-global-scope="SoftNatureDesignSystem_879b9a.ProgressTrack" value="{{ 25 }}" height="{{ 5 }}" style="width:52px" hint-size="52px,5px"></x-import>
+              </span>
+            </div>
+          </article>
+
+          <article style="position:relative;background:var(--surface-card);border-radius:4px 22px 22px 22px;box-shadow:var(--elevation-card);padding:16px">
+            <span style="position:absolute;top:-13px;left:0;height:15px;padding:0 14px;display:inline-flex;align-items:center;gap:6px;background:var(--surface-card);border-radius:7px 7px 0 0;font:var(--weight-bold) 9px/1 var(--font-sans);letter-spacing:.07em;text-transform:uppercase;color:var(--text-muted)"><span style="width:5px;height:5px;border-radius:99px;background:var(--status-hot)"></span>Bug</span>
+            <div style="display:flex;align-items:center;gap:8px">
+              <x-import component-from-global-scope="SoftNatureDesignSystem_879b9a.Avatar" name="Mika Ito" size="xs" hint-size="22px,22px"></x-import>
+              <span style="font:var(--type-micro);color:var(--text-muted)">m-ito</span>
+              <span style="font:var(--weight-medium) 11px/1 var(--font-mono);color:var(--text-faint)">#476</span>
+              <span style="margin-left:auto"><x-import component-from-global-scope="SoftNatureDesignSystem_879b9a.Badge" tone="warm" dot="{{ true }}" hint-size="auto,20px">P2</x-import></span>
+            </div>
+            <h3 style="margin:11px 0 6px;font:var(--type-card-title);letter-spacing:var(--track-tight);color:var(--text-strong);text-wrap:pretty">Sidebar collapses on resize under 1280px</h3>
+            <p style="margin:0;font:var(--type-body);color:var(--text-muted);text-wrap:pretty">Rail overlaps the first column instead of docking. Reproduced on Chrome and Safari.</p>
+            <div style="display:flex;align-items:center;gap:10px;margin-top:14px">
+              <span style="font:var(--type-micro);color:var(--text-muted)">Due 2 April</span>
+              <span style="margin-left:auto;display:flex;align-items:center;gap:7px">
+                <span style="font:var(--type-micro);color:var(--text-faint)">0/2</span>
+                <x-import component-from-global-scope="SoftNatureDesignSystem_879b9a.ProgressTrack" value="{{ 0 }}" height="{{ 5 }}" style="width:52px" hint-size="52px,5px"></x-import>
+              </span>
+            </div>
+          </article>
+
+          <article style="position:relative;background:var(--surface-card);border-radius:4px 22px 22px 22px;box-shadow:var(--elevation-card);padding:16px">
+            <span style="position:absolute;top:-13px;left:0;height:15px;padding:0 14px;display:inline-flex;align-items:center;gap:6px;background:var(--surface-card);border-radius:7px 7px 0 0;font:var(--weight-bold) 9px/1 var(--font-sans);letter-spacing:.07em;text-transform:uppercase;color:var(--text-muted)"><span style="width:5px;height:5px;border-radius:99px;background:var(--status-hot)"></span>Bug</span>
+            <div style="display:flex;align-items:center;gap:8px">
+              <x-import component-from-global-scope="SoftNatureDesignSystem_879b9a.Avatar" name="Dev Patel" size="xs" hint-size="22px,22px"></x-import>
+              <span style="font:var(--type-micro);color:var(--text-muted)">dpatel</span>
+              <span style="font:var(--weight-medium) 11px/1 var(--font-mono);color:var(--text-faint)">#471</span>
+              <span style="margin-left:auto"><x-import component-from-global-scope="SoftNatureDesignSystem_879b9a.Badge" tone="neutral" hint-size="auto,20px">P3</x-import></span>
+            </div>
+            <h3 style="margin:11px 0 6px;font:var(--type-card-title);letter-spacing:var(--track-tight);color:var(--text-strong);text-wrap:pretty">CSV export drops the last row</h3>
+            <p style="margin:0;font:var(--type-body);color:var(--text-muted);text-wrap:pretty">Off-by-one in the stream writer. Only affects exports over 500 rows.</p>
+            <div style="display:flex;align-items:center;gap:10px;margin-top:14px">
+              <span style="font:var(--type-micro);color:var(--text-muted)">No due date</span>
+              <span style="margin-left:auto;display:flex;align-items:center;gap:7px">
+                <span style="font:var(--type-micro);color:var(--text-faint)">2/2</span>
+                <x-import component-from-global-scope="SoftNatureDesignSystem_879b9a.ProgressTrack" value="{{ 100 }}" height="{{ 5 }}" style="width:52px" hint-size="52px,5px"></x-import>
+              </span>
+            </div>
+          </article>
+        </div>
+
+        <div style="display:flex;flex-direction:column;gap:22px">
+          <div style="display:flex;align-items:center;gap:8px">
+            <span style="width:8px;height:8px;border-radius:99px;background:var(--status-info)"></span>
+            <span style="font:var(--type-section);letter-spacing:var(--track-tight);color:var(--text-strong)">Feature</span>
+            <span style="font:var(--type-label);color:var(--text-strong);border-bottom:1.5px solid var(--lime-400);padding-bottom:2px">9</span>
+          </div>
+
+          <article style="position:relative;background:var(--surface-accent);border-radius:4px 22px 22px 22px;box-shadow:var(--elevation-card);padding:16px">
+            <span style="position:absolute;top:-13px;left:0;height:15px;padding:0 14px;display:inline-flex;align-items:center;gap:6px;background:var(--surface-accent);border-radius:7px 7px 0 0;font:var(--weight-bold) 9px/1 var(--font-sans);letter-spacing:.07em;text-transform:uppercase;color:var(--ink-900)"><span style="width:5px;height:5px;border-radius:99px;background:var(--ink-900)"></span>Feature</span>
+            <div style="display:flex;align-items:center;gap:8px">
+              <x-import component-from-global-scope="SoftNatureDesignSystem_879b9a.Avatar" name="Ravi Nair" size="xs" style="background:rgba(14,15,16,.12);color:var(--ink-900)" hint-size="22px,22px"></x-import>
+              <span style="font:var(--type-micro);color:rgba(14,15,16,.72)">ravi-n</span>
+              <span style="font:var(--weight-medium) 11px/1 var(--font-mono);color:rgba(14,15,16,.5)">#489</span>
+              <span style="margin-left:auto;display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:99px;background:var(--ink-900);font:var(--type-micro);color:#fff"><span style="width:6px;height:6px;border-radius:99px;background:var(--lime-400)"></span>In progress</span>
+            </div>
+            <h3 style="margin:11px 0 6px;font:var(--type-card-title);letter-spacing:var(--track-tight);color:var(--ink-900);text-wrap:pretty">Bulk assign issues from the board</h3>
+            <p style="margin:0;font:var(--type-body);color:rgba(14,15,16,.72);text-wrap:pretty">Multi-select cards, then set assignee, milestone or priority in one action.</p>
+            <div style="display:flex;align-items:center;gap:10px;margin-top:14px">
+              <span style="font:var(--type-micro);color:rgba(14,15,16,.72)">Milestone 1.4 · Due 5 April</span>
+              <span style="margin-left:auto;display:flex;align-items:center;gap:7px">
+                <span style="font:var(--type-micro);color:rgba(14,15,16,.6)">2/5</span>
+                <x-import component-from-global-scope="SoftNatureDesignSystem_879b9a.ProgressTrack" value="{{ 40 }}" height="{{ 5 }}" tone="ink" style="width:52px;background:rgba(14,15,16,.16)" hint-size="52px,5px"></x-import>
+              </span>
+            </div>
+          </article>
+
+          <article style="position:relative;background:var(--surface-card);border-radius:4px 22px 22px 22px;box-shadow:var(--elevation-card);padding:16px">
+            <span style="position:absolute;top:-13px;left:0;height:15px;padding:0 14px;display:inline-flex;align-items:center;gap:6px;background:var(--surface-card);border-radius:7px 7px 0 0;font:var(--weight-bold) 9px/1 var(--font-sans);letter-spacing:.07em;text-transform:uppercase;color:var(--text-muted)"><span style="width:5px;height:5px;border-radius:99px;background:var(--status-info)"></span>Feature</span>
+            <div style="display:flex;align-items:center;gap:8px">
+              <x-import component-from-global-scope="SoftNatureDesignSystem_879b9a.Avatar" name="Lin Chen" size="xs" hint-size="22px,22px"></x-import>
+              <span style="font:var(--type-micro);color:var(--text-muted)">lm-chen</span>
+              <span style="font:var(--weight-medium) 11px/1 var(--font-mono);color:var(--text-faint)">#490</span>
+              <span style="margin-left:auto"><x-import component-from-global-scope="SoftNatureDesignSystem_879b9a.Badge" tone="hot" dot="{{ true }}" hint-size="auto,20px">P1</x-import></span>
+            </div>
+            <h3 style="margin:11px 0 6px;font:var(--type-card-title);letter-spacing:var(--track-tight);color:var(--text-strong);text-wrap:pretty">Saved filter views</h3>
+            <p style="margin:0;font:var(--type-body);color:var(--text-muted);text-wrap:pretty">Persist a filter set per repo tab and restore it on launch.</p>
+            <div style="display:flex;align-items:center;gap:10px;margin-top:14px">
+              <span style="font:var(--type-micro);color:var(--text-muted)">Milestone 1.4</span>
+              <span style="margin-left:auto;display:flex;align-items:center;gap:7px">
+                <span style="font:var(--type-micro);color:var(--text-faint)">1/6</span>
+                <x-import component-from-global-scope="SoftNatureDesignSystem_879b9a.ProgressTrack" value="{{ 17 }}" height="{{ 5 }}" style="width:52px" hint-size="52px,5px"></x-import>
+              </span>
+            </div>
+          </article>
+
+          <article style="position:relative;background:var(--surface-card);border-radius:4px 22px 22px 22px;box-shadow:var(--elevation-card);padding:16px">
+            <span style="position:absolute;top:-13px;left:0;height:15px;padding:0 14px;display:inline-flex;align-items:center;gap:6px;background:var(--surface-card);border-radius:7px 7px 0 0;font:var(--weight-bold) 9px/1 var(--font-sans);letter-spacing:.07em;text-transform:uppercase;color:var(--text-muted)"><span style="width:5px;height:5px;border-radius:99px;background:var(--status-info)"></span>Feature</span>
+            <div style="display:flex;align-items:center;gap:8px">
+              <x-import component-from-global-scope="SoftNatureDesignSystem_879b9a.Avatar" name="Sarah Kwan" size="xs" hint-size="22px,22px"></x-import>
+              <span style="font:var(--type-micro);color:var(--text-muted)">sarah-kwan</span>
+              <span style="font:var(--weight-medium) 11px/1 var(--font-mono);color:var(--text-faint)">#485</span>
+              <span style="margin-left:auto"><x-import component-from-global-scope="SoftNatureDesignSystem_879b9a.Badge" tone="neutral" hint-size="auto,20px">P3</x-import></span>
+            </div>
+            <h3 style="margin:11px 0 6px;font:var(--type-card-title);letter-spacing:var(--track-tight);color:var(--text-strong);text-wrap:pretty">Keyboard shortcuts for column moves</h3>
+            <p style="margin:0;font:var(--type-body);color:var(--text-muted);text-wrap:pretty">Move a focused card between type columns without the mouse.</p>
+            <div style="display:flex;align-items:center;gap:10px;margin-top:14px">
+              <span style="font:var(--type-micro);color:var(--text-muted)">No due date</span>
+              <span style="margin-left:auto;display:flex;align-items:center;gap:7px">
+                <span style="font:var(--type-micro);color:var(--text-faint)">0/3</span>
+                <x-import component-from-global-scope="SoftNatureDesignSystem_879b9a.ProgressTrack" value="{{ 0 }}" height="{{ 5 }}" style="width:52px" hint-size="52px,5px"></x-import>
+              </span>
+            </div>
+          </article>
+        </div>
+
+        <div style="display:flex;flex-direction:column;gap:22px">
+          <div style="display:flex;align-items:center;gap:8px">
+            <span style="width:8px;height:8px;border-radius:99px;background:var(--neutral-400)"></span>
+            <span style="font:var(--type-section);letter-spacing:var(--track-tight);color:var(--text-strong)">Chore</span>
+            <span style="font:var(--type-label);color:var(--text-strong);border-bottom:1.5px solid var(--lime-400);padding-bottom:2px">3</span>
+          </div>
+
+          <article style="position:relative;background:var(--surface-card);border-radius:4px 22px 22px 22px;box-shadow:var(--elevation-card);padding:16px">
+            <span style="position:absolute;top:-13px;left:0;height:15px;padding:0 14px;display:inline-flex;align-items:center;gap:6px;background:var(--surface-card);border-radius:7px 7px 0 0;font:var(--weight-bold) 9px/1 var(--font-sans);letter-spacing:.07em;text-transform:uppercase;color:var(--text-muted)"><span style="width:5px;height:5px;border-radius:99px;background:var(--neutral-400)"></span>Chore</span>
+            <div style="display:flex;align-items:center;gap:8px">
+              <x-import component-from-global-scope="SoftNatureDesignSystem_879b9a.Avatar" name="Mika Ito" size="xs" hint-size="22px,22px"></x-import>
+              <span style="font:var(--type-micro);color:var(--text-muted)">m-ito</span>
+              <span style="font:var(--weight-medium) 11px/1 var(--font-mono);color:var(--text-faint)">#465</span>
+              <span style="margin-left:auto"><x-import component-from-global-scope="SoftNatureDesignSystem_879b9a.Badge" tone="warm" dot="{{ true }}" hint-size="auto,20px">P2</x-import></span>
+            </div>
+            <h3 style="margin:11px 0 6px;font:var(--type-card-title);letter-spacing:var(--track-tight);color:var(--text-strong);text-wrap:pretty">Split CI job by package</h3>
+            <p style="margin:0;font:var(--type-body);color:var(--text-muted);text-wrap:pretty">Full suite runs on every commit. Cut the 14 minute wait for docs-only changes.</p>
+            <div style="display:flex;align-items:center;gap:10px;margin-top:14px">
+              <span style="font:var(--type-micro);color:var(--text-muted)">Due 30 March</span>
+              <span style="margin-left:auto;display:flex;align-items:center;gap:7px">
+                <span style="font:var(--type-micro);color:var(--text-faint)">3/4</span>
+                <x-import component-from-global-scope="SoftNatureDesignSystem_879b9a.ProgressTrack" value="{{ 75 }}" height="{{ 5 }}" style="width:52px" hint-size="52px,5px"></x-import>
+              </span>
+            </div>
+          </article>
+
+          <article style="position:relative;background:var(--surface-card);border-radius:4px 22px 22px 22px;box-shadow:var(--elevation-card);padding:16px">
+            <span style="position:absolute;top:-13px;left:0;height:15px;padding:0 14px;display:inline-flex;align-items:center;gap:6px;background:var(--surface-card);border-radius:7px 7px 0 0;font:var(--weight-bold) 9px/1 var(--font-sans);letter-spacing:.07em;text-transform:uppercase;color:var(--text-muted)"><span style="width:5px;height:5px;border-radius:99px;background:var(--neutral-400)"></span>Chore</span>
+            <div style="display:flex;align-items:center;gap:8px">
+              <x-import component-from-global-scope="SoftNatureDesignSystem_879b9a.Avatar" name="Dev Patel" size="xs" hint-size="22px,22px"></x-import>
+              <span style="font:var(--type-micro);color:var(--text-muted)">dpatel</span>
+              <span style="font:var(--weight-medium) 11px/1 var(--font-mono);color:var(--text-faint)">#468</span>
+              <span style="margin-left:auto"><x-import component-from-global-scope="SoftNatureDesignSystem_879b9a.Badge" tone="neutral" hint-size="auto,20px">P3</x-import></span>
+            </div>
+            <h3 style="margin:11px 0 6px;font:var(--type-card-title);letter-spacing:var(--track-tight);color:var(--text-strong);text-wrap:pretty">Bump lucide to 0.474</h3>
+            <p style="margin:0;font:var(--type-body);color:var(--text-muted);text-wrap:pretty">Two glyph names changed upstream. Check the rail and card icons after upgrade.</p>
+            <div style="display:flex;align-items:center;gap:10px;margin-top:14px">
+              <span style="font:var(--type-micro);color:var(--text-muted)">Due 27 March</span>
+              <span style="margin-left:auto;display:flex;align-items:center;gap:7px">
+                <span style="font:var(--type-micro);color:var(--text-faint)">1/1</span>
+                <x-import component-from-global-scope="SoftNatureDesignSystem_879b9a.ProgressTrack" value="{{ 100 }}" height="{{ 5 }}" style="width:52px" hint-size="52px,5px"></x-import>
+              </span>
+            </div>
+          </article>
+
+          <div style="border-radius:22px;background:rgba(14,15,16,.035);padding:18px;text-align:center;font:var(--type-micro);color:var(--text-faint)">Drop a card here to retype it</div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<div class="dv-opt" id="1b">
+<div class="dv-olabel"><a class="dv-oid" href="#1b">1b</a>Card treatments — three notch reads</div>
+<div style="display:flex;gap:20px;padding:26px 24px;background:var(--surface-app);border-radius:20px;box-shadow:0 10px 30px rgba(14,15,16,.1)">
+  <div style="width:272px;display:flex;flex-direction:column;gap:12px">
+    <div style="font:var(--type-micro);color:var(--text-faint)">A · Notch tab, type in the tab</div>
+    <article style="position:relative;margin-top:8px;background:var(--surface-card);border-radius:4px 22px 22px 22px;box-shadow:var(--elevation-card);padding:16px">
+      <span style="position:absolute;top:-13px;left:0;height:15px;padding:0 14px;display:inline-flex;align-items:center;gap:6px;background:var(--surface-card);border-radius:7px 7px 0 0;font:var(--weight-bold) 9px/1 var(--font-sans);letter-spacing:.07em;text-transform:uppercase;color:var(--text-muted)"><span style="width:5px;height:5px;border-radius:99px;background:var(--status-hot)"></span>Bug</span>
+      <div style="display:flex;align-items:center;gap:8px">
+        <x-import component-from-global-scope="SoftNatureDesignSystem_879b9a.Avatar" name="Sarah Kwan" size="xs" hint-size="22px,22px"></x-import>
+        <span style="font:var(--type-micro);color:var(--text-muted)">sarah-kwan</span>
+        <span style="font:var(--weight-medium) 11px/1 var(--font-mono);color:var(--text-faint)">#482</span>
+        <span style="margin-left:auto"><x-import component-from-global-scope="SoftNatureDesignSystem_879b9a.Badge" tone="hot" dot="{{ true }}" hint-size="auto,20px">P1</x-import></span>
+      </div>
+      <h3 style="margin:11px 0 6px;font:var(--type-card-title);letter-spacing:var(--track-tight);color:var(--text-strong)">Token refresh loop on expired session</h3>
+      <p style="margin:0;font:var(--type-body);color:var(--text-muted)">Client retries the refresh endpoint indefinitely on an expired grant.</p>
+      <div style="display:flex;align-items:center;margin-top:14px"><span style="font:var(--type-micro);color:var(--text-muted)">Due 28 March</span><span style="margin-left:auto;font:var(--type-micro);color:var(--text-faint)">1/4</span></div>
+    </article>
+  </div>
+
+  <div style="width:272px;display:flex;flex-direction:column;gap:12px">
+    <div style="font:var(--type-micro);color:var(--text-faint)">B · Ink tab, priority carried by the tab colour</div>
+    <article style="position:relative;margin-top:8px;background:var(--surface-card);border-radius:4px 22px 22px 22px;box-shadow:var(--elevation-card);padding:18px 16px 16px">
+      <span style="position:absolute;top:-15px;left:0;height:17px;padding:0 13px;display:inline-flex;align-items:center;gap:6px;background:var(--surface-ink);border-radius:8px 8px 0 0;font:var(--weight-bold) 9px/1 var(--font-sans);letter-spacing:.07em;text-transform:uppercase;color:#fff">Bug · P1</span>
+      <h3 style="margin:0 0 6px;font:var(--type-card-title);letter-spacing:var(--track-tight);color:var(--text-strong)">Token refresh loop on expired session</h3>
+      <p style="margin:0 0 14px;font:var(--type-body);color:var(--text-muted)">Client retries the refresh endpoint indefinitely on an expired grant.</p>
+      <div style="display:flex;align-items:center;gap:8px;padding-top:12px;border-top:1px solid var(--line-hairline)">
+        <x-import component-from-global-scope="SoftNatureDesignSystem_879b9a.Avatar" name="Sarah Kwan" size="xs" hint-size="22px,22px"></x-import>
+        <span style="font:var(--type-micro);color:var(--text-muted)">sarah-kwan · #482</span>
+        <span style="margin-left:auto;font:var(--type-micro);color:var(--text-faint)">1/4 · 28 Mar</span>
+      </div>
+    </article>
+  </div>
+
+  <div style="width:272px;display:flex;flex-direction:column;gap:12px">
+    <div style="font:var(--type-micro);color:var(--text-faint)">C · Wide tab with subtask checklist open</div>
+    <article style="position:relative;margin-top:8px;background:var(--surface-card);border-radius:4px 22px 22px 22px;box-shadow:var(--elevation-card-hover);padding:16px">
+      <span style="position:absolute;top:-14px;left:0;height:16px;padding:0 16px;display:inline-flex;align-items:center;gap:6px;background:var(--surface-card);border-radius:8px 8px 0 0;font:var(--weight-bold) 9px/1 var(--font-sans);letter-spacing:.07em;text-transform:uppercase;color:var(--text-muted)"><span style="width:5px;height:5px;border-radius:99px;background:var(--status-hot)"></span>Bug · atlas-web</span>
+      <div style="display:flex;align-items:center;gap:8px">
+        <x-import component-from-global-scope="SoftNatureDesignSystem_879b9a.Avatar" name="Sarah Kwan" size="xs" hint-size="22px,22px"></x-import>
+        <span style="font:var(--type-micro);color:var(--text-muted)">sarah-kwan</span>
+        <span style="margin-left:auto"><x-import component-from-global-scope="SoftNatureDesignSystem_879b9a.Badge" tone="hot" dot="{{ true }}" hint-size="auto,20px">P1</x-import></span>
+      </div>
+      <h3 style="margin:11px 0 10px;font:var(--type-card-title);letter-spacing:var(--track-tight);color:var(--text-strong)">Token refresh loop on expired session</h3>
+      <div style="display:flex;flex-direction:column;gap:8px;padding:12px;border-radius:14px;background:var(--surface-sunken)">
+        <x-import component-from-global-scope="SoftNatureDesignSystem_879b9a.Checkbox" checked="{{ true }}" label="Reproduce with expired grant" style="font:var(--type-micro)" hint-size="100%,20px"></x-import>
+        <x-import component-from-global-scope="SoftNatureDesignSystem_879b9a.Checkbox" label="Add retry ceiling" style="font:var(--type-micro)" hint-size="100%,20px"></x-import>
+        <x-import component-from-global-scope="SoftNatureDesignSystem_879b9a.Checkbox" label="Cover with a regression test" style="font:var(--type-micro)" hint-size="100%,20px"></x-import>
+      </div>
+      <div style="display:flex;align-items:center;margin-top:12px"><span style="font:var(--type-micro);color:var(--text-muted)">Due 28 March</span><span style="margin-left:auto;font:var(--type-micro);color:var(--text-faint)">1/4</span></div>
+    </article>
+  </div>
+</div>
+</div>
+
+<div class="dv-opt" id="1c">
+<div class="dv-olabel"><a class="dv-oid" href="#1c">1c</a>Dense row layout — same data, list instead of columns</div>
+<div class="win" style="width:760px">
+  <div style="padding:20px 22px;display:flex;flex-direction:column;gap:14px">
+    <div style="display:flex;align-items:center;gap:10px">
+      <span style="font:var(--type-section);letter-spacing:var(--track-tight);color:var(--text-strong)">atlas-web</span>
+      <span style="font:var(--type-micro);color:var(--text-muted)">grouped by type</span>
+      <span style="margin-left:auto;display:flex;gap:6px">
+        <x-import component-from-global-scope="SoftNatureDesignSystem_879b9a.FilterChip" active="{{ true }}" hint-size="auto,32px">All</x-import>
+        <x-import component-from-global-scope="SoftNatureDesignSystem_879b9a.FilterChip" dot-color="#F0433A" hint-size="auto,32px">Bug</x-import>
+        <x-import component-from-global-scope="SoftNatureDesignSystem_879b9a.FilterChip" dot-color="#3D7BF7" hint-size="auto,32px">Feature</x-import>
+        <x-import component-from-global-scope="SoftNatureDesignSystem_879b9a.FilterChip" dot-color="#B4B5AE" hint-size="auto,32px">Chore</x-import>
+      </span>
+    </div>
+
+    <div style="font:var(--weight-bold) 9px/1 var(--font-sans);letter-spacing:.07em;text-transform:uppercase;color:var(--text-faint);margin-top:4px">Bug — 6</div>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <div style="position:relative;display:flex;align-items:center;gap:12px;background:var(--surface-card);border-radius:4px 18px 18px 18px;box-shadow:var(--elevation-card);padding:12px 16px">
+        <span style="position:absolute;top:-9px;left:0;height:11px;padding:0 12px;display:inline-flex;align-items:center;background:var(--surface-card);border-radius:6px 6px 0 0;font:var(--weight-bold) 8px/1 var(--font-sans);letter-spacing:.07em;text-transform:uppercase;color:var(--status-hot)">Bug</span>
+        <x-import component-from-global-scope="SoftNatureDesignSystem_879b9a.Avatar" name="Sarah Kwan" size="xs" hint-size="22px,22px"></x-import>
+        <span style="font:var(--weight-semibold) 14px/1.3 var(--font-display);color:var(--text-strong)">Token refresh loop on expired session</span>
+        <span style="font:var(--weight-medium) 11px/1 var(--font-mono);color:var(--text-faint)">#482</span>
+        <span style="margin-left:auto;display:flex;align-items:center;gap:12px">
+          <span style="font:var(--type-micro);color:var(--text-muted)">1/4</span>
+          <span style="font:var(--type-micro);color:var(--text-muted)">28 Mar</span>
+          <x-import component-from-global-scope="SoftNatureDesignSystem_879b9a.Badge" tone="hot" dot="{{ true }}" hint-size="auto,20px">P1</x-import>
+        </span>
+      </div>
+      <div style="position:relative;display:flex;align-items:center;gap:12px;background:var(--surface-card);border-radius:4px 18px 18px 18px;box-shadow:var(--elevation-card);padding:12px 16px">
+        <span style="position:absolute;top:-9px;left:0;height:11px;padding:0 12px;display:inline-flex;align-items:center;background:var(--surface-card);border-radius:6px 6px 0 0;font:var(--weight-bold) 8px/1 var(--font-sans);letter-spacing:.07em;text-transform:uppercase;color:var(--status-hot)">Bug</span>
+        <x-import component-from-global-scope="SoftNatureDesignSystem_879b9a.Avatar" name="Mika Ito" size="xs" hint-size="22px,22px"></x-import>
+        <span style="font:var(--weight-semibold) 14px/1.3 var(--font-display);color:var(--text-strong)">Sidebar collapses on resize under 1280px</span>
+        <span style="font:var(--weight-medium) 11px/1 var(--font-mono);color:var(--text-faint)">#476</span>
+        <span style="margin-left:auto;display:flex;align-items:center;gap:12px">
+          <span style="font:var(--type-micro);color:var(--text-muted)">0/2</span>
+          <span style="font:var(--type-micro);color:var(--text-muted)">2 Apr</span>
+          <x-import component-from-global-scope="SoftNatureDesignSystem_879b9a.Badge" tone="warm" dot="{{ true }}" hint-size="auto,20px">P2</x-import>
+        </span>
+      </div>
+    </div>
+
+    <div style="font:var(--weight-bold) 9px/1 var(--font-sans);letter-spacing:.07em;text-transform:uppercase;color:var(--text-faint);margin-top:8px">Feature — 9</div>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <div style="position:relative;display:flex;align-items:center;gap:12px;background:var(--surface-accent);border-radius:4px 18px 18px 18px;box-shadow:var(--elevation-card);padding:12px 16px">
+        <span style="position:absolute;top:-9px;left:0;height:11px;padding:0 12px;display:inline-flex;align-items:center;background:var(--surface-accent);border-radius:6px 6px 0 0;font:var(--weight-bold) 8px/1 var(--font-sans);letter-spacing:.07em;text-transform:uppercase;color:var(--ink-900)">Feature</span>
+        <x-import component-from-global-scope="SoftNatureDesignSystem_879b9a.Avatar" name="Ravi Nair" size="xs" style="background:rgba(14,15,16,.12);color:var(--ink-900)" hint-size="22px,22px"></x-import>
+        <span style="font:var(--weight-semibold) 14px/1.3 var(--font-display);color:var(--ink-900)">Bulk assign issues from the board</span>
+        <span style="font:var(--weight-medium) 11px/1 var(--font-mono);color:rgba(14,15,16,.5)">#489</span>
+        <span style="margin-left:auto;display:flex;align-items:center;gap:12px">
+          <span style="font:var(--type-micro);color:rgba(14,15,16,.7)">2/5</span>
+          <span style="font:var(--type-micro);color:rgba(14,15,16,.7)">5 Apr</span>
+          <span style="display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:99px;background:var(--ink-900);font:var(--type-micro);color:#fff">In progress</span>
+        </span>
+      </div>
+      <div style="position:relative;display:flex;align-items:center;gap:12px;background:var(--surface-card);border-radius:4px 18px 18px 18px;box-shadow:var(--elevation-card);padding:12px 16px">
+        <span style="position:absolute;top:-9px;left:0;height:11px;padding:0 12px;display:inline-flex;align-items:center;background:var(--surface-card);border-radius:6px 6px 0 0;font:var(--weight-bold) 8px/1 var(--font-sans);letter-spacing:.07em;text-transform:uppercase;color:var(--status-info)">Feature</span>
+        <x-import component-from-global-scope="SoftNatureDesignSystem_879b9a.Avatar" name="Lin Chen" size="xs" hint-size="22px,22px"></x-import>
+        <span style="font:var(--weight-semibold) 14px/1.3 var(--font-display);color:var(--text-strong)">Saved filter views</span>
+        <span style="font:var(--weight-medium) 11px/1 var(--font-mono);color:var(--text-faint)">#490</span>
+        <span style="margin-left:auto;display:flex;align-items:center;gap:12px">
+          <span style="font:var(--type-micro);color:var(--text-muted)">1/6</span>
+          <span style="font:var(--type-micro);color:var(--text-muted)">M 1.4</span>
+          <x-import component-from-global-scope="SoftNatureDesignSystem_879b9a.Badge" tone="hot" dot="{{ true }}" hint-size="auto,20px">P1</x-import>
+        </span>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<div class="dv-opt" id="1d">
+<div class="dv-olabel"><a class="dv-oid" href="#1d">1d</a>Repo picker — add a repo to track</div>
+<div style="width:540px;background:var(--surface-card);border-radius:26px;box-shadow:var(--elevation-floating);padding:24px">
+  <div style="display:flex;align-items:baseline;gap:10px">
+    <span style="font:var(--type-section);letter-spacing:var(--track-tight);color:var(--text-strong)">Track a repository</span>
+    <span style="margin-left:auto;font:var(--type-micro);color:var(--text-faint)">4 of 12 tracked</span>
+  </div>
+  <p style="margin:6px 0 16px;font:var(--type-body);color:var(--text-muted)">Only tracked repos sync. Everything else stays untouched on GitHub.</p>
+  <x-import component-from-global-scope="SoftNatureDesignSystem_879b9a.SearchField" placeholder="Filter your repositories" style="width:100%;margin-bottom:14px" hint-size="100%,38px"></x-import>
+  <div style="display:flex;flex-direction:column;gap:8px">
+    <div style="display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:16px;background:var(--surface-sunken)">
+      <x-import component-from-global-scope="SoftNatureDesignSystem_879b9a.Checkbox" checked="{{ true }}" hint-size="20px,20px"></x-import>
+      <span style="display:flex;flex-direction:column;gap:2px"><span style="font:var(--weight-semibold) 14px/1.2 var(--font-display);color:var(--text-strong)">acme/atlas-web</span><span style="font:var(--type-micro);color:var(--text-muted)">18 open · updated 4h ago</span></span>
+      <span style="margin-left:auto;font:var(--type-micro);color:var(--text-muted)">Private</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:16px;background:var(--surface-sunken)">
+      <x-import component-from-global-scope="SoftNatureDesignSystem_879b9a.Checkbox" checked="{{ true }}" hint-size="20px,20px"></x-import>
+      <span style="display:flex;flex-direction:column;gap:2px"><span style="font:var(--weight-semibold) 14px/1.2 var(--font-display);color:var(--text-strong)">acme/design-system</span><span style="font:var(--type-micro);color:var(--text-muted)">7 open · updated yesterday</span></span>
+      <span style="margin-left:auto;font:var(--type-micro);color:var(--text-muted)">Private</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:16px">
+      <x-import component-from-global-scope="SoftNatureDesignSystem_879b9a.Checkbox" hint-size="20px,20px"></x-import>
+      <span style="display:flex;flex-direction:column;gap:2px"><span style="font:var(--weight-semibold) 14px/1.2 var(--font-display);color:var(--text-strong)">acme/edge-proxy</span><span style="font:var(--type-micro);color:var(--text-muted)">2 open · updated 6 days ago</span></span>
+      <span style="margin-left:auto;font:var(--type-micro);color:var(--text-muted)">Public</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:16px">
+      <x-import component-from-global-scope="SoftNatureDesignSystem_879b9a.Checkbox" hint-size="20px,20px"></x-import>
+      <span style="display:flex;flex-direction:column;gap:2px"><span style="font:var(--weight-semibold) 14px/1.2 var(--font-display);color:var(--text-strong)">sarah-kwan/dotfiles</span><span style="font:var(--type-micro);color:var(--text-muted)">0 open · updated 3 weeks ago</span></span>
+      <span style="margin-left:auto;font:var(--type-micro);color:var(--text-muted)">Public</span>
+    </div>
+  </div>
+  <div style="display:flex;align-items:center;gap:10px;margin-top:20px">
+    <span style="font:var(--type-micro);color:var(--text-faint)">Signed in as sarah-kwan</span>
+    <span style="margin-left:auto;display:flex;gap:8px">
+      <x-import component-from-global-scope="SoftNatureDesignSystem_879b9a.Button" variant="ghost" size="sm" hint-size="auto,34px">Cancel</x-import>
+      <x-import component-from-global-scope="SoftNatureDesignSystem_879b9a.Button" variant="primary" size="sm" hint-size="auto,34px">Add 2 repos</x-import>
+    </span>
+  </div>
+</div>
+</div>
+
+<div class="dv-opt" id="1e">
+<div class="dv-olabel"><a class="dv-oid" href="#1e">1e</a>Issue detail — subtasks live here</div>
+<div style="width:620px;background:var(--surface-card);border-radius:26px;box-shadow:var(--elevation-floating);padding:24px">
+  <div style="display:flex;align-items:center;gap:10px">
+    <span style="display:inline-flex;align-items:center;gap:6px;padding:5px 12px;border-radius:99px;background:var(--status-hot-bg);font:var(--weight-bold) 9px/1 var(--font-sans);letter-spacing:.07em;text-transform:uppercase;color:var(--status-hot)">Bug</span>
+    <span style="font:var(--weight-medium) 11px/1 var(--font-mono);color:var(--text-faint)">acme/atlas-web #482</span>
+    <span style="margin-left:auto;display:flex;gap:8px">
+      <x-import component-from-global-scope="SoftNatureDesignSystem_879b9a.IconButton" icon="external-link" size="sm" variant="quiet" hint-size="28px,28px"></x-import>
+      <x-import component-from-global-scope="SoftNatureDesignSystem_879b9a.IconButton" icon="more-horizontal" size="sm" variant="quiet" hint-size="28px,28px"></x-import>
+    </span>
+  </div>
+  <h2 style="margin:14px 0 10px;font:var(--weight-semibold) 26px/1.2 var(--font-display);letter-spacing:var(--track-tight);color:var(--text-strong);text-wrap:pretty">Token refresh loop on expired session</h2>
+  <p style="margin:0 0 18px;font:var(--type-body);color:var(--text-body);text-wrap:pretty">Client retries the refresh endpoint indefinitely when the server returns 401 with an expired grant. The loop saturates the auth service and the user is never signed out. Reproduced on staging with a grant older than 30 days.</p>
+  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;padding:14px 16px;border-radius:18px;background:var(--surface-sunken);margin-bottom:18px">
+    <span style="display:flex;flex-direction:column;gap:4px"><span style="font:var(--type-micro);color:var(--text-faint)">Owner</span><span style="font:var(--type-label);color:var(--text-strong)">sarah-kwan</span></span>
+    <span style="display:flex;flex-direction:column;gap:4px"><span style="font:var(--type-micro);color:var(--text-faint)">Priority</span><span style="font:var(--type-label);color:var(--status-hot)">P1</span></span>
+    <span style="display:flex;flex-direction:column;gap:4px"><span style="font:var(--type-micro);color:var(--text-faint)">Milestone</span><span style="font:var(--type-label);color:var(--text-strong)">1.4</span></span>
+    <span style="display:flex;flex-direction:column;gap:4px"><span style="font:var(--type-micro);color:var(--text-faint)">Due</span><span style="font:var(--type-label);color:var(--text-strong)">28 March</span></span>
+  </div>
+  <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+    <span style="font:var(--type-card-title);color:var(--text-strong)">Subtasks</span>
+    <span style="font:var(--type-micro);color:var(--text-faint)">1 of 4 · local, not pushed to GitHub</span>
+    <span style="margin-left:auto;width:90px"><x-import component-from-global-scope="SoftNatureDesignSystem_879b9a.ProgressTrack" value="{{ 25 }}" height="{{ 6 }}" hint-size="90px,6px"></x-import></span>
+  </div>
+  <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:16px">
+    <x-import component-from-global-scope="SoftNatureDesignSystem_879b9a.Checkbox" checked="{{ true }}" label="Reproduce with an expired grant on staging" hint-size="100%,22px"></x-import>
+    <x-import component-from-global-scope="SoftNatureDesignSystem_879b9a.Checkbox" label="Add a retry ceiling and backoff" hint-size="100%,22px"></x-import>
+    <x-import component-from-global-scope="SoftNatureDesignSystem_879b9a.Checkbox" label="Sign the user out on terminal 401" hint-size="100%,22px"></x-import>
+    <x-import component-from-global-scope="SoftNatureDesignSystem_879b9a.Checkbox" label="Cover with a regression test" hint-size="100%,22px"></x-import>
+  </div>
+  <div style="display:flex;align-items:center;gap:8px">
+    <x-import component-from-global-scope="SoftNatureDesignSystem_879b9a.Button" variant="secondary" size="sm" icon-left="plus" hint-size="auto,34px">Subtask</x-import>
+    <span style="margin-left:auto;font:var(--type-micro);color:var(--text-faint)">Opened 21 March by sarah-kwan</span>
+  </div>
+</div>
+</div>
+
+<div class="dv-opt" id="1f">
+<div class="dv-olabel"><a class="dv-oid" href="#1f">1f</a>Empty state — no repos tracked yet</div>
+<div class="win" style="width:620px">
+  <div style="height:44px;background:var(--surface-ink);display:flex;align-items:center;gap:14px;padding:0 16px">
+    <span style="display:flex;gap:7px"><span style="width:11px;height:11px;border-radius:99px;background:#F0433A"></span><span style="width:11px;height:11px;border-radius:99px;background:#F5C93B"></span><span style="width:11px;height:11px;border-radius:99px;background:#59C24C"></span></span>
+    <span style="font:600 11px/1 Outfit,sans-serif;letter-spacing:.14em;color:#fff;margin-left:8px">ATLAS</span>
+  </div>
+  <div style="padding:64px 40px;display:flex;flex-direction:column;align-items:center;text-align:center;gap:14px">
+    <div style="position:relative;width:120px;height:84px;margin-bottom:8px">
+      <span style="position:absolute;top:0;left:0;width:46px;height:12px;background:var(--neutral-200);border-radius:6px 6px 0 0"></span>
+      <span style="position:absolute;top:11px;left:0;width:120px;height:73px;background:var(--neutral-200);border-radius:3px 18px 18px 18px"></span>
+    </div>
+    <div style="font:var(--type-section);letter-spacing:var(--track-tight);color:var(--text-strong)">No repositories tracked</div>
+    <p style="margin:0;max-width:320px;font:var(--type-body);color:var(--text-muted)">Pick the repos you want on the board. Atlas pulls their open issues and leaves the rest alone.</p>
+    <span style="margin-top:6px"><x-import component-from-global-scope="SoftNatureDesignSystem_879b9a.Button" variant="primary" icon-left="plus" hint-size="auto,40px">Track a repository</x-import></span>
+    <span style="font:var(--type-micro);color:var(--text-faint)">Signed in as sarah-kwan</span>
+  </div>
+</div>
+</div>
+
+<div class="dv-opt" id="1g">
+<div class="dv-olabel"><a class="dv-oid" href="#1g">1g</a>Settings — sync</div>
+<div style="width:560px;background:var(--surface-card);border-radius:26px;box-shadow:var(--elevation-card);padding:24px">
+  <div style="font:var(--type-section);letter-spacing:var(--track-tight);color:var(--text-strong);margin-bottom:4px">Sync</div>
+  <div style="font:var(--type-micro);color:var(--text-muted);margin-bottom:18px">Last pull 2 min ago · 4 repos · 40 issues</div>
+  <div style="display:flex;flex-direction:column;gap:2px">
+    <div style="display:flex;align-items:center;gap:14px;padding:14px 0;border-bottom:1px solid var(--line-hairline)">
+      <span style="display:flex;flex-direction:column;gap:3px"><span style="font:var(--type-label);color:var(--text-strong)">Pull interval</span><span style="font:var(--type-micro);color:var(--text-muted)">How often Atlas checks GitHub for changes</span></span>
+      <span style="margin-left:auto"><x-import component-from-global-scope="SoftNatureDesignSystem_879b9a.SelectPill" value="Every 5 min" options="{{ intervalOptions }}" hint-size="auto,34px"></x-import></span>
+    </div>
+    <div style="display:flex;align-items:center;gap:14px;padding:14px 0;border-bottom:1px solid var(--line-hairline)">
+      <span style="display:flex;flex-direction:column;gap:3px"><span style="font:var(--type-label);color:var(--text-strong)">Push subtask progress as a comment</span><span style="font:var(--type-micro);color:var(--text-muted)">Subtasks are local by default</span></span>
+      <span style="margin-left:auto"><x-import component-from-global-scope="SoftNatureDesignSystem_879b9a.Switch" hint-size="44px,24px"></x-import></span>
+    </div>
+    <div style="display:flex;align-items:center;gap:14px;padding:14px 0;border-bottom:1px solid var(--line-hairline)">
+      <span style="display:flex;flex-direction:column;gap:3px"><span style="font:var(--type-label);color:var(--text-strong)">Map labels to types</span><span style="font:var(--type-micro);color:var(--text-muted)">bug → Bug · enhancement → Feature · everything else → Chore</span></span>
+      <span style="margin-left:auto"><x-import component-from-global-scope="SoftNatureDesignSystem_879b9a.Switch" checked="{{ true }}" hint-size="44px,24px"></x-import></span>
+    </div>
+    <div style="display:flex;align-items:center;gap:14px;padding:14px 0">
+      <span style="display:flex;flex-direction:column;gap:3px"><span style="font:var(--type-label);color:var(--text-strong)">Notify on new P1</span><span style="font:var(--type-micro);color:var(--text-muted)">Desktop notification when a P1 lands in a tracked repo</span></span>
+      <span style="margin-left:auto"><x-import component-from-global-scope="SoftNatureDesignSystem_879b9a.Switch" checked="{{ true }}" hint-size="44px,24px"></x-import></span>
+    </div>
+  </div>
+  <div style="display:flex;align-items:center;gap:10px;margin-top:20px;padding:14px 16px;border-radius:18px;background:var(--surface-sunken)">
+    <span style="width:7px;height:7px;border-radius:99px;background:var(--status-won)"></span>
+    <span style="font:var(--type-micro);color:var(--text-muted)">All four repos synced cleanly</span>
+    <span style="margin-left:auto"><x-import component-from-global-scope="SoftNatureDesignSystem_879b9a.Button" variant="secondary" size="sm" icon-left="refresh-cw" hint-size="auto,34px">Sync now</x-import></span>
+  </div>
+</div>
+</div>
+
+<div class="dv-opt" id="1h">
+<div class="dv-olabel"><a class="dv-oid" href="#1h">1h</a>Search across tracked repos</div>
+<div class="win" style="width:620px">
+  <div style="padding:20px 22px;display:flex;flex-direction:column;gap:14px">
+    <x-import component-from-global-scope="SoftNatureDesignSystem_879b9a.SearchField" placeholder="refresh token" style="width:100%" hint-size="100%,38px"></x-import>
+    <div style="display:flex;gap:6px;flex-wrap:wrap">
+      <x-import component-from-global-scope="SoftNatureDesignSystem_879b9a.Tag" on-remove="{{ noop }}" hint-size="auto,26px">repo: atlas-web</x-import>
+      <x-import component-from-global-scope="SoftNatureDesignSystem_879b9a.Tag" on-remove="{{ noop }}" hint-size="auto,26px">priority: P1</x-import>
+      <x-import component-from-global-scope="SoftNatureDesignSystem_879b9a.Tag" hint-size="auto,26px">+ filter</x-import>
+      <span style="margin-left:auto;font:var(--type-micro);color:var(--text-faint);align-self:center">3 results</span>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:14px;margin-top:4px">
+      <div style="position:relative;background:var(--surface-card);border-radius:4px 18px 18px 18px;box-shadow:var(--elevation-card);padding:14px 16px">
+        <span style="position:absolute;top:-10px;left:0;height:12px;padding:0 12px;display:inline-flex;align-items:center;background:var(--surface-card);border-radius:6px 6px 0 0;font:var(--weight-bold) 8px/1 var(--font-sans);letter-spacing:.07em;text-transform:uppercase;color:var(--status-hot)">Bug · atlas-web</span>
+        <div style="display:flex;align-items:center;gap:10px">
+          <span style="font:var(--weight-semibold) 14px/1.3 var(--font-display);color:var(--text-strong)">Token <mark style="background:var(--lime-200);color:var(--ink-900)">refresh</mark> loop on expired session</span>
+          <span style="margin-left:auto"><x-import component-from-global-scope="SoftNatureDesignSystem_879b9a.Badge" tone="hot" dot="{{ true }}" hint-size="auto,20px">P1</x-import></span>
+        </div>
+        <p style="margin:6px 0 0;font:var(--type-body);color:var(--text-muted)">sarah-kwan · #482 · due 28 March</p>
+      </div>
+      <div style="position:relative;background:var(--surface-card);border-radius:4px 18px 18px 18px;box-shadow:var(--elevation-card);padding:14px 16px">
+        <span style="position:absolute;top:-10px;left:0;height:12px;padding:0 12px;display:inline-flex;align-items:center;background:var(--surface-card);border-radius:6px 6px 0 0;font:var(--weight-bold) 8px/1 var(--font-sans);letter-spacing:.07em;text-transform:uppercase;color:var(--neutral-500)">Chore · cli-tools</span>
+        <div style="display:flex;align-items:center;gap:10px">
+          <span style="font:var(--weight-semibold) 14px/1.3 var(--font-display);color:var(--text-strong)">Rotate the <mark style="background:var(--lime-200);color:var(--ink-900)">refresh</mark> secret in CI</span>
+          <span style="margin-left:auto"><x-import component-from-global-scope="SoftNatureDesignSystem_879b9a.Badge" tone="warm" dot="{{ true }}" hint-size="auto,20px">P2</x-import></span>
+        </div>
+        <p style="margin:6px 0 0;font:var(--type-body);color:var(--text-muted)">dpatel · #112 · no due date</p>
+      </div>
+      <div style="position:relative;background:var(--surface-card);border-radius:4px 18px 18px 18px;box-shadow:var(--elevation-card);padding:14px 16px">
+        <span style="position:absolute;top:-10px;left:0;height:12px;padding:0 12px;display:inline-flex;align-items:center;background:var(--surface-card);border-radius:6px 6px 0 0;font:var(--weight-bold) 8px/1 var(--font-sans);letter-spacing:.07em;text-transform:uppercase;color:var(--status-info)">Feature · atlas-web</span>
+        <div style="display:flex;align-items:center;gap:10px">
+          <span style="font:var(--weight-semibold) 14px/1.3 var(--font-display);color:var(--text-strong)">Silent <mark style="background:var(--lime-200);color:var(--ink-900)">refresh</mark> on window focus</span>
+          <span style="margin-left:auto"><x-import component-from-global-scope="SoftNatureDesignSystem_879b9a.Badge" tone="neutral" hint-size="auto,20px">P3</x-import></span>
+        </div>
+        <p style="margin:6px 0 0;font:var(--type-body);color:var(--text-muted)">ravi-n · #493 · milestone 1.5</p>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+</div>
+<p class="dv-next">Try next: "take the tab from <a class="dv-oid" href="#1b">1b</a>-B into the board" · "make <a class="dv-oid" href="#1c">1c</a> the default layout" · "add a Done column and a card drag state"</p>
+</section>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  renderVals() {
+    return {
+      railItems: [
+        {id:'board', icon:'layout-grid', label:'Board'},
+        {id:'search', icon:'search', label:'Search'},
+        {id:'milestones', icon:'calendar', label:'Milestones'},
+        {id:'people', icon:'users', label:'People'},
+        {id:'settings', icon:'sliders-horizontal', label:'Settings'}
+      ],
+      sortOptions: ['Priority', 'Due date', 'Recently updated', 'Issue number'],
+      assigneeOptions: ['Assignee: All', 'sarah-kwan', 'm-ito', 'dpatel', 'ravi-n', 'lm-chen'],
+      intervalOptions: ['Every 5 min', 'Every 15 min', 'Hourly', 'Manual only'],
+      noop: () => {}
+    };
+  }
+}
+</script>
+</body>
+</html>

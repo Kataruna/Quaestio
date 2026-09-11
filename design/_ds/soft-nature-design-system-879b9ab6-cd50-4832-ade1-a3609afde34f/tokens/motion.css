@@ -1,0 +1,11 @@
+:root{
+--duration-instant:80ms;/* @kind other */
+--duration-fast:140ms;/* @kind other */
+--duration-base:220ms;/* @kind other */
+--duration-slow:380ms;/* @kind other */
+--ease-standard:cubic-bezier(.4,0,.2,1);/* @kind other */
+--ease-out-soft:cubic-bezier(.22,.61,.36,1);/* @kind other */
+--ease-in-soft:cubic-bezier(.55,.06,.68,.19);/* @kind other */
+--transition-hover:background-color var(--duration-fast) var(--ease-standard),color var(--duration-fast) var(--ease-standard),box-shadow var(--duration-base) var(--ease-out-soft),transform var(--duration-fast) var(--ease-standard);/* @kind other */
+--press-scale:.97;/* @kind other */
+}
