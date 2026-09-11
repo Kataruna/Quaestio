@@ -418,12 +418,23 @@ git commit -m "refactor: restructure src into main/preload/renderer/shared"
 - Modify: `package.json`, `tsconfig.json`, `index.html`
 - Create: `src/renderer/index.tsx`, `src/renderer/App.tsx`
 
-- [ ] **Step 1: Install React**
+- [ ] **Step 1: Install React, and bump TypeScript off the template's 2022 pin**
+
+The Electron Forge template ships `typescript@4.5.5`. Step 2's tsconfig uses `moduleResolution: "bundler"`, which requires TypeScript 5.0+, so the bump is mandatory, not cosmetic. CLAUDE.md also requires latest-stable for every package.
 
 ```bash
+npm install --save-exact --save-dev typescript@latest
 npm install --save-exact react react-dom
 npm install --save-exact --save-dev @types/react @types/react-dom @vitejs/plugin-react
 ```
+
+Confirm the bump landed before continuing:
+
+```bash
+node -p "require('./node_modules/typescript/package.json').version"
+```
+
+Expected: `5.x` or higher. Record the exact version — Task 8's Decisions log needs it.
 
 - [ ] **Step 2: Enable strict mode in `tsconfig.json`**
 
@@ -448,8 +459,11 @@ Replace `compilerOptions` with:
     "resolveJsonModule": true,
     "isolatedModules": true,
     "noEmit": true,
-    // Declares `*.css` imports and `import.meta.env`, both of which this app uses.
-    "types": ["vite/client"],
+    // "vite/client" declares `*.css` imports and `import.meta.env`; "node" must be
+    // listed alongside it, because naming `types` at all suppresses every other
+    // global type package — and the main process needs `process`, `__dirname`,
+    // and `NodeJS.Platform`.
+    "types": ["vite/client", "node"],
     "baseUrl": ".",
     "paths": {
       "@/*": ["src/renderer/*"],
@@ -773,11 +787,24 @@ git commit -m "feat: add Tailwind v4, self-hosted fonts, and Soft Nature design 
 - Create: `eslint.config.js`, `.prettierrc`, `.prettierignore`
 - Modify: `package.json`
 
-- [ ] **Step 1: Install**
+- [ ] **Step 1: Install the flat-config toolchain and remove the template's legacy one**
+
+The template scaffolded ESLint 8 with `.eslintrc.json` and the old `@typescript-eslint/*` packages. Flat config (`eslint.config.js`, `tseslint.config()`, `projectService`) needs ESLint 9 + typescript-eslint v8, so the old ones must go or two ESLint versions fight over the same files.
 
 ```bash
-npm install --save-exact --save-dev eslint @eslint/js typescript-eslint eslint-plugin-react-hooks eslint-plugin-react-refresh prettier eslint-config-prettier
+npm uninstall @typescript-eslint/eslint-plugin @typescript-eslint/parser eslint-plugin-import
+rm -f .eslintrc.json
+npm install --save-exact --save-dev eslint@latest @eslint/js typescript-eslint eslint-plugin-react-hooks eslint-plugin-react-refresh prettier eslint-config-prettier
 ```
+
+Confirm the majors are right before continuing:
+
+```bash
+node -p "require('./node_modules/eslint/package.json').version"
+node -p "require('./node_modules/typescript-eslint/package.json').version"
+```
+
+Expected: eslint `9.x` or higher, typescript-eslint `8.x` or higher. If either is lower, the config in Step 2 will not parse.
 
 - [ ] **Step 2: Write `eslint.config.js`**
 
@@ -794,7 +821,10 @@ export default tseslint.config(
   ...tseslint.configs.recommendedTypeChecked,
   {
     languageOptions: {
-      parserOptions: { project: ['./tsconfig.json'], tsconfigRootDir: import.meta.dirname },
+      // projectService (not `project`) so config files outside tsconfig's `include`
+      // — eslint.config.js itself, vitest.config.ts — lint without a
+      // "file not found in project" error.
+      parserOptions: { projectService: true, tsconfigRootDir: import.meta.dirname },
     },
     plugins: { 'react-hooks': reactHooks, 'react-refresh': reactRefresh },
     rules: {
@@ -1114,6 +1144,11 @@ jobs:
         with:
           node-version: 22
           cache: npm
+
+      # The Forge lockfile resolves @electron/node-gyp over git+ssh, which an
+      # unauthenticated runner cannot clone. Rewrite it to HTTPS before install.
+      - name: Use HTTPS for git dependencies
+        run: git config --global url."https://github.com/".insteadOf ssh://git@github.com/
 
       - name: Install dependencies
         run: npm ci
