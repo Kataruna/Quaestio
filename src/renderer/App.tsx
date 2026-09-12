@@ -5,18 +5,10 @@ import { SidebarRail, type ScreenId } from '@/components/shell/SidebarRail';
 import { RepoTabs } from '@/components/shell/RepoTabs';
 import { StateBanner } from '@/components/shell/StateBanner';
 import { PlaceholderScreen } from '@/features/PlaceholderScreen';
+import { BoardScreen } from '@/features/board/BoardScreen';
 import { issues, repos as repoFixtures, syncStatus as initialStatus } from '@/lib/fixtures';
 
-/* ---- Stubs, each replaced by its real screen in Tasks 14-18. ---- */
-// Task 14 replaces this with: import { BoardScreen } from '@/features/board/BoardScreen';
-function BoardScreen(_props: {
-  repoFullName: string;
-  issues: Issue[];
-  loading?: boolean;
-  onOpenIssue: (issue: Issue) => void;
-}) {
-  return <PlaceholderScreen title="Board" />;
-}
+/* ---- Stubs, each replaced by its real screen in Tasks 15-18. ---- */
 // Task 18 replaces this with: import { SearchScreen } from '@/features/search/SearchScreen';
 function SearchScreen() {
   return <PlaceholderScreen title="Search" />;
