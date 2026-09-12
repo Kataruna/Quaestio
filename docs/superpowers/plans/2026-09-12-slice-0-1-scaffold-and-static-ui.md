@@ -1014,11 +1014,22 @@ Slice 1 is static UI, so there is almost no logic to test — but `vitest run` e
 **Files:**
 - Create: `vitest.config.ts`, `src/shared/types.ts`, `src/shared/label-mapping.ts`, `tests/label-mapping.test.ts`
 
-- [ ] **Step 1: Install Vitest**
+- [ ] **Step 1: Install Vitest — pinned below `latest`, matching the project's `vite` pin**
+
+**Do not install `vitest@latest`.** As of this writing that resolves to the 5.x line, whose own `dependencies.vite` requirement is `^6.0.0 || ^7.0.0 || ^8.0.0` — incompatible with this project's `vite@5.4.21` (pinned since Task 1; Tailwind's and React's Vite plugins both depend on that exact version being present). Vitest 4.x has the same `^6.0.0+` requirement. Verify this yourself before installing — `npm view vitest peerDependencies` and `npm view vitest dependencies` — since versions move fast and this could shift again by the time you run it. The last major line whose `vite` requirement actually admits 5.x is 3.x (`dependencies.vite: "^5.0.0 || ^6.0.0 || ^7.0.0-0"` as of `vitest@3.2.7`).
 
 ```bash
-npm install --save-exact --save-dev vitest
+npm install --save-exact --save-dev vitest@3.2.7
 ```
+
+Confirm it landed and pulled a compatible `vite`, not a second copy:
+
+```bash
+node -p "require('./node_modules/vitest/package.json').version"
+npm ls vite
+```
+
+Expected: `3.2.7`, and `npm ls vite` shows a single deduped `vite@5.4.21` — not two different `vite` versions in the tree. If `npm ls vite` shows a nested, separate `vite` version under `vitest`, that means npm couldn't dedupe and something is wrong with the version choice — stop and report it rather than proceeding.
 
 - [ ] **Step 2: Write `vitest.config.ts`**
 
