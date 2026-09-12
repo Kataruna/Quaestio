@@ -12,7 +12,13 @@ import { IssueDetailDialog } from '@/features/issues/IssueDetailDialog';
 import { SettingsScreen } from '@/features/settings/SettingsScreen';
 import { SearchScreen } from '@/features/search/SearchScreen';
 import { StateGallery } from '@/features/StateGallery';
-import { issues, repos as repoFixtures, syncStatus as initialStatus } from '@/lib/fixtures';
+import {
+  currentUser,
+  issues,
+  repos as repoFixtures,
+  searchResults,
+  syncStatus as initialStatus,
+} from '@/lib/fixtures';
 
 export function App() {
   const [screen, setScreen] = useState<ScreenId>('board');
@@ -24,6 +30,9 @@ export function App() {
   const [loading, setLoading] = useState(false);
 
   const tracked = repos.filter((repo) => repo.tracked);
+  // The board shows one repo at a time, so the active tab — not the whole
+  // fixture set — decides which issues reach it.
+  const activeIssues = issues.filter((issue) => issue.repoFullName === activeRepo);
 
   function untrack(fullName: string) {
     setRepos((current) =>
@@ -36,7 +45,7 @@ export function App() {
       <TitleBar status={status} onSync={() => setStatus({ kind: 'syncing' })} />
 
       {tracked.length === 0 ? (
-        <EmptyState onTrack={() => setPickerOpen(true)} />
+        <EmptyState onTrack={() => setPickerOpen(true)} userLogin={currentUser.login} />
       ) : (
         <>
           <RepoTabs
@@ -62,12 +71,12 @@ export function App() {
               {screen === 'board' ? (
                 <BoardScreen
                   repoFullName={activeRepo}
-                  issues={issues}
+                  issues={activeIssues}
                   loading={loading}
                   onOpenIssue={setOpenIssue}
                 />
               ) : null}
-              {screen === 'search' ? <SearchScreen /> : null}
+              {screen === 'search' ? <SearchScreen results={searchResults} /> : null}
               {screen === 'settings' ? <SettingsScreen /> : null}
               {screen === 'milestones' ? <PlaceholderScreen title="Milestones" /> : null}
               {screen === 'people' ? <PlaceholderScreen title="People" /> : null}
@@ -79,6 +88,7 @@ export function App() {
       <RepoPickerDialog
         open={pickerOpen}
         repos={repos}
+        userLogin={currentUser.login}
         onClose={() => setPickerOpen(false)}
         onConfirm={(next) => {
           setRepos(next);

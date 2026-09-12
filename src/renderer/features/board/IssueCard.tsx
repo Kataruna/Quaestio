@@ -56,7 +56,10 @@ export function IssueCard({
         )}
       >
         <span
-          className={cn('h-[5px] w-[5px] rounded-pill', active ? 'bg-ink-900' : TYPE_DOT[issue.type])}
+          className={cn(
+            'h-[5px] w-[5px] rounded-pill',
+            active ? 'bg-ink-900' : TYPE_DOT[issue.type],
+          )}
         />
         {TYPE_LABEL[issue.type]}
       </span>
@@ -80,7 +83,7 @@ export function IssueCard({
           </span>
           <span
             className={cn(
-              'font-mono text-[11px] font-medium',
+              'select-text font-mono text-[11px] font-medium',
               active ? 'text-ink-900/50' : 'text-text-faint',
             )}
           >
@@ -102,7 +105,7 @@ export function IssueCard({
 
         <h3
           className={cn(
-            'mb-1.5 mt-3 font-display text-title-s font-semibold tracking-[-0.02em] text-pretty',
+            'mb-1.5 mt-3 select-text font-display text-title-s font-semibold tracking-[-0.02em] text-pretty',
             active ? 'text-ink-900' : 'text-text-strong',
           )}
         >

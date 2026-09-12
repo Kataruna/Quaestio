@@ -34,7 +34,9 @@ export function BoardScreen({
     <div className="flex flex-col gap-[18px]">
       <BoardToolbar
         repoName={repoName}
-        openCount={issues.length}
+        // The repo-level open count, so it stays put while the user searches —
+        // deliberately from `issues`, not the search-filtered `visible`.
+        openCount={issues.filter((issue) => issue.state === 'open').length}
         search={search}
         onSearchChange={setSearch}
       />

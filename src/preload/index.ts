@@ -1,5 +1,8 @@
 import { contextBridge, ipcRenderer } from 'electron';
-import { CHANNELS, type Api } from '../shared/ipc-contract';
+import { CHANNELS } from '../shared/channels';
+// Type-only: fully erased at compile time, so `ipc-contract`'s zod schema layer
+// never reaches the preload bundle.
+import type { Api } from '../shared/ipc-contract';
 
 const api: Api = {
   platform: process.platform,

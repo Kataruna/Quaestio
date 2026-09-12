@@ -49,7 +49,12 @@ export function IssueDetailDialog({
     setSubtasks(issue?.subtasks ?? []);
   }
 
-  if (!issue) return <Dialog open={false} onClose={onClose}>{null}</Dialog>;
+  if (!issue)
+    return (
+      <Dialog open={false} onClose={onClose}>
+        {null}
+      </Dialog>
+    );
 
   const done = subtasks.filter((task) => task.done).length;
   const percent = subtasks.length === 0 ? 0 : Math.round((done / subtasks.length) * 100);
@@ -72,7 +77,7 @@ export function IssueDetailDialog({
         >
           {TYPE_LABEL[issue.type]}
         </span>
-        <span className="font-mono text-[11px] font-medium text-text-faint">
+        <span className="select-text font-mono text-[11px] font-medium text-text-faint">
           {issue.repoFullName} #{issue.number}
         </span>
         <span className="ml-auto flex gap-2">
@@ -86,7 +91,7 @@ export function IssueDetailDialog({
         </span>
       </div>
 
-      <h2 className="mb-2.5 mt-3.5 font-display text-[26px] font-semibold leading-[1.2] tracking-[-0.02em] text-text-strong text-pretty">
+      <h2 className="mb-2.5 mt-3.5 select-text font-display text-[26px] font-semibold leading-[1.2] tracking-[-0.02em] text-text-strong text-pretty">
         {issue.title}
       </h2>
 
@@ -105,7 +110,9 @@ export function IssueDetailDialog({
         </div>
         <div className="flex flex-col gap-1">
           <dt className="font-sans text-micro text-text-faint">Priority</dt>
-          <dd className={cn('m-0 font-sans text-label font-medium', PRIORITY_COLOR[issue.priority])}>
+          <dd
+            className={cn('m-0 font-sans text-label font-medium', PRIORITY_COLOR[issue.priority])}
+          >
             {issue.priority.toUpperCase()}
           </dd>
         </div>

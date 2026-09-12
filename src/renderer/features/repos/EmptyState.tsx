@@ -1,8 +1,7 @@
 import { Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { currentUser } from '@/lib/fixtures';
 
-export function EmptyState({ onTrack }: { onTrack: () => void }) {
+export function EmptyState({ onTrack, userLogin }: { onTrack: () => void; userLogin: string }) {
   return (
     <div className="flex flex-1 flex-col items-center justify-center gap-3.5 px-10 text-center">
       <div aria-hidden className="relative mb-2 h-[84px] w-[120px]">
@@ -21,9 +20,7 @@ export function EmptyState({ onTrack }: { onTrack: () => void }) {
           Track a repository
         </Button>
       </span>
-      <span className="font-sans text-micro text-text-faint">
-        Signed in as {currentUser.login}
-      </span>
+      <span className="font-sans text-micro text-text-faint">Signed in as {userLogin}</span>
     </div>
   );
 }

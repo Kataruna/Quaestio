@@ -4,7 +4,6 @@ import { Dialog } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { SearchField } from '@/components/ui/search-field';
-import { currentUser } from '@/lib/fixtures';
 import { cn } from '@/lib/cn';
 
 function relativeUpdated(iso: string): string {
@@ -19,11 +18,13 @@ function relativeUpdated(iso: string): string {
 export function RepoPickerDialog({
   open,
   repos,
+  userLogin,
   onClose,
   onConfirm,
 }: {
   open: boolean;
   repos: Repo[];
+  userLogin: string;
   onClose: () => void;
   onConfirm: (next: Repo[]) => void;
 }) {
@@ -65,8 +66,14 @@ export function RepoPickerDialog({
         <h2 className="font-display text-title-m font-semibold tracking-[-0.02em] text-text-strong">
           Track a repository
         </h2>
+        {/*
+          "selected", not "tracked": this counts the live checkbox selection, which
+          changes on every click and only becomes the tracked set once Save is
+          pressed. The Save button's `addedCount` carries the "what will change"
+          signal separately.
+        */}
         <span className="ml-auto font-sans text-micro text-text-faint">
-          {selected.size} of {repos.length} tracked
+          {selected.size} of {repos.length} selected
         </span>
       </div>
       <p className="mb-4 mt-1.5 font-sans text-body text-text-muted">
@@ -114,9 +121,7 @@ export function RepoPickerDialog({
       </div>
 
       <div className="mt-5 flex items-center gap-2.5">
-        <span className="font-sans text-micro text-text-faint">
-          Signed in as {currentUser.login}
-        </span>
+        <span className="font-sans text-micro text-text-faint">Signed in as {userLogin}</span>
         <span className="ml-auto flex gap-2">
           <Button variant="ghost" size="sm" onClick={onClose}>
             Cancel

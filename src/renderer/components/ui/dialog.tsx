@@ -29,13 +29,13 @@ export function Dialog({
         // Clicking the backdrop (the dialog element itself) dismisses.
         if (event.target === ref.current) onClose();
       }}
-      className={cn(
-        'rounded-card bg-surface-card p-0 shadow-modal backdrop:bg-ink-900/55',
-        'open:flex open:flex-col',
-        className,
-      )}
+      // Sizing and padding from `className` go on the inner wrapper, never here:
+      // padding applied to the <dialog> itself sits inside its own border box, so
+      // clicks in that band would hit `ref.current` and be misread as backdrop
+      // clicks — silently closing the modal mid-interaction.
+      className="rounded-card bg-surface-card p-0 shadow-modal backdrop:bg-ink-900/55 open:flex open:flex-col"
     >
-      {open ? children : null}
+      {open ? <div className={cn('flex flex-col', className)}>{children}</div> : null}
     </dialog>
   );
 }

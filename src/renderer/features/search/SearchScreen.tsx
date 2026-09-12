@@ -4,7 +4,6 @@ import { Badge, type BadgeTone } from '@/components/ui/badge';
 import { SearchField } from '@/components/ui/search-field';
 import { Tag } from '@/components/ui/tag';
 import { TYPE_LABEL } from '@/features/board/IssueCard';
-import { searchResults } from '@/lib/fixtures';
 import { cn } from '@/lib/cn';
 
 const TYPE_TEXT: Record<Issue['type'], string> = {
@@ -33,18 +32,18 @@ function highlight(title: string, needle: string) {
   ];
 }
 
-export function SearchScreen() {
+export function SearchScreen({ results }: { results: Issue[] }) {
   const [query, setQuery] = useState('refresh');
   const [filters, setFilters] = useState(['repo: atlas-web', 'priority: P1']);
 
-  const results = useMemo(() => {
+  const matches = useMemo(() => {
     const needle = query.trim().toLowerCase();
     if (!needle) return [];
-    return searchResults.filter(
+    return results.filter(
       (issue) =>
         issue.title.toLowerCase().includes(needle) || issue.body.toLowerCase().includes(needle),
     );
-  }, [query]);
+  }, [query, results]);
 
   return (
     <div className="flex max-w-[620px] flex-col gap-3.5">
@@ -66,17 +65,17 @@ export function SearchScreen() {
         ))}
         <Tag>+ filter</Tag>
         <span className="ml-auto self-center font-sans text-micro text-text-faint">
-          {results.length} result{results.length === 1 ? '' : 's'}
+          {matches.length} result{matches.length === 1 ? '' : 's'}
         </span>
       </div>
 
-      {results.length === 0 ? (
+      {matches.length === 0 ? (
         <p className="py-12 text-center font-sans text-body text-text-muted">
           {query.trim() ? `Nothing matches “${query}”` : 'Type to search your tracked repos'}
         </p>
       ) : (
         <div className="mt-1 flex flex-col gap-3.5">
-          {results.map((issue) => (
+          {matches.map((issue) => (
             <article key={issue.id} className="relative">
               <span
                 className={cn(

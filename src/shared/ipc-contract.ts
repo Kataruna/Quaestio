@@ -1,23 +1,10 @@
 import { z } from 'zod';
 import type { Issue, Repo, SyncStatus, User } from './types';
 
-/** Channel names live in one place so main and preload cannot drift. */
-export const CHANNELS = {
-  authSignInWithToken: 'auth:sign-in-with-token',
-  authStartDeviceFlow: 'auth:start-device-flow',
-  authSignOut: 'auth:sign-out',
-  authGetUser: 'auth:get-user',
-  reposList: 'repos:list',
-  reposSetTracked: 'repos:set-tracked',
-  issuesList: 'issues:list',
-  issuesGet: 'issues:get',
-  syncNow: 'sync:now',
-  syncGetStatus: 'sync:get-status',
-  /** Main -> renderer push after a sync changes data. */
-  syncUpdated: 'sync:updated',
-} as const;
-
-export type Channel = (typeof CHANNELS)[keyof typeof CHANNELS];
+// Re-exported so every existing `import { CHANNELS } from '.../ipc-contract'`
+// keeps working. The definitions live in the zod-free `./channels` module, which
+// the preload imports directly to keep zod out of its bundle.
+export { CHANNELS, type Channel } from './channels';
 
 /* ---- payload schemas: main validates every inbound payload with these ---- */
 
