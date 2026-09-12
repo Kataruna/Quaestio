@@ -7,6 +7,11 @@
 @import '@fontsource/dm-mono/500.css';
 
 @import 'tailwindcss';
+/* Tailwind v4's automatic source detection otherwise scans the whole repo,
+   including docs/, which contains future tasks' code snippets with Tailwind
+   classes not actually used yet. Exclude it so the compiled CSS only ever
+   reflects classes this app really references. */
+@source not '../../../docs';
 @import './tokens.css';
 
 @layer base {

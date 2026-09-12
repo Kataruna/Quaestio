@@ -11,4 +11,10 @@ export default defineConfig({
       '@shared': path.resolve(__dirname, 'src/shared'),
     },
   },
+  build: {
+    // The strict CSP sets `font-src 'self'`, which does not admit `data:`.
+    // Without this, Vite inlines small font subsets (e.g. cyrillic-ext) as
+    // base64 data: URIs, producing an @font-face the CSP silently blocks.
+    assetsInlineLimit: 0,
+  },
 });
