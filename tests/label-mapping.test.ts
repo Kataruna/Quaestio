@@ -25,6 +25,14 @@ describe('issueTypeFromLabels', () => {
   it('prefers bug when an issue is labelled both bug and enhancement', () => {
     expect(issueTypeFromLabels(['enhancement', 'bug'])).toBe('bug');
   });
+
+  it('reads the defect synonym for bug', () => {
+    expect(issueTypeFromLabels(['defect'])).toBe('bug');
+  });
+
+  it('reads the feature synonym for enhancement', () => {
+    expect(issueTypeFromLabels(['feature'])).toBe('feature');
+  });
 });
 
 describe('priorityFromLabels', () => {
@@ -46,5 +54,21 @@ describe('priorityFromLabels', () => {
 
   it('prefers the highest priority when several are present', () => {
     expect(priorityFromLabels(['p3', 'p1'])).toBe('p1');
+  });
+
+  it('reads the priority:high form with no space', () => {
+    expect(priorityFromLabels(['priority:high'])).toBe('p1');
+  });
+
+  it('reads the critical synonym for p1', () => {
+    expect(priorityFromLabels(['critical'])).toBe('p1');
+  });
+
+  it('reads the priority: medium form', () => {
+    expect(priorityFromLabels(['priority: medium'])).toBe('p2');
+  });
+
+  it('reads the priority:medium form with no space', () => {
+    expect(priorityFromLabels(['priority:medium'])).toBe('p2');
   });
 });
