@@ -237,7 +237,7 @@ The template puts everything in `src/*.ts`. CLAUDE.md mandates `src/main/`, `src
 - Create: `src/preload/index.ts`
 - Create: `src/renderer/index.ts` (placeholder — Task 3 replaces it with the React root `index.tsx`)
 - Delete: `src/main.ts`, `src/preload.ts`, `src/renderer.ts`
-- Modify: `forge.config.ts`, `index.html`
+- Modify: `forge.config.ts`, `index.html`, `vite.main.config.ts`, `vite.preload.config.ts`
 
 - [ ] **Step 1: Create the directories and move the entry points**
 
@@ -412,13 +412,65 @@ In `forge.config.ts`, update the Vite plugin `build` and `renderer` entries:
       ],
 ```
 
+- [ ] **Step 6b: Give the main and preload builds distinct output filenames**
+
+The Forge Vite plugin writes every build target into the same shared `.vite/build/` directory, and by default names each target's output after its entry file's basename (`[name].js`). Step 6 pointed both targets at a file named `index.ts` (`src/main/index.ts` and `src/preload/index.ts`) — matching, colliding basenames. Without this step, whichever target's build runs second silently overwrites the other's output file, and the preload bundle never reaches disk: `contextBridge.exposeInMainWorld` runs during the build, not at runtime, so the app itself never errors — `window.api` is just silently absent in the renderer, forever, until someone digs into `.vite/build/`.
+
+Rewrite `vite.main.config.ts`:
+
+```ts
+import { defineConfig } from 'vite';
+
+// https://vitejs.dev/config
+export default defineConfig({
+  build: {
+    lib: {
+      entry: 'src/main/index.ts',
+      // Force a stable filename instead of the plugin's default `[name].js`,
+      // which derives `[name]` from the entry's basename — and every entry
+      // in this project is named `index.ts`.
+      fileName: () => 'main.js',
+      formats: ['cjs'],
+    },
+  },
+});
+```
+
+Rewrite `vite.preload.config.ts`:
+
+```ts
+import { defineConfig } from 'vite';
+
+// https://vitejs.dev/config
+export default defineConfig({
+  build: {
+    rollupOptions: {
+      output: {
+        entryFileNames: 'preload.js',
+      },
+    },
+  },
+});
+```
+
+Confirm `package.json`'s `"main"` field already reads `.vite/build/main.js` — it should, unchanged since Task 1's scaffold.
+
 - [ ] **Step 7: Verify it still launches, then commit**
 
 ```bash
+rm -rf .vite
 npm start
 ```
 
-Expected: window opens, no errors in the terminal. Close it.
+Then, in a second terminal (or after backgrounding and waiting a few seconds), confirm both files exist and are distinct:
+
+```bash
+ls -la .vite/build/
+grep -c contextBridge .vite/build/preload.js
+grep -c BrowserWindow .vite/build/main.js
+```
+
+Expected: `.vite/build/` contains both `main.js` and `preload.js` as separate files; `contextBridge` appears in `preload.js` (not just as a path string — the actual call); `BrowserWindow` appears in `main.js`. The window opens, no errors in the terminal. Close it.
 
 ```bash
 git add -A
