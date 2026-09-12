@@ -3516,7 +3516,7 @@ git commit -m "feat: add the repo picker dialog and empty state"
 The body renders through `react-markdown` with `rehype-sanitize` — issue content is untrusted, and CLAUDE.md requires sanitising even though Slice 1's content is fixture text.
 
 ```tsx
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { ExternalLink, MoreHorizontal, Plus } from 'lucide-react';
 import Markdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
@@ -3555,13 +3555,20 @@ export function IssueDetailDialog({
   issue: Issue | null;
   onClose: () => void;
 }) {
-  const [subtasks, setSubtasks] = useState<Subtask[]>([]);
+  const [subtasks, setSubtasks] = useState<Subtask[]>(issue?.subtasks ?? []);
 
-  useEffect(() => {
+  // Re-seed exactly when the `issue` prop changes — the render-time
+  // prop-comparison pattern, not a `useEffect`. A `useEffect` calling
+  // `setSubtasks` synchronously fails `eslint-plugin-react-hooks`'s
+  // `set-state-in-effect` rule (active since Task 5), and CLAUDE.md forbids
+  // `eslint-disable`. See Task 15's `RepoPickerDialog` for the same pattern.
+  const [prevIssue, setPrevIssue] = useState(issue);
+  if (issue !== prevIssue) {
+    setPrevIssue(issue);
     setSubtasks(issue?.subtasks ?? []);
-  }, [issue]);
+  }
 
-  if (!issue) return <Dialog open={false} onClose={onClose} />;
+  if (!issue) return <Dialog open={false} onClose={onClose}>{null}</Dialog>;
 
   const done = subtasks.filter((task) => task.done).length;
   const percent = subtasks.length === 0 ? 0 : Math.round((done / subtasks.length) * 100);
