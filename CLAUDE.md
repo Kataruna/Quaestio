@@ -144,6 +144,17 @@ tests/
 
 <!-- Record pinned versions and key decisions here, newest first. -->
 
+### Slice 2 — Auth (2026-09-13)
+
+**Pinned versions** (exact, no ranges — see `package.json`):
+
+| Package | Version |
+| --- | --- |
+| @octokit/rest | 22.0.1 |
+| @octokit/plugin-throttling | 11.0.5 |
+| @octokit/plugin-retry | 8.1.1 |
+| @octokit/auth-oauth-device | 8.0.5 |
+
 ### Slice 1 — Design system and static UI (2026-09-12)
 
 - **Board layout is columns by type** (design 1a). The dense-row alternative (1c) was explored in the handoff and not built.
