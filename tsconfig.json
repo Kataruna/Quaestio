@@ -21,6 +21,11 @@
     // global type package — and the main process needs `process`, `__dirname`,
     // and `NodeJS.Platform`.
     "types": ["vite/client", "node"],
+    // typescript@6.0.3 deprecates "baseUrl" (TS5101, errors unless suppressed with
+    // "ignoreDeprecations") ahead of its removal in TS 7.0 (TS5102). Rather than add
+    // a suppression flag, "paths" uses relative values with no "baseUrl" — the exact
+    // form TS5102's own message prescribes, and it needs no escape hatch under 6.0.3
+    // or any later major.
     "paths": {
       "@/*": ["./src/renderer/*"],
       "@shared/*": ["./src/shared/*"]
