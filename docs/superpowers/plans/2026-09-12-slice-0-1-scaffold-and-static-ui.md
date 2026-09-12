@@ -482,26 +482,45 @@ git commit -m "refactor: restructure src into main/preload/renderer/shared"
 ### Task 3: Add React with strict TypeScript
 
 **Files:**
-- Modify: `package.json`, `tsconfig.json`, `index.html`
+- Modify: `package.json`, `tsconfig.json`, `index.html`, `forge.config.ts`
 - Create: `src/renderer/index.tsx`, `src/renderer/App.tsx`
+- Rename: `vite.renderer.config.ts` → `vite.renderer.config.mts` (Step 3 — `@vitejs/plugin-react` is ESM-only)
+- Delete: `src/renderer/index.ts` (Task 2's placeholder, superseded by `index.tsx`)
 
-- [ ] **Step 1: Install React, and bump TypeScript off the template's 2022 pin**
+- [ ] **Step 1: Install React, and bump TypeScript off the template's 2022 pin — to 6.0.3, not literal `latest`**
 
-The Electron Forge template ships `typescript@4.5.5`. Step 2's tsconfig uses `moduleResolution: "bundler"`, which requires TypeScript 5.0+, so the bump is mandatory, not cosmetic. CLAUDE.md also requires latest-stable for every package.
+The Electron Forge template ships `typescript@4.5.5`. Step 2's tsconfig uses `moduleResolution: "bundler"`, which requires TypeScript 5.0+, so the bump is mandatory, not cosmetic.
+
+**Do not install `typescript@latest`.** npm's `latest` dist-tag now points at the 7.x line (TypeScript 7 is the native/Go-port compiler rewrite) — verify this yourself with `npm view typescript version` before assuming otherwise, toolchains move fast. `typescript-eslint@latest` (which Task 5 installs for flat-config, type-aware linting) declares a peer range of `typescript: ">=4.8.4 <6.1.0"` — verify with `npm view typescript-eslint peerDependencies`. TypeScript 7 falls outside that range entirely, and it isn't a soft warning: `@typescript-eslint`'s type-utils package calls into TS compiler APIs that TS 7 changed, and it crashes outright (`Cannot read properties of undefined (reading 'Any')`) rather than merely warning. Installing TS7 now would silently set up Task 5 to fail.
+
+Install the highest stable release that still satisfies typescript-eslint's range:
 
 ```bash
-npm install --save-exact --save-dev typescript@latest
+npm install --save-exact --save-dev typescript@6.0.3
 npm install --save-exact react react-dom
-npm install --save-exact --save-dev @types/react @types/react-dom @vitejs/plugin-react
+npm install --save-exact --save-dev @types/react @types/react-dom
 ```
 
-Confirm the bump landed before continuing:
+`@vitejs/plugin-react`'s newest releases (6.x) require `vite@^8`, and this project's `vite` is pinned at `5.4.21` (Task 1's scope) — installing plain `@vitejs/plugin-react@latest` would pull an incompatible major. Check the peer range yourself and pick the newest version that still admits `vite@5.4.21`:
+
+```bash
+npm view @vitejs/plugin-react peerDependencies
+```
+
+At time of writing that is `5.2.0` (peer range `^4.2.0 || ^5.0.0 || ^6.0.0 || ^7.0.0 || ^8.0.0` — none of which include a bare `vite: "5.4.21"` compatible entry above 5.x). Install whatever version your own check confirms, pinned exactly:
+
+```bash
+npm install --save-exact --save-dev @vitejs/plugin-react@5.2.0
+```
+
+Confirm both landed before continuing:
 
 ```bash
 node -p "require('./node_modules/typescript/package.json').version"
+node -p "require('./node_modules/@vitejs/plugin-react/package.json').version"
 ```
 
-Expected: `5.x` or higher. Record the exact version — Task 8's Decisions log needs it.
+Expected: `6.0.3` and `5.2.0` (or whatever your own peer-range check confirmed). Record both exact versions — Task 8's Decisions log needs them, along with the reason (typescript-eslint's TS ceiling; @vitejs/plugin-react's vite floor).
 
 - [ ] **Step 2: Enable strict mode in `tsconfig.json`**
 
@@ -531,19 +550,31 @@ Replace `compilerOptions` with:
     // global type package — and the main process needs `process`, `__dirname`,
     // and `NodeJS.Platform`.
     "types": ["vite/client", "node"],
-    "baseUrl": ".",
+    // typescript@6.0.3 deprecates "baseUrl" (TS5101, errors unless suppressed with
+    // "ignoreDeprecations") ahead of its removal in TS 7.0 (TS5102). Rather than add
+    // a suppression flag, "paths" uses relative values with no "baseUrl" — the exact
+    // form TS5102's own message prescribes, and it needs no escape hatch under 6.0.3
+    // or any later major.
     "paths": {
-      "@/*": ["src/renderer/*"],
-      "@shared/*": ["src/shared/*"]
+      "@/*": ["./src/renderer/*"],
+      "@shared/*": ["./src/shared/*"]
     }
   },
-  "include": ["src", "tests", "*.config.ts"]
+  "include": ["src", "tests", "*.config.ts", "*.config.mts", "forge.env.d.ts"]
 }
 ```
 
-- [ ] **Step 3: Teach Vite the same path aliases**
+- [ ] **Step 3: Teach Vite the same path aliases — and rename the config file to `.mts`**
 
-In `vite.renderer.config.ts`:
+`@vitejs/plugin-react` ships pure ESM with no CJS export. `package.json` has no `"type": "module"`, so a plain `.ts` extension makes Vite's config loader bundle this file as CJS, and esbuild then refuses to `require()` the ESM-only plugin (`"@vitejs/plugin-react" resolved to an ESM file. ESM file cannot be loaded by require`) — this breaks `npm start` entirely, not just a lint nitpick. Fix it the way Vite's own troubleshooting guidance does: give the file an ESM-specific extension instead of setting `"type": "module"` on the whole package (which would also affect the main/preload CJS build output, outside this task's scope).
+
+Rename `vite.renderer.config.ts` to `vite.renderer.config.mts`:
+
+```bash
+git mv vite.renderer.config.ts vite.renderer.config.mts
+```
+
+Content (unchanged from the original — `__dirname` still resolves here because Vite's config loader bundles this file with esbuild regardless of extension, and injects the CJS shims a Vite config commonly needs):
 
 ```ts
 import { defineConfig } from 'vite';
@@ -559,6 +590,17 @@ export default defineConfig({
     },
   },
 });
+```
+
+Update `forge.config.ts`'s renderer entry to match the renamed file:
+
+```ts
+      renderer: [
+        {
+          name: 'main_window',
+          config: 'vite.renderer.config.mts',
+        },
+      ],
 ```
 
 - [ ] **Step 4: Write `src/renderer/App.tsx`** (placeholder — replaced in Task 13)
