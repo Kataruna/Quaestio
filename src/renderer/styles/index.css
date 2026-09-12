@@ -1,0 +1,42 @@
+@import '@fontsource/outfit/400.css';
+@import '@fontsource/outfit/500.css';
+@import '@fontsource/outfit/600.css';
+@import '@fontsource/outfit/700.css';
+@import '@fontsource-variable/plus-jakarta-sans';
+@import '@fontsource/dm-mono/400.css';
+@import '@fontsource/dm-mono/500.css';
+
+@import 'tailwindcss';
+@import './tokens.css';
+
+@layer base {
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+
+  body {
+    margin: 0;
+    background: var(--color-surface-app);
+    color: var(--color-text-body);
+    font-family: var(--font-sans);
+    font-size: var(--text-body);
+    line-height: 1.45;
+    -webkit-font-smoothing: antialiased;
+    /* Desktop chrome: the app is not a document. */
+    user-select: none;
+    overflow: hidden;
+  }
+
+  /* The design specifies a 3px lime halo, never a hard outline. */
+  :focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(182, 226, 48, 0.45);
+  }
+
+  ::selection {
+    background: var(--color-lime-300);
+    color: var(--color-ink-900);
+  }
+}

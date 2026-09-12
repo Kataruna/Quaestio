@@ -1,0 +1,101 @@
+/* Design tokens extracted from the Soft Nature design bundle's token files
+   (design/_ds/soft-nature-design-system-<id>/tokens/, each a tokens/*.css file).
+   Do not hand-edit values here without cross-checking the design bundle first. */
+@theme {
+  /* ---- lime accent ---- */
+  --color-lime-100: #f1fbd9;
+  --color-lime-200: #e2f8ac;
+  --color-lime-300: #d4f57d;
+  --color-lime-400: #c7f24c;
+  --color-lime-500: #b6e230;
+  --color-lime-600: #9cc81c;
+  --color-lime-700: #6e8f14;
+
+  /* ---- ink chrome ---- */
+  --color-ink-900: #0e0f10;
+  --color-ink-800: #16181a;
+  --color-ink-700: #232629;
+  --color-ink-600: #3a3e42;
+
+  /* ---- warm neutrals ---- */
+  --color-neutral-0: #ffffff;
+  --color-neutral-25: #fbfbf9;
+  --color-neutral-50: #f4f4f1;
+  --color-neutral-100: #eeeeea;
+  --color-neutral-200: #e4e4de;
+  --color-neutral-300: #d6d6cf;
+  --color-neutral-400: #b4b5ae;
+  --color-neutral-500: #8a8d8f;
+  --color-neutral-600: #6e7174;
+  --color-neutral-700: #4a4d50;
+
+  /* ---- status hues (dot colour + tinted background) ---- */
+  --color-status-hot: #f0433a;
+  --color-status-hot-bg: #fde4e2;
+  --color-status-warm: #fb8c3a;
+  --color-status-warm-bg: #feebda;
+  --color-status-due: #f5c93b;
+  --color-status-due-bg: #fdf2d6;
+  --color-status-won: #59c24c;
+  --color-status-won-bg: #e1f5de;
+  --color-status-info: #3d7bf7;
+  --color-status-info-bg: #e0eafe;
+
+  /* ---- semantic surfaces and text ---- */
+  --color-surface-app: #f4f4f1;
+  --color-surface-card: #ffffff;
+  --color-surface-sunken: #eeeeea;
+  --color-surface-ink: #0e0f10;
+  --color-surface-accent: #c7f24c;
+  --color-surface-accent-soft: #f1fbd9;
+  --color-text-strong: #16181a;
+  --color-text-body: #232629;
+  --color-text-muted: #6e7174;
+  --color-text-faint: #b4b5ae;
+  --color-line-hairline: #e4e4de;
+  --color-line-strong: #d6d6cf;
+
+  /* ---- type ----
+     font-sans uses "Plus Jakarta Sans Variable": the design token file itself
+     says "Plus Jakarta Sans", but that name is only defined for a static-weight
+     @fontsource package. This project self-hosts the variable-weight package
+     (@fontsource-variable/plus-jakarta-sans), which registers its @font-face
+     rules under the family name "Plus Jakarta Sans Variable" (confirmed by
+     reading node_modules/@fontsource-variable/plus-jakarta-sans/index.css).
+     Using the design file's literal string here would not match any loaded
+     @font-face and would silently fall back to system-ui. */
+  --font-display: 'Outfit', system-ui, sans-serif;
+  --font-sans: 'Plus Jakarta Sans Variable', system-ui, sans-serif;
+  --font-mono: 'DM Mono', ui-monospace, monospace;
+
+  --text-nano: 10px;
+  --text-micro: 11px;
+  --text-label: 12px;
+  --text-body-s: 13px;
+  --text-body: 14px;
+  --text-title-s: 16px;
+  --text-title-m: 18px;
+  --text-title-l: 22px;
+  --text-page: 32px;
+  --text-stat: 38px;
+
+  /* ---- radius: shadcn defaults are ~8px; this design is 26px and 999px ---- */
+  --radius-xs: 6px;
+  --radius-sm: 10px;
+  --radius-tile: 14px;
+  --radius-lg: 20px;
+  --radius-card: 26px;
+  --radius-screen: 34px;
+  --radius-pill: 999px;
+
+  /* ---- elevation ---- */
+  --shadow-xs: 0 1px 2px rgba(14, 15, 16, 0.04);
+  --shadow-card: 0 2px 8px rgba(14, 15, 16, 0.05);
+  --shadow-card-hover: 0 6px 20px rgba(14, 15, 16, 0.07);
+  --shadow-floating: 0 14px 40px rgba(14, 15, 16, 0.1);
+  --shadow-modal: 0 28px 70px rgba(14, 15, 16, 0.16);
+
+  /* ---- motion ---- */
+  --ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-out-soft: cubic-bezier(0.22, 0.61, 0.36, 1);
+}
