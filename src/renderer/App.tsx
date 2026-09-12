@@ -9,16 +9,13 @@ import { BoardScreen } from '@/features/board/BoardScreen';
 import { RepoPickerDialog } from '@/features/repos/RepoPickerDialog';
 import { EmptyState } from '@/features/repos/EmptyState';
 import { IssueDetailDialog } from '@/features/issues/IssueDetailDialog';
+import { SettingsScreen } from '@/features/settings/SettingsScreen';
 import { issues, repos as repoFixtures, syncStatus as initialStatus } from '@/lib/fixtures';
 
-/* ---- Stubs, each replaced by its real screen in Tasks 17-18. ---- */
+/* ---- Stub, replaced by its real screen in Task 18. ---- */
 // Task 18 replaces this with: import { SearchScreen } from '@/features/search/SearchScreen';
 function SearchScreen() {
   return <PlaceholderScreen title="Search" />;
-}
-// Task 17 replaces this with: import { SettingsScreen } from '@/features/settings/SettingsScreen';
-function SettingsScreen() {
-  return <PlaceholderScreen title="Settings" />;
 }
 
 export function App() {
