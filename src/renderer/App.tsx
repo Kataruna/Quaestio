@@ -10,13 +10,8 @@ import { RepoPickerDialog } from '@/features/repos/RepoPickerDialog';
 import { EmptyState } from '@/features/repos/EmptyState';
 import { IssueDetailDialog } from '@/features/issues/IssueDetailDialog';
 import { SettingsScreen } from '@/features/settings/SettingsScreen';
+import { SearchScreen } from '@/features/search/SearchScreen';
 import { issues, repos as repoFixtures, syncStatus as initialStatus } from '@/lib/fixtures';
-
-/* ---- Stub, replaced by its real screen in Task 18. ---- */
-// Task 18 replaces this with: import { SearchScreen } from '@/features/search/SearchScreen';
-function SearchScreen() {
-  return <PlaceholderScreen title="Search" />;
-}
 
 export function App() {
   const [screen, setScreen] = useState<ScreenId>('board');
