@@ -87,26 +87,69 @@ function issue(partial: Omit<Issue, 'repoFullName' | 'state' | 'createdAt' | 'ht
   };
 }
 
+/**
+ * Hoisted into named consts (instead of read back out of `issues` by index)
+ * because `searchResults` below reuses these three, with overrides. Indexing
+ * `issues[n]` types as `Issue | undefined` under the project's
+ * `noUncheckedIndexedAccess`, which would force a cast; a direct variable
+ * reference doesn't have that problem.
+ */
+const tokenRefreshLoopIssue = issue({
+  id: 482,
+  number: 482,
+  title: 'Token refresh loop on expired session',
+  body: 'Client retries the refresh endpoint indefinitely when the server returns 401 with an expired grant. The loop saturates the auth service and the user is never signed out. Reproduced on staging with a grant older than 30 days.',
+  type: 'bug',
+  priority: 'p1',
+  labels: ['bug', 'p1'],
+  assignee: people['sarah-kwan'] ?? null,
+  milestone: '1.4',
+  dueDate: '2026-03-28',
+  updatedAt: '2026-03-26T08:12:00Z',
+  subtasks: [
+    { id: '482-1', title: 'Reproduce with an expired grant on staging', done: true },
+    { id: '482-2', title: 'Add a retry ceiling and backoff', done: false },
+    { id: '482-3', title: 'Sign the user out on terminal 401', done: false },
+    { id: '482-4', title: 'Cover with a regression test', done: false },
+  ],
+});
+
+const keyboardShortcutsIssue = issue({
+  id: 485,
+  number: 485,
+  title: 'Keyboard shortcuts for column moves',
+  body: 'Move a focused card between type columns without the mouse.',
+  type: 'feature',
+  priority: 'p3',
+  labels: ['enhancement'],
+  assignee: people['sarah-kwan'] ?? null,
+  milestone: null,
+  dueDate: null,
+  updatedAt: '2026-03-23T13:20:00Z',
+  subtasks: [
+    { id: '485-1', title: 'Focus model for cards', done: false },
+    { id: '485-2', title: 'Move left and right', done: false },
+    { id: '485-3', title: 'Announce the move to screen readers', done: false },
+  ],
+});
+
+const bumpLucideIssue = issue({
+  id: 468,
+  number: 468,
+  title: 'Bump lucide to 0.474',
+  body: 'Two glyph names changed upstream. Check the rail and card icons after upgrade.',
+  type: 'chore',
+  priority: 'p3',
+  labels: [],
+  assignee: people['dpatel'] ?? null,
+  milestone: null,
+  dueDate: '2026-03-27',
+  updatedAt: '2026-03-21T16:45:00Z',
+  subtasks: [{ id: '468-1', title: 'Update and smoke-test the icon set', done: true }],
+});
+
 export const issues: Issue[] = [
-  issue({
-    id: 482,
-    number: 482,
-    title: 'Token refresh loop on expired session',
-    body: 'Client retries the refresh endpoint indefinitely when the server returns 401 with an expired grant. The loop saturates the auth service and the user is never signed out. Reproduced on staging with a grant older than 30 days.',
-    type: 'bug',
-    priority: 'p1',
-    labels: ['bug', 'p1'],
-    assignee: people['sarah-kwan'] ?? null,
-    milestone: '1.4',
-    dueDate: '2026-03-28',
-    updatedAt: '2026-03-26T08:12:00Z',
-    subtasks: [
-      { id: '482-1', title: 'Reproduce with an expired grant on staging', done: true },
-      { id: '482-2', title: 'Add a retry ceiling and backoff', done: false },
-      { id: '482-3', title: 'Sign the user out on terminal 401', done: false },
-      { id: '482-4', title: 'Cover with a regression test', done: false },
-    ],
-  }),
+  tokenRefreshLoopIssue,
   issue({
     id: 476,
     number: 476,
@@ -182,24 +225,7 @@ export const issues: Issue[] = [
       { id: '490-6', title: 'Keyboard switch between views', done: false },
     ],
   }),
-  issue({
-    id: 485,
-    number: 485,
-    title: 'Keyboard shortcuts for column moves',
-    body: 'Move a focused card between type columns without the mouse.',
-    type: 'feature',
-    priority: 'p3',
-    labels: ['enhancement'],
-    assignee: people['sarah-kwan'] ?? null,
-    milestone: null,
-    dueDate: null,
-    updatedAt: '2026-03-23T13:20:00Z',
-    subtasks: [
-      { id: '485-1', title: 'Focus model for cards', done: false },
-      { id: '485-2', title: 'Move left and right', done: false },
-      { id: '485-3', title: 'Announce the move to screen readers', done: false },
-    ],
-  }),
+  keyboardShortcutsIssue,
   issue({
     id: 465,
     number: 465,
@@ -219,27 +245,14 @@ export const issues: Issue[] = [
       { id: '465-4', title: 'Verify total wall time', done: false },
     ],
   }),
-  issue({
-    id: 468,
-    number: 468,
-    title: 'Bump lucide to 0.474',
-    body: 'Two glyph names changed upstream. Check the rail and card icons after upgrade.',
-    type: 'chore',
-    priority: 'p3',
-    labels: [],
-    assignee: people['dpatel'] ?? null,
-    milestone: null,
-    dueDate: '2026-03-27',
-    updatedAt: '2026-03-21T16:45:00Z',
-    subtasks: [{ id: '468-1', title: 'Update and smoke-test the icon set', done: true }],
-  }),
+  bumpLucideIssue,
 ];
 
 /** Cross-repo results for the Search screen (design 1h). */
 export const searchResults: Issue[] = [
-  issues[0] as Issue,
+  tokenRefreshLoopIssue,
   {
-    ...(issues[7] as Issue),
+    ...bumpLucideIssue,
     id: 112,
     number: 112,
     repoFullName: 'acme/cli-tools',
@@ -250,12 +263,17 @@ export const searchResults: Issue[] = [
     labels: ['p2'],
     assignee: people['dpatel'] ?? null,
     dueDate: null,
+    subtasks: [
+      { id: '112-1', title: 'Generate a new refresh secret', done: false },
+      { id: '112-2', title: 'Update the CI secret store', done: false },
+    ],
     htmlUrl: 'https://github.com/acme/cli-tools/issues/112',
   },
   {
-    ...(issues[5] as Issue),
+    ...keyboardShortcutsIssue,
     id: 493,
     number: 493,
+    repoFullName: 'acme/design-system',
     title: 'Silent refresh on window focus',
     body: 'Refresh the session quietly when the window regains focus.',
     type: 'feature',
@@ -264,7 +282,11 @@ export const searchResults: Issue[] = [
     assignee: people['ravi-n'] ?? null,
     milestone: '1.5',
     dueDate: null,
-    htmlUrl: 'https://github.com/acme/atlas-web/issues/493',
+    subtasks: [
+      { id: '493-1', title: 'Detect focus regain in the renderer', done: false },
+      { id: '493-2', title: 'Debounce repeated focus events', done: false },
+    ],
+    htmlUrl: 'https://github.com/acme/design-system/issues/493',
   },
 ];
 
