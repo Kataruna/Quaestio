@@ -8,9 +8,10 @@ import { PlaceholderScreen } from '@/features/PlaceholderScreen';
 import { BoardScreen } from '@/features/board/BoardScreen';
 import { RepoPickerDialog } from '@/features/repos/RepoPickerDialog';
 import { EmptyState } from '@/features/repos/EmptyState';
+import { IssueDetailDialog } from '@/features/issues/IssueDetailDialog';
 import { issues, repos as repoFixtures, syncStatus as initialStatus } from '@/lib/fixtures';
 
-/* ---- Stubs, each replaced by its real screen in Tasks 15-18. ---- */
+/* ---- Stubs, each replaced by its real screen in Tasks 17-18. ---- */
 // Task 18 replaces this with: import { SearchScreen } from '@/features/search/SearchScreen';
 function SearchScreen() {
   return <PlaceholderScreen title="Search" />;
@@ -18,10 +19,6 @@ function SearchScreen() {
 // Task 17 replaces this with: import { SettingsScreen } from '@/features/settings/SettingsScreen';
 function SettingsScreen() {
   return <PlaceholderScreen title="Settings" />;
-}
-// Task 16 replaces this with the real dialog.
-function IssueDetailDialog(_props: { issue: Issue | null; onClose: () => void }) {
-  return null;
 }
 
 export function App() {
