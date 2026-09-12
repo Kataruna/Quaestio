@@ -3303,7 +3303,7 @@ export function Dialog({
 - [ ] **Step 2: Write `src/renderer/features/repos/RepoPickerDialog.tsx`**
 
 ```tsx
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import type { Repo } from '@shared/types';
 import { Dialog } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -3335,13 +3335,21 @@ export function RepoPickerDialog({
   const [selected, setSelected] = useState<Set<number>>(new Set());
   const [filter, setFilter] = useState('');
 
-  // Re-seed from props each time the dialog opens.
-  useEffect(() => {
+  // Re-seed from props exactly when the dialog transitions from closed to open.
+  // A `useEffect` here would call setState synchronously inside an effect, which
+  // `eslint-plugin-react-hooks`'s `set-state-in-effect` rule (part of the
+  // project's `recommended` config since Task 5) flags as a cascading-render
+  // risk, and CLAUDE.md forbids `eslint-disable`. This is React's own documented
+  // alternative — adjusting state during render by comparing against the
+  // previous prop value — for "reset state when a prop changes."
+  const [prevOpen, setPrevOpen] = useState(open);
+  if (open !== prevOpen) {
+    setPrevOpen(open);
     if (open) {
       setSelected(new Set(repos.filter((repo) => repo.tracked).map((repo) => repo.id)));
       setFilter('');
     }
-  }, [open, repos]);
+  }
 
   const visible = repos.filter((repo) =>
     repo.fullName.toLowerCase().includes(filter.trim().toLowerCase()),
