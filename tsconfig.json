@@ -26,5 +26,5 @@
       "@shared/*": ["./src/shared/*"]
     }
   },
-  "include": ["src", "tests", "*.config.ts", "forge.env.d.ts"]
+  "include": ["src", "tests", "*.config.ts", "*.config.mts", "forge.env.d.ts"]
 }
