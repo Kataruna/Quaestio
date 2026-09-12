@@ -160,8 +160,11 @@ tests/
 | @vitejs/plugin-react | 5.2.0 |
 | vitest | 3.2.7 |
 | eslint | 10.10.0 |
-
-`zod` is not yet installed — it arrives with the typed IPC contract in a later task, so no version is pinned for it here.
+| zod | 4.6.2 |
+| @tanstack/react-query | 5.102.8 |
+| react-markdown | 10.1.0 |
+| remark-gfm | 4.0.1 |
+| rehype-sanitize | 6.0.0 |
 
 **Decisions:**
 
