@@ -6,6 +6,8 @@ import { RepoTabs } from '@/components/shell/RepoTabs';
 import { StateBanner } from '@/components/shell/StateBanner';
 import { PlaceholderScreen } from '@/features/PlaceholderScreen';
 import { BoardScreen } from '@/features/board/BoardScreen';
+import { RepoPickerDialog } from '@/features/repos/RepoPickerDialog';
+import { EmptyState } from '@/features/repos/EmptyState';
 import { issues, repos as repoFixtures, syncStatus as initialStatus } from '@/lib/fixtures';
 
 /* ---- Stubs, each replaced by its real screen in Tasks 15-18. ---- */
@@ -16,18 +18,6 @@ function SearchScreen() {
 // Task 17 replaces this with: import { SettingsScreen } from '@/features/settings/SettingsScreen';
 function SettingsScreen() {
   return <PlaceholderScreen title="Settings" />;
-}
-// Task 15 replaces these with the real dialogs.
-function RepoPickerDialog(_props: {
-  open: boolean;
-  repos: typeof repoFixtures;
-  onClose: () => void;
-  onConfirm: (next: typeof repoFixtures) => void;
-}) {
-  return null;
-}
-function EmptyState(_props: { onTrack: () => void }) {
-  return <PlaceholderScreen title="No repositories tracked" />;
 }
 // Task 16 replaces this with the real dialog.
 function IssueDetailDialog(_props: { issue: Issue | null; onClose: () => void }) {
