@@ -1,12 +1,104 @@
+import { useState } from 'react';
+import type { Issue, SyncStatus } from '@shared/types';
+import { TitleBar } from '@/components/shell/TitleBar';
+import { SidebarRail, type ScreenId } from '@/components/shell/SidebarRail';
+import { RepoTabs } from '@/components/shell/RepoTabs';
+import { StateBanner } from '@/components/shell/StateBanner';
+import { PlaceholderScreen } from '@/features/PlaceholderScreen';
+import { issues, repos as repoFixtures, syncStatus as initialStatus } from '@/lib/fixtures';
+
+/* ---- Stubs, each replaced by its real screen in Tasks 14-18. ---- */
+// Task 14 replaces this with: import { BoardScreen } from '@/features/board/BoardScreen';
+function BoardScreen(_props: {
+  repoFullName: string;
+  issues: Issue[];
+  loading?: boolean;
+  onOpenIssue: (issue: Issue) => void;
+}) {
+  return <PlaceholderScreen title="Board" />;
+}
+// Task 18 replaces this with: import { SearchScreen } from '@/features/search/SearchScreen';
+function SearchScreen() {
+  return <PlaceholderScreen title="Search" />;
+}
+// Task 17 replaces this with: import { SettingsScreen } from '@/features/settings/SettingsScreen';
+function SettingsScreen() {
+  return <PlaceholderScreen title="Settings" />;
+}
+// Task 15 replaces these with the real dialogs.
+function RepoPickerDialog(_props: {
+  open: boolean;
+  repos: typeof repoFixtures;
+  onClose: () => void;
+  onConfirm: (next: typeof repoFixtures) => void;
+}) {
+  return null;
+}
+function EmptyState(_props: { onTrack: () => void }) {
+  return <PlaceholderScreen title="No repositories tracked" />;
+}
+// Task 16 replaces this with the real dialog.
+function IssueDetailDialog(_props: { issue: Issue | null; onClose: () => void }) {
+  return null;
+}
+
 export function App() {
+  const [screen, setScreen] = useState<ScreenId>('board');
+  const [repos, setRepos] = useState(repoFixtures);
+  const [activeRepo, setActiveRepo] = useState('acme/atlas-web');
+  const [status, setStatus] = useState<SyncStatus>(initialStatus);
+  const [pickerOpen, setPickerOpen] = useState(false);
+  const [openIssue, setOpenIssue] = useState<Issue | null>(null);
+
+  const tracked = repos.filter((repo) => repo.tracked);
+
+  function untrack(fullName: string) {
+    setRepos((current) =>
+      current.map((repo) => (repo.fullName === fullName ? { ...repo, tracked: false } : repo)),
+    );
+  }
+
   return (
-    <div className="p-10">
-      <h1 className="font-display text-page font-semibold tracking-[-0.02em] text-text-strong">
-        Outfit display
-      </h1>
-      <p className="font-sans text-body text-text-muted">Plus Jakarta Sans body</p>
-      <p className="font-mono text-micro text-text-faint">#482 DM Mono</p>
-      <div className="mt-6 rounded-card bg-surface-card p-5 shadow-card">Card, 26px radius</div>
+    <div className="flex h-full flex-col overflow-hidden">
+      <TitleBar status={status} onSync={() => setStatus({ kind: 'syncing' })} />
+
+      {tracked.length === 0 ? (
+        <EmptyState onTrack={() => setPickerOpen(true)} />
+      ) : (
+        <>
+          <RepoTabs
+            repos={tracked}
+            activeFullName={activeRepo}
+            onSelect={setActiveRepo}
+            onUntrack={untrack}
+            onAdd={() => setPickerOpen(true)}
+          />
+          <StateBanner status={status} onRetry={() => setStatus({ kind: 'syncing' })} />
+          <div className="flex min-h-0 flex-1 gap-4 px-5 pb-6 pt-4">
+            <SidebarRail active={screen} onSelect={setScreen} />
+            <main className="min-w-0 flex-1 overflow-y-auto">
+              {screen === 'board' ? (
+                <BoardScreen repoFullName={activeRepo} issues={issues} onOpenIssue={setOpenIssue} />
+              ) : null}
+              {screen === 'search' ? <SearchScreen /> : null}
+              {screen === 'settings' ? <SettingsScreen /> : null}
+              {screen === 'milestones' ? <PlaceholderScreen title="Milestones" /> : null}
+              {screen === 'people' ? <PlaceholderScreen title="People" /> : null}
+            </main>
+          </div>
+        </>
+      )}
+
+      <RepoPickerDialog
+        open={pickerOpen}
+        repos={repos}
+        onClose={() => setPickerOpen(false)}
+        onConfirm={(next) => {
+          setRepos(next);
+          setPickerOpen(false);
+        }}
+      />
+      <IssueDetailDialog issue={openIssue} onClose={() => setOpenIssue(null)} />
     </div>
   );
 }
