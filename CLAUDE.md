@@ -118,9 +118,9 @@ tests/
 
 ## Roadmap (one slice per session; check it off when done)
 
-- [ ] **Slice 0 — Scaffold.** Set up Forge (Vite + TS), React, Tailwind, shadcn, strict TS, ESLint, Prettier, Vitest, and scripts. Add GitHub Actions CI that runs typecheck, lint, and test on `windows-latest` and `macos-latest`.
+- [x] **Slice 0 — Scaffold.** Set up Forge (Vite + TS), React, Tailwind, shadcn, strict TS, ESLint, Prettier, Vitest, and scripts. Add GitHub Actions CI that runs typecheck, lint, and test on `windows-latest` and `macos-latest`.
   *Done when:* `npm start` opens a window and all checks pass.
-- [ ] **Slice 1 — Design system + static UI.** Extract tokens, build the app shell, and build every design screen using fixtures. Add stubs for the typed IPC contract and all UI states.
+- [x] **Slice 1 — Design system + static UI.** Extract tokens, build the app shell, and build every design screen using fixtures. Add stubs for the typed IPC contract and all UI states.
   *Done when:* every screen from `design/` is reachable and visually matches.
 - [ ] **Slice 2 — Auth.** Add PAT login, then Device Flow. Store the token with safeStorage. Show the user's avatar and name, and add sign-out.
   *Done when:* login survives a restart, and sign-out clears the token.
@@ -143,6 +143,17 @@ tests/
 ## Decisions log
 
 <!-- Record pinned versions and key decisions here, newest first. -->
+
+### Slice 1 — Design system and static UI (2026-09-12)
+
+- **Board layout is columns by type** (design 1a). The dense-row alternative (1c) was explored in the handoff and not built.
+- **One card treatment: the notch tab** (design 1b-A). B and C were alternatives, not additional components.
+- **Screens not in the handoff, built in the same visual language:** sign-in (PAT + device flow), device-code screen, loading skeletons, offline / rate-limited / sync-error banners, and placeholder screens for the Milestones and People rail destinations, which the design lists (in the sidebar rail data) but never draws as a screen.
+- **Modals use the native `<dialog>` element** (`src/renderer/components/ui/dialog.tsx`, using `showModal()`/`close()` and a backdrop click handler) for focus trapping and Escape handling, rather than a dialog dependency.
+- **Screen routing is local component state** (`useState<ScreenId>` in `App.tsx`). Five destinations does not justify a router, and no router package is installed.
+- **The Slice 0 decision to hand-write design-system primitives held for the whole slice:** `src/renderer/components/ui/` has 14 hand-written files, not `shadcn init` output — 13 from the initial primitives pass plus `dialog.tsx` added later for the modal work.
+- **Two components reset local state from a changed prop by comparing against a stored previous value during render, not via a `useEffect` that calls `setState`:** `RepoPickerDialog` re-seeds `selected`/`filter` when `open` flips closed→open, and `IssueDetailDialog` re-seeds `subtasks` when the `issue` prop changes. Both compare the new prop to a `prevX` state variable inside the render body and call `setState` synchronously when it differs, instead of an effect — `eslint-plugin-react-hooks`'s `set-state-in-effect` rule (in the `recommended` config since Task 5) flags the effect-based version as a cascading-render risk, and CLAUDE.md forbids `eslint-disable`. Reuse this pattern for any future component that needs to re-seed state when a prop changes.
+- **A dev-only state gallery** (`src/renderer/features/StateGallery.tsx`, gated on `import.meta.env.DEV` in `App.tsx`) makes every sync state (synced/syncing/offline/rate-limited/error) and the board loading skeleton reachable for visual review. It is not present in packaged builds.
 
 ### Slice 0 — Scaffold (2026-09-12)
 
