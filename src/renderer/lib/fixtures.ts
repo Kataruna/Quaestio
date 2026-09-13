@@ -1,11 +1,5 @@
 import type { Issue, Repo, SyncStatus, User } from '@shared/types';
 
-export const currentUser: User = {
-  login: 'sarah-kwan',
-  name: 'Sarah Kwan',
-  avatarUrl: null,
-};
-
 const people: Record<string, User> = {
   'sarah-kwan': { login: 'sarah-kwan', name: 'Sarah Kwan', avatarUrl: null },
   'm-ito': { login: 'm-ito', name: 'Mika Ito', avatarUrl: null },
