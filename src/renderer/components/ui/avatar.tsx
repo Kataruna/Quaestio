@@ -32,6 +32,18 @@ export function Avatar({
   className?: string;
 }) {
   const [imageFailed, setImageFailed] = useState(false);
+  // Tracks the previous `src` so we can re-seed `imageFailed` during render
+  // (the React-endorsed alternative to a setState-in-effect, which
+  // eslint-plugin-react-hooks flags as a cascading-render risk) whenever the
+  // `src` prop changes to a different value — otherwise a failed image would
+  // keep showing initials forever, even once a caller reuses this instance
+  // for a different `src`.
+  const [prevSrc, setPrevSrc] = useState(src);
+
+  if (src !== prevSrc) {
+    setPrevSrc(src);
+    setImageFailed(false);
+  }
 
   if (src && !imageFailed) {
     return (

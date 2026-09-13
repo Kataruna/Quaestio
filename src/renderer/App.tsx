@@ -47,15 +47,23 @@ export function App() {
     void window.api.auth
       .getUser()
       .then(setUser)
+      .catch(() => {
+        setAuthError('Could not check sign-in status');
+      })
       .finally(() => setAuthChecked(true));
 
     // Fires when sign-in, sign-out, or a background device-flow login
     // changes who's signed in — re-check who that is now.
     return window.api.auth.onUpdated(() => {
-      void window.api.auth.getUser().then((next) => {
-        setUser(next);
-        if (next) setDeviceCode(null);
-      });
+      void window.api.auth
+        .getUser()
+        .then((next) => {
+          setUser(next);
+          if (next) setDeviceCode(null);
+        })
+        .catch((error: unknown) => {
+          console.error('Failed to refresh sign-in status', error);
+        });
     });
   }, []);
 
@@ -84,7 +92,16 @@ export function App() {
   }
 
   function handleSignOut() {
-    void window.api.auth.signOut().then(() => setUser(null));
+    void window.api.auth
+      .signOut()
+      .then(() => {
+        setUser(null);
+        setAuthError(undefined);
+        setDeviceCode(null);
+      })
+      .catch((error: unknown) => {
+        setAuthError(error instanceof Error ? error.message : 'Sign-out failed');
+      });
   }
 
   function untrack(fullName: string) {
