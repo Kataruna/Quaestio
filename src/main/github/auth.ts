@@ -145,10 +145,20 @@ export async function signInWithToken(token: string): Promise<User> {
   const user = mapGitHubUser(data);
   await saveToken(token);
   currentToken = token;
-  // Cache the identity immediately so a fresh sign-in has a fallback ready
-  // for the very next `getCurrentUser()` call, not just after its next
-  // successful live check.
-  await saveLastKnownUser(user);
+  try {
+    // Cache the identity immediately so a fresh sign-in has a fallback ready
+    // for the very next `getCurrentUser()` call, not just after its next
+    // successful live check. Best-effort, same as `getCurrentUser()`'s own
+    // cache write: a failed cache write here must not surface as a failed
+    // sign-in — the token was already saved and the session is genuinely
+    // valid, so the next `getCurrentUser()` call will retry the cache write.
+    await saveLastKnownUser(user);
+  } catch (error) {
+    console.warn(
+      'Failed to cache the signed-in identity:',
+      error instanceof Error ? error.message : error,
+    );
+  }
   notifyUpdated();
   return user;
 }
