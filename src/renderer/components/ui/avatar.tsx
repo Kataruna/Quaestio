@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { cn } from '@/lib/cn';
 
 type Size = 'xs' | 'sm' | 'md';
@@ -19,13 +20,31 @@ function initials(name: string): string {
 
 export function Avatar({
   name,
+  src,
   size = 'xs',
   className,
 }: {
   name: string;
+  /** GitHub avatar URL. Falls back to initials when absent or when the image fails to load
+   * (e.g. an offline launch — the CSP already allows https://avatars.githubusercontent.com). */
+  src?: string | null;
   size?: Size;
   className?: string;
 }) {
+  const [imageFailed, setImageFailed] = useState(false);
+
+  if (src && !imageFailed) {
+    return (
+      <img
+        src={src}
+        alt=""
+        aria-hidden
+        onError={() => setImageFailed(true)}
+        className={cn('inline-block shrink-0 rounded-pill object-cover', SIZES[size], className)}
+      />
+    );
+  }
+
   return (
     <span
       aria-hidden

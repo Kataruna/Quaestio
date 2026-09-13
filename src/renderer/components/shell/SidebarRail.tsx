@@ -87,7 +87,7 @@ export function SidebarRail({
             aria-expanded={menuOpen}
             className="rounded-pill transition-transform active:scale-[0.97]"
           >
-            <Avatar name={user.name} size="sm" />
+            <Avatar name={user.name} src={user.avatarUrl} size="sm" />
           </button>
         </div>
       ) : null}
