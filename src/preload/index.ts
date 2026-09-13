@@ -11,6 +11,11 @@ const api: Api = {
     startDeviceFlow: () => ipcRenderer.invoke(CHANNELS.authStartDeviceFlow),
     signOut: () => ipcRenderer.invoke(CHANNELS.authSignOut),
     getUser: () => ipcRenderer.invoke(CHANNELS.authGetUser),
+    onUpdated: (listener) => {
+      const handler = () => listener();
+      ipcRenderer.on(CHANNELS.authUpdated, handler);
+      return () => ipcRenderer.removeListener(CHANNELS.authUpdated, handler);
+    },
   },
   repos: {
     list: () => ipcRenderer.invoke(CHANNELS.reposList),

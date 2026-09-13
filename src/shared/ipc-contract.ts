@@ -48,6 +48,8 @@ export interface Api {
     startDeviceFlow(): Promise<DeviceFlowStarted>;
     signOut(): Promise<void>;
     getUser(): Promise<User | null>;
+    /** Returns an unsubscribe function. */
+    onUpdated(listener: () => void): () => void;
   };
   repos: {
     list(): Promise<Repo[]>;

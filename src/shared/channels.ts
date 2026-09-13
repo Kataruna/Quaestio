@@ -11,6 +11,8 @@ export const CHANNELS = {
   authStartDeviceFlow: 'auth:start-device-flow',
   authSignOut: 'auth:sign-out',
   authGetUser: 'auth:get-user',
+  /** Main -> renderer push after sign-in, sign-out, or a device-flow login completes. */
+  authUpdated: 'auth:updated',
   reposList: 'repos:list',
   reposSetTracked: 'repos:set-tracked',
   issuesList: 'issues:list',
