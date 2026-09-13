@@ -48,10 +48,11 @@ export async function getCurrentUser(): Promise<User | null> {
     const { data } = await client.rest.users.getAuthenticated();
     return mapGitHubUser(data);
   } catch (error) {
-    // Never log the full error object here: this request carried the token
-    // in its Authorization header, and an Octokit RequestError attaches the
-    // request (headers included) as an enumerable property that `console.warn`
-    // would print alongside the message. Log `.message` only.
+    // Log `.message` only, never the full error object. This is a
+    // defense-in-depth precaution, independent of whether the installed
+    // @octokit/request-error currently redacts the Authorization header on
+    // its attached request — CLAUDE.md requires never logging the token
+    // regardless of what today's dependency version happens to do.
     const status =
       typeof error === 'object' && error !== null && 'status' in error ? error.status : undefined;
     console.warn(
