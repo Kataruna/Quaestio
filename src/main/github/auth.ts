@@ -4,7 +4,14 @@ import { mapGitHubUser } from '@shared/map-github-user';
 import type { User } from '@shared/types';
 import type { DeviceFlowStarted } from '@shared/ipc-contract';
 import { createGitHubClient } from './client';
-import { saveToken, loadToken, clearToken } from '../secure-store';
+import {
+  saveToken,
+  loadToken,
+  clearToken,
+  saveLastKnownUser,
+  loadLastKnownUser,
+  clearLastKnownUser,
+} from '../secure-store';
 
 // Device flow needs no client secret — GitHub's device authorization grant
 // only ever requires the client ID. This value is not sensitive; it's a
@@ -64,17 +71,42 @@ export async function restoreSession(): Promise<void> {
 /**
  * Returns the signed-in user, or null if there's no token, the stored token
  * is actually invalid (401 — revoked or expired), or the check couldn't
- * complete (offline, GitHub down). Only the 401 case clears the stored
- * token: a network failure isn't evidence the token is bad, and clearing it
- * on every failed call would sign the user out on an offline launch, which
- * breaks this app's offline-first requirement.
+ * complete (offline, GitHub down) with no cached identity to fall back on.
+ * Only the 401 case clears the stored token: a network failure isn't
+ * evidence the token is bad, and clearing it on every failed call would sign
+ * the user out on an offline launch, which breaks this app's offline-first
+ * requirement.
+ *
+ * This app is offline-first per CLAUDE.md ("the app keeps a local SQLite
+ * cache so it opens instantly and can be read offline") — a network failure
+ * here is not evidence the user is signed out, only that we couldn't
+ * confirm it live. So on any non-401 failure, fall back to the last
+ * confirmed user cached in `secure-store.ts` (kept fresh on every successful
+ * check and on sign-in) rather than bouncing a still-valid session to the
+ * sign-in screen. Only a genuinely dead token (401) or a real first-ever
+ * offline launch with nothing cached yet should end up returning null.
  */
 export async function getCurrentUser(): Promise<User | null> {
   if (!currentToken) return null;
   try {
     const client = createGitHubClient(currentToken);
     const { data } = await client.rest.users.getAuthenticated();
-    return mapGitHubUser(data);
+    const user = mapGitHubUser(data);
+    try {
+      await saveLastKnownUser(user);
+    } catch (error) {
+      // Caching is best-effort — a failed cache write (disk full,
+      // permissions) must not make an otherwise-successful live check look
+      // like a failure. Falling into this function's own catch block below
+      // would report a confirmed-good check as a token failure and could
+      // even bounce the user to sign-in, which is exactly the bug this
+      // cache exists to prevent.
+      console.warn(
+        'Failed to cache the signed-in identity:',
+        error instanceof Error ? error.message : error,
+      );
+    }
+    return user;
   } catch (error) {
     // Log `.message` only, never the full error object. This is a
     // defense-in-depth precaution, independent of whether the installed
@@ -88,15 +120,20 @@ export async function getCurrentUser(): Promise<User | null> {
       error instanceof Error ? error.message : error,
     );
     if (status === 401) {
-      // The token itself is invalid (revoked, expired) — clear it so the
-      // app doesn't keep retrying the same broken token.
+      // The token itself is invalid (revoked, expired) — clear it, and clear
+      // the cached identity with it, so the app doesn't keep retrying the
+      // same broken token or fall back to a dead session's identity.
       currentToken = null;
       await clearToken();
+      await clearLastKnownUser();
+      return null;
     }
     // Any other failure (offline, GitHub outage, rate limit) is not evidence
     // the token is bad — leave it stored so a later, connected check can
-    // still succeed.
-    return null;
+    // still succeed. The session is presumed still valid; return the cached
+    // identity if we have one instead of forcing the user through sign-in
+    // again for a problem that isn't theirs.
+    return loadLastKnownUser();
   }
 }
 
@@ -108,6 +145,10 @@ export async function signInWithToken(token: string): Promise<User> {
   const user = mapGitHubUser(data);
   await saveToken(token);
   currentToken = token;
+  // Cache the identity immediately so a fresh sign-in has a fallback ready
+  // for the very next `getCurrentUser()` call, not just after its next
+  // successful live check.
+  await saveLastKnownUser(user);
   notifyUpdated();
   return user;
 }
@@ -115,6 +156,7 @@ export async function signInWithToken(token: string): Promise<User> {
 export async function signOut(): Promise<void> {
   currentToken = null;
   await clearToken();
+  await clearLastKnownUser();
   notifyUpdated();
 }
 
