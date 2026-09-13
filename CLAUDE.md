@@ -122,7 +122,7 @@ tests/
   *Done when:* `npm start` opens a window and all checks pass.
 - [x] **Slice 1 — Design system + static UI.** Extract tokens, build the app shell, and build every design screen using fixtures. Add stubs for the typed IPC contract and all UI states.
   *Done when:* every screen from `design/` is reachable and visually matches.
-- [ ] **Slice 2 — Auth.** Add PAT login, then Device Flow. Store the token with safeStorage. Show the user's avatar and name, and add sign-out.
+- [x] **Slice 2 — Auth.** Add PAT login, then Device Flow. Store the token with safeStorage. Show the user's avatar and name, and add sign-out.
   *Done when:* login survives a restart, and sign-out clears the token.
 - [ ] **Slice 3 — Repos + first sync.** Let the user pick tracked repos from their repo list. Run the initial sync into SQLite. The issue list reads from SQLite through IPC.
   *Done when:* after quitting and reopening the app **offline**, issues still show.
