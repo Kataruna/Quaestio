@@ -25,12 +25,40 @@ export function onAuthUpdated(listener: () => void): () => void {
 }
 
 function notifyUpdated(): void {
-  for (const listener of updatedListeners) listener();
+  for (const listener of updatedListeners) {
+    try {
+      listener();
+    } catch (error) {
+      // One listener throwing (e.g. `webContents.send(...)` on a window
+      // destroyed mid-flow) must not stop the remaining listeners from being
+      // notified, and must not turn into a rejection of whatever caller
+      // (signInWithToken, signOut, ...) triggered this notification after
+      // its own work already succeeded.
+      console.error(
+        'Auth update listener threw:',
+        error instanceof Error ? error.message : error,
+      );
+    }
+  }
 }
 
-/** Called once at app startup, before any window exists. */
+/**
+ * Called once at app startup, before any window exists. Fails safe: a
+ * corrupted or undecryptable token file (OS keychain change, migration,
+ * backup restore) must not block the app from starting. `loadToken()` only
+ * swallows ENOENT itself — any other error is caught here, at the
+ * startup-blocking call site, rather than in the low-level primitive.
+ */
 export async function restoreSession(): Promise<void> {
-  currentToken = await loadToken();
+  try {
+    currentToken = await loadToken();
+  } catch (error) {
+    console.error(
+      'Failed to restore saved session, starting signed out:',
+      error instanceof Error ? error.message : error,
+    );
+    currentToken = null;
+  }
 }
 
 /**
@@ -78,8 +106,8 @@ export async function signInWithToken(token: string): Promise<User> {
   const client = createGitHubClient(token);
   const { data } = await client.rest.users.getAuthenticated();
   const user = mapGitHubUser(data);
-  currentToken = token;
   await saveToken(token);
+  currentToken = token;
   notifyUpdated();
   return user;
 }
@@ -107,7 +135,17 @@ export async function startDeviceFlow(): Promise<DeviceFlowStarted> {
       scopes: SCOPES,
       onVerification(verification) {
         verificationReceived = true;
-        void shell.openExternal(verification.verification_uri);
+        // shell.openExternal returns a Promise<void> that can reject
+        // (invalid URL, no default browser registrable, sandbox denial).
+        // The user still has the code on screen to enter manually if the
+        // browser doesn't open, so this is recoverable — just log it
+        // instead of leaving an unhandled rejection.
+        shell.openExternal(verification.verification_uri).catch((error: unknown) => {
+          console.error(
+            'Failed to open the verification URL in the browser:',
+            error instanceof Error ? error.message : error,
+          );
+        });
         resolve({
           userCode: verification.user_code,
           verificationUri: verification.verification_uri,
@@ -118,9 +156,27 @@ export async function startDeviceFlow(): Promise<DeviceFlowStarted> {
 
     auth({ type: 'oauth' })
       .then(async (tokenAuth) => {
-        currentToken = tokenAuth.token;
-        await saveToken(tokenAuth.token);
-        notifyUpdated();
+        try {
+          currentToken = tokenAuth.token;
+          await saveToken(tokenAuth.token);
+          notifyUpdated();
+        } catch (error) {
+          // The user DID successfully authorize on github.com — polling
+          // itself succeeded. A failure here is this block's own logic
+          // (e.g. saveToken throwing because safeStorage became unavailable
+          // mid-session), not a device-flow/polling failure, so it must be
+          // logged distinctly rather than falling into the outer .catch()
+          // and being mislabeled as one. Still notify listeners if
+          // currentToken was actually set, so the renderer can act on the
+          // fact that the in-process session is live even though it failed
+          // to persist to disk — otherwise the user is stuck on the
+          // device-code screen indefinitely.
+          console.error(
+            'Device flow succeeded but failed to persist/notify:',
+            error instanceof Error ? error.message : error,
+          );
+          if (currentToken) notifyUpdated();
+        }
       })
       .catch((error: unknown) => {
         if (!verificationReceived) {
