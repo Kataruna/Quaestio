@@ -83,6 +83,10 @@ describe('mapGitHubIssue', () => {
     expect(mapGitHubIssue({ ...base, state: 'closed' }, 'acme/atlas-web').state).toBe('closed');
   });
 
+  it('normalises an unrecognized state value to open', () => {
+    expect(mapGitHubIssue({ ...base, state: 'archived' }, 'acme/atlas-web').state).toBe('open');
+  });
+
   it('falls back to an empty string when body is absent', () => {
     expect(mapGitHubIssue({ ...base, body: undefined }, 'acme/atlas-web').body).toBe('');
   });

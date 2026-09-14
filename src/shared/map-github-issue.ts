@@ -64,7 +64,10 @@ function labelNames(labels: (string | GitHubLabel)[]): string[] {
 /**
  * GitHub's schema types `state` as a plain `string` (only documented, not
  * enforced, to be `'open' | 'closed'`). Anything other than `'closed'` maps
- * to `'open'`, matching GitHub's own documented behaviour.
+ * to `'open'`, matching GitHub's own documented behaviour. Defaulting to
+ * `'open'` is safer than `'closed'`: a wrongly-visible issue is just an
+ * annoyance the user will see and ignore, but a wrongly-hidden issue could
+ * silently drop something from the board that still needs attention.
  */
 function normaliseState(state: string): IssueState {
   return state === 'closed' ? 'closed' : 'open';
