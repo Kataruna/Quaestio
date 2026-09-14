@@ -1,4 +1,4 @@
-import { app, BrowserWindow } from 'electron';
+import { app, BrowserWindow, dialog } from 'electron';
 import squirrelStartup from 'electron-squirrel-startup';
 import { createMainWindow } from './window';
 import { applyNavigationPolicy } from './security';
@@ -35,7 +35,17 @@ async function bootstrap(): Promise<void> {
   start();
 }
 
-void app.whenReady().then(bootstrap);
+void app.whenReady().then(async () => {
+  try {
+    await bootstrap();
+  } catch (error) {
+    dialog.showErrorBox(
+      'Issue Desk failed to start',
+      error instanceof Error ? error.message : String(error),
+    );
+    app.quit();
+  }
+});
 
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') app.quit();
