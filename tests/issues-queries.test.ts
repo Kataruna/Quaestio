@@ -92,4 +92,29 @@ describe('issues-queries', () => {
     upsertIssues(db, [issue({ id: 1, number: 1, repoFullName: 'acme/web', assignee: null })]);
     expect(listIssues(db, 'acme/web')[0]?.assignee).toBeNull();
   });
+
+  it('preserves existing subtasks across a re-sync, even when the incoming issue has none', () => {
+    upsertIssues(db, [
+      issue({
+        id: 1,
+        number: 1,
+        repoFullName: 'acme/web',
+        subtasks: [{ id: 's1', title: 'Do the thing', done: false }],
+      }),
+    ]);
+    upsertIssues(db, [issue({ id: 1, number: 1, repoFullName: 'acme/web', subtasks: [] })]);
+
+    expect(listIssues(db, 'acme/web')[0]?.subtasks).toEqual([{ id: 's1', title: 'Do the thing', done: false }]);
+  });
+
+  it('keeps createdAt pinned to its original value across a re-sync', () => {
+    upsertIssues(db, [
+      issue({ id: 1, number: 1, repoFullName: 'acme/web', createdAt: '2026-01-01T00:00:00Z' }),
+    ]);
+    upsertIssues(db, [
+      issue({ id: 1, number: 1, repoFullName: 'acme/web', createdAt: '2026-06-01T00:00:00Z' }),
+    ]);
+
+    expect(listIssues(db, 'acme/web')[0]?.createdAt).toBe('2026-01-01T00:00:00Z');
+  });
 });

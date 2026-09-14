@@ -53,16 +53,20 @@ export function getIssue(
 }
 
 /**
- * `subtasks` is intentionally excluded from the `onConflictDoUpdate` set —
- * it's local-only and GitHub never supplies it, so a re-sync must never
- * erase a user's local checklist progress once that becomes editable in a
- * later slice. Every incoming `Issue` currently has `subtasks: []` anyway
- * (see `map-github-issue.ts`), so this has no visible effect yet — it's a
- * guard against future drift, not a workaround for a bug today.
+ * `subtasks` and `createdAt` are intentionally excluded from the `onConflictDoUpdate` set.
  *
- * Runs as a single transaction, matching `repos-queries.ts`'s `upsertRepos`
- * — a mid-batch failure should roll back rather than leave issues
- * half-synced.
+ * `subtasks` is local-only and GitHub never supplies it, so a re-sync must never erase a
+ * user's local checklist progress once that becomes editable in a later slice. Every
+ * incoming `Issue` currently has `subtasks: []` anyway (see `map-github-issue.ts`), so
+ * this has no visible effect yet — it's a guard against future drift, not a workaround
+ * for a bug today.
+ *
+ * `createdAt` is pinned to its original value because a future locally-constructed `Issue`
+ * (e.g. new-issue creation or an optimistic update) could otherwise let a subsequent sync
+ * overwrite the true original creation date.
+ *
+ * Runs as a single transaction, matching `repos-queries.ts`'s `upsertRepos` — a mid-batch
+ * failure should roll back rather than leave issues half-synced.
  */
 export function upsertIssues(db: BetterSQLite3Database, incoming: Issue[]): void {
   db.transaction((tx) => {
