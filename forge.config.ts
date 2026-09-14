@@ -10,6 +10,13 @@ import { FuseV1Options, FuseVersion } from '@electron/fuses';
 const config: ForgeConfig = {
   packagerConfig: {
     asar: true,
+    // The Drizzle migrations aren't part of the Vite-bundled main process —
+    // they're static .sql files `db/client.ts`'s `runMigrations()` reads
+    // from disk at startup. asar archives can't be read as a plain
+    // directory the way `migrationsFolder()` expects, so this copies
+    // `drizzle/` next to the packaged app instead, reachable via
+    // `process.resourcesPath`.
+    extraResource: ['drizzle'],
   },
   rebuildConfig: {},
   makers: [
