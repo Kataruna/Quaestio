@@ -4,7 +4,7 @@ import { drizzle } from 'drizzle-orm/better-sqlite3';
 import { migrate } from 'drizzle-orm/better-sqlite3/migrator';
 import type { BetterSQLite3Database } from 'drizzle-orm/better-sqlite3';
 import type { Issue } from '@shared/types';
-import { listIssues, getIssue, upsertIssues } from '../src/main/db/issues-queries';
+import { listIssues, getIssue, upsertIssues, clearAllIssues } from '../src/main/db/issues-queries';
 
 function freshDb(): BetterSQLite3Database {
   const sqlite = new Database(':memory:');
@@ -116,5 +116,20 @@ describe('issues-queries', () => {
     ]);
 
     expect(listIssues(db, 'acme/web')[0]?.createdAt).toBe('2026-01-01T00:00:00Z');
+  });
+
+  it('clearAllIssues empties the table when rows exist, and is safe to call again on an empty one', () => {
+    upsertIssues(db, [
+      issue({ id: 1, number: 1, repoFullName: 'acme/web' }),
+      issue({ id: 2, number: 2, repoFullName: 'acme/web' }),
+    ]);
+    expect(listIssues(db, 'acme/web')).toHaveLength(2);
+
+    clearAllIssues(db);
+    expect(listIssues(db, 'acme/web')).toEqual([]);
+
+    // Calling it again on an already-empty table must not throw.
+    expect(() => clearAllIssues(db)).not.toThrow();
+    expect(listIssues(db, 'acme/web')).toEqual([]);
   });
 });

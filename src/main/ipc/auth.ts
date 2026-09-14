@@ -8,6 +8,9 @@ import {
   signOut,
   startDeviceFlow,
 } from '../github/auth';
+import { getDb } from '../db/client';
+import { clearAllRepos } from '../db/repos-queries';
+import { clearAllIssues } from '../db/issues-queries';
 
 /**
  * Registers every auth:* IPC handler exactly once. Call this once at app
@@ -26,7 +29,24 @@ export function registerAuthHandlers(): void {
   });
 
   ipcMain.handle(CHANNELS.authSignOut, async () => {
-    return signOut();
+    // `signOut()` can throw: `clearToken()`/`clearLastKnownUser()` in
+    // secure-store.ts rethrow on any filesystem error other than ENOENT
+    // (permissions, disk I/O). Deliberately NOT wrapped in try/finally — the
+    // cache should only be wiped once sign-out has actually completed. If
+    // signOut() itself fails, the in-memory token was already nulled out but
+    // the on-disk token file may still exist, so this isn't yet a confirmed
+    // "safe to switch accounts" state; surfacing the rejection to the
+    // renderer (so it can show an error and let the user retry) is more
+    // correct than silently clearing the cache underneath a session that
+    // might still be considered signed in in some other reload of the app.
+    await signOut();
+    // Issues cleared before repos: `issues` has no declared foreign key to
+    // `repos` today (checked in schema.ts), so this order has no functional
+    // effect right now, but clearing the child-shaped table first is the
+    // defensive ordering if one is ever added later.
+    const db = getDb();
+    clearAllIssues(db);
+    clearAllRepos(db);
   });
 
   ipcMain.handle(CHANNELS.authGetUser, async () => {

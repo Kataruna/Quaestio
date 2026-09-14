@@ -7,6 +7,12 @@ export function listRepos(db: BetterSQLite3Database): Repo[] {
   return db.select().from(repos).all();
 }
 
+/** Deletes every row — called on sign-out so a different GitHub account
+ * signing in afterward never sees a previous account's cached repos. */
+export function clearAllRepos(db: BetterSQLite3Database): void {
+  db.delete(repos).run();
+}
+
 /**
  * Upserts the GitHub-derived fields for each repo. `tracked` is never
  * clobbered on a refresh: it's omitted from `onConflictDoUpdate`'s `set`
@@ -50,11 +56,13 @@ export function upsertRepos(db: BetterSQLite3Database, incoming: Omit<Repo, 'tra
 export function setTrackedRepos(db: BetterSQLite3Database, repoIds: number[]): number[] {
   const before = new Map(listRepos(db).map((repo) => [repo.id, repo.tracked]));
   const wantTracked = new Set(repoIds);
-  for (const [id, wasTracked] of before) {
-    const shouldTrack = wantTracked.has(id);
-    if (shouldTrack !== wasTracked) {
-      db.update(repos).set({ tracked: shouldTrack }).where(eq(repos.id, id)).run();
+  db.transaction((tx) => {
+    for (const [id, wasTracked] of before) {
+      const shouldTrack = wantTracked.has(id);
+      if (shouldTrack !== wasTracked) {
+        tx.update(repos).set({ tracked: shouldTrack }).where(eq(repos.id, id)).run();
+      }
     }
-  }
+  });
   return repoIds.filter((id) => !(before.get(id) ?? false));
 }

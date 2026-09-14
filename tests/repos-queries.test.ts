@@ -3,7 +3,7 @@ import Database from 'better-sqlite3';
 import { drizzle } from 'drizzle-orm/better-sqlite3';
 import { migrate } from 'drizzle-orm/better-sqlite3/migrator';
 import type { BetterSQLite3Database } from 'drizzle-orm/better-sqlite3';
-import { listRepos, upsertRepos, setTrackedRepos } from '../src/main/db/repos-queries';
+import { listRepos, upsertRepos, setTrackedRepos, clearAllRepos } from '../src/main/db/repos-queries';
 
 function freshDb(): BetterSQLite3Database {
   const sqlite = new Database(':memory:');
@@ -146,5 +146,21 @@ describe('repos-queries', () => {
     setTrackedRepos(db, [1]);
     const newly = setTrackedRepos(db, [1, 2]);
     expect(newly).toEqual([2]);
+  });
+
+  it('clearAllRepos empties the table when rows exist, and is safe to call again on an empty one', () => {
+    upsertRepos(db, [
+      { id: 1, owner: 'a', name: 'one', fullName: 'a/one', isPrivate: false, openIssueCount: 0, updatedAt: '2026-01-01T00:00:00Z' },
+      { id: 2, owner: 'a', name: 'two', fullName: 'a/two', isPrivate: false, openIssueCount: 0, updatedAt: '2026-01-01T00:00:00Z' },
+    ]);
+    setTrackedRepos(db, [1, 2]);
+    expect(listRepos(db)).toHaveLength(2);
+
+    clearAllRepos(db);
+    expect(listRepos(db)).toEqual([]);
+
+    // Calling it again on an already-empty table must not throw.
+    expect(() => clearAllRepos(db)).not.toThrow();
+    expect(listRepos(db)).toEqual([]);
   });
 });

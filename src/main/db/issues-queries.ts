@@ -39,6 +39,12 @@ export function listIssues(db: BetterSQLite3Database, repoFullName: string): Iss
     .map(rowToIssue);
 }
 
+/** Deletes every row — called on sign-out so a different GitHub account
+ * signing in afterward never sees a previous account's cached issues. */
+export function clearAllIssues(db: BetterSQLite3Database): void {
+  db.delete(issues).run();
+}
+
 export function getIssue(
   db: BetterSQLite3Database,
   repoFullName: string,

@@ -130,6 +130,14 @@ export function App() {
       })
       .catch((error: unknown) => {
         console.error('Failed to load issues', error);
+        // Degrade to the documented "false empty state" limitation instead
+        // of leaving the previously-active repo's issues on screen mislabeled
+        // as this repo's — wrong data reads as correct, an empty board reads
+        // as "nothing to show." Guarded by `cancelled` (checked below, same
+        // as the `.then` branch) so a stale rejection from a repo the user
+        // has already navigated away from can't clobber issues that a newer,
+        // still-in-flight request for the current repo already set.
+        if (!cancelled) setIssues([]);
       })
       .finally(() => {
         if (!cancelled) setIssuesLoadedFor(activeRepo);
