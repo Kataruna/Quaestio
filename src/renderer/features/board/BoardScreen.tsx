@@ -48,34 +48,34 @@ export function BoardScreen({
         onSearchChange={setSearch}
       />
 
-      {/* `min-h-0` is required for a flex child to actually shrink and
-          scroll instead of growing to fit its content. */}
-      <div className="min-h-0 flex-1 overflow-y-auto">
-        {loading ? (
-          <div className="grid grid-cols-3 items-start gap-4">
-            {COLUMNS.map((type) => (
-              <div key={type} className="flex flex-col gap-[22px]">
-                <Skeleton className="h-5 w-24" />
-                <Skeleton className="h-[168px] rounded-[4px_22px_22px_22px]" />
-                <Skeleton className="h-[168px] rounded-[4px_22px_22px_22px]" />
-              </div>
-            ))}
-          </div>
-        ) : (
-          <div className="grid grid-cols-3 items-start gap-4">
-            {COLUMNS.map((type) => (
-              <BoardColumn
-                key={type}
-                type={type}
-                issues={visible.filter((issue) => issue.type === type)}
-                // Exactly one lime card per view, as the design system requires.
-                activeIssueNumber={489}
-                onOpenIssue={onOpenIssue}
-              />
-            ))}
-          </div>
-        )}
-      </div>
+      {loading ? (
+        <div className="grid grid-cols-3 items-start gap-4">
+          {COLUMNS.map((type) => (
+            <div key={type} className="flex flex-col gap-[22px]">
+              <Skeleton className="h-5 w-24" />
+              <Skeleton className="h-[168px] rounded-[4px_22px_22px_22px]" />
+              <Skeleton className="h-[168px] rounded-[4px_22px_22px_22px]" />
+            </div>
+          ))}
+        </div>
+      ) : (
+        // No `overflow-y-auto` here, and no `items-start` — each column
+        // scrolls its own cards independently (see BoardColumn), so this
+        // grid row must stretch (the default) to give every column the same
+        // full height to scroll within, not just size to its own content.
+        <div className="grid min-h-0 flex-1 grid-cols-3 gap-4">
+          {COLUMNS.map((type) => (
+            <BoardColumn
+              key={type}
+              type={type}
+              issues={visible.filter((issue) => issue.type === type)}
+              // Exactly one lime card per view, as the design system requires.
+              activeIssueNumber={489}
+              onOpenIssue={onOpenIssue}
+            />
+          ))}
+        </div>
+      )}
     </div>
   );
 }
