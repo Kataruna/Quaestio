@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import type { DeviceFlowStarted } from '@shared/ipc-contract';
-import type { Issue, SyncStatus, User } from '@shared/types';
+import type { Issue, Repo, SyncStatus, User } from '@shared/types';
 import { TitleBar } from '@/components/shell/TitleBar';
 import { SidebarRail, type ScreenId } from '@/components/shell/SidebarRail';
 import { RepoTabs } from '@/components/shell/RepoTabs';
@@ -15,7 +15,7 @@ import { SearchScreen } from '@/features/search/SearchScreen';
 import { StateGallery } from '@/features/StateGallery';
 import { SignInScreen } from '@/features/auth/SignInScreen';
 import { DeviceCodeScreen } from '@/features/auth/DeviceCodeScreen';
-import { issues, repos as repoFixtures, searchResults, syncStatus as initialStatus } from '@/lib/fixtures';
+import { searchResults, syncStatus as initialStatus } from '@/lib/fixtures';
 
 export function App() {
   const [authChecked, setAuthChecked] = useState(false);
@@ -25,25 +25,38 @@ export function App() {
   const [authError, setAuthError] = useState<string | undefined>(undefined);
 
   const [screen, setScreen] = useState<ScreenId>('board');
-  const [repos, setRepos] = useState(repoFixtures);
-  const [activeRepo, setActiveRepo] = useState('acme/atlas-web');
+  const [repos, setRepos] = useState<Repo[]>([]);
+  // `reposLoadedFor` names the signed-in user whose repo list `repos`
+  // currently reflects. `reposLoading` is derived from comparing it against
+  // `userLogin`, rather than toggled with a separate boolean, so the only
+  // setState calls inside the fetch effect below live in `.then`/`.catch`/
+  // `.finally` callbacks (nested function scopes) instead of directly in the
+  // effect body — a direct, synchronous `setReposLoading(true)` at the top
+  // of the effect trips `react-hooks/set-state-in-effect` ("Avoid calling
+  // setState() directly within an effect"), which this project's ESLint
+  // config enables and CLAUDE.md forbids silencing with eslint-disable.
+  const [reposLoadedFor, setReposLoadedFor] = useState<string | null>(null);
+  const [activeRepo, setActiveRepo] = useState<string | null>(null);
+  const [issues, setIssues] = useState<Issue[]>([]);
+  // Same derived-loading approach as `reposLoadedFor`, keyed on the repo the
+  // current `issues` array was fetched for instead of `activeRepo` itself.
+  const [issuesLoadedFor, setIssuesLoadedFor] = useState<string | null>(null);
   const [status, setStatus] = useState<SyncStatus>(initialStatus);
   const [pickerOpen, setPickerOpen] = useState(false);
   const [openIssue, setOpenIssue] = useState<Issue | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [devLoading, setDevLoading] = useState(false);
 
   const tracked = repos.filter((repo) => repo.tracked);
-  const activeIssues = issues.filter((issue) => issue.repoFullName === activeRepo);
+  // A stable primitive to key the repo-loading effect on, instead of the
+  // `user` object itself — `getCurrentUser()` returns a freshly mapped
+  // object on every call, so keying on object identity would refetch the
+  // repo list on every `auth:updated` event even for the same signed-in
+  // person.
+  const userLogin = user?.login ?? null;
+  const reposLoading = userLogin !== null && reposLoadedFor !== userLogin;
+  const issuesLoading = activeRepo !== null && issuesLoadedFor !== activeRepo;
 
   useEffect(() => {
-    // `void` satisfies `@typescript-eslint/no-floating-promises` — verified
-    // directly against this project's eslint.config.js before writing this
-    // task: a bare `.then().finally()` chain with no `void` and no `.catch`
-    // fails that rule, but prefixing `void` (with `.finally` still present)
-    // passes clean, and — checked separately — does not trip
-    // `react-hooks/set-state-in-effect` either, since that rule only flags
-    // *synchronous* setState calls in the effect body, not ones inside a
-    // promise callback.
     void window.api.auth
       .getUser()
       .then(setUser)
@@ -52,8 +65,6 @@ export function App() {
       })
       .finally(() => setAuthChecked(true));
 
-    // Fires when sign-in, sign-out, or a background device-flow login
-    // changes who's signed in — re-check who that is now.
     return window.api.auth.onUpdated(() => {
       void window.api.auth
         .getUser()
@@ -66,6 +77,46 @@ export function App() {
         });
     });
   }, []);
+
+  useEffect(() => {
+    if (!userLogin) return;
+    let cancelled = false;
+    void window.api.repos
+      .list()
+      .then((next) => {
+        if (cancelled) return;
+        setRepos(next);
+        setActiveRepo((current) => current ?? next.find((repo) => repo.tracked)?.fullName ?? null);
+      })
+      .catch((error: unknown) => {
+        console.error('Failed to load repositories', error);
+      })
+      .finally(() => {
+        if (!cancelled) setReposLoadedFor(userLogin);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [userLogin]);
+
+  useEffect(() => {
+    if (!activeRepo) return;
+    let cancelled = false;
+    void window.api.issues
+      .list({ repoFullName: activeRepo })
+      .then((next) => {
+        if (!cancelled) setIssues(next);
+      })
+      .catch((error: unknown) => {
+        console.error('Failed to load issues', error);
+      })
+      .finally(() => {
+        if (!cancelled) setIssuesLoadedFor(activeRepo);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [activeRepo]);
 
   function handleUseToken(token: string) {
     setAuthBusy(true);
@@ -105,9 +156,43 @@ export function App() {
   }
 
   function untrack(fullName: string) {
-    setRepos((current) =>
-      current.map((repo) => (repo.fullName === fullName ? { ...repo, tracked: false } : repo)),
-    );
+    const repoIds = repos
+      .filter((repo) => repo.tracked && repo.fullName !== fullName)
+      .map((repo) => repo.id);
+    void window.api.repos
+      .setTracked({ repoIds })
+      .then((next) => {
+        setRepos(next);
+        setActiveRepo((current) =>
+          current === fullName ? (next.find((repo) => repo.tracked)?.fullName ?? null) : current,
+        );
+      })
+      .catch((error: unknown) => {
+        console.error('Failed to untrack repository', error);
+      });
+  }
+
+  function confirmTracked(next: Repo[]) {
+    const repoIds = next.filter((repo) => repo.tracked).map((repo) => repo.id);
+    void window.api.repos
+      .setTracked({ repoIds })
+      .then((updated) => {
+        setRepos(updated);
+        // Keep the current tab only if it's still tracked after this
+        // confirm — the user may have untracked the active repo and tracked
+        // a different one in the same picker session, in which case
+        // `current` would otherwise point at a repo no longer in `tracked`
+        // and no tab would render as active.
+        setActiveRepo((current) =>
+          current && updated.some((repo) => repo.tracked && repo.fullName === current)
+            ? current
+            : (updated.find((repo) => repo.tracked)?.fullName ?? null),
+        );
+        setPickerOpen(false);
+      })
+      .catch((error: unknown) => {
+        console.error('Failed to update tracked repositories', error);
+      });
   }
 
   if (!authChecked) {
@@ -139,6 +224,16 @@ export function App() {
     );
   }
 
+  if (reposLoading) {
+    return (
+      <div className="flex h-full items-center justify-center bg-surface-app">
+        <span className="font-display text-title-m text-text-muted">Loading your repositories…</span>
+      </div>
+    );
+  }
+
+  const activeFullName = activeRepo ?? tracked[0]?.fullName ?? '';
+
   return (
     <div className="flex h-full flex-col overflow-hidden">
       <TitleBar status={status} onSync={() => setStatus({ kind: 'syncing' })} />
@@ -149,7 +244,7 @@ export function App() {
         <>
           <RepoTabs
             repos={tracked}
-            activeFullName={activeRepo}
+            activeFullName={activeFullName}
             onSelect={setActiveRepo}
             onUntrack={untrack}
             onAdd={() => setPickerOpen(true)}
@@ -158,8 +253,8 @@ export function App() {
             <div className="px-5 pt-4">
               <StateGallery
                 onPick={setStatus}
-                loading={loading}
-                onToggleLoading={() => setLoading((current) => !current)}
+                loading={devLoading}
+                onToggleLoading={() => setDevLoading((current) => !current)}
               />
             </div>
           ) : null}
@@ -169,9 +264,9 @@ export function App() {
             <main className="min-w-0 flex-1 overflow-y-auto">
               {screen === 'board' ? (
                 <BoardScreen
-                  repoFullName={activeRepo}
-                  issues={activeIssues}
-                  loading={loading}
+                  repoFullName={activeFullName}
+                  issues={issues}
+                  loading={issuesLoading || devLoading}
                   onOpenIssue={setOpenIssue}
                 />
               ) : null}
@@ -189,10 +284,7 @@ export function App() {
         repos={repos}
         userLogin={user.login}
         onClose={() => setPickerOpen(false)}
-        onConfirm={(next) => {
-          setRepos(next);
-          setPickerOpen(false);
-        }}
+        onConfirm={confirmTracked}
       />
       <IssueDetailDialog issue={openIssue} onClose={() => setOpenIssue(null)} />
     </div>
