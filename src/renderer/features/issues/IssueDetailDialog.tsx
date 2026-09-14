@@ -67,8 +67,9 @@ export function IssueDetailDialog({
   }
 
   return (
-    <Dialog open onClose={onClose} className="w-[620px] p-6">
-      <div className="flex items-center gap-2.5">
+    <Dialog open onClose={onClose} className="max-h-[85vh] w-[620px] p-0">
+      {/* Frozen header: never scrolls. Only the content below it does. */}
+      <div className="flex items-center gap-2.5 px-6 pb-0 pt-6">
         <span
           className={cn(
             'inline-flex items-center rounded-pill px-3 py-1.5',
@@ -92,76 +93,95 @@ export function IssueDetailDialog({
         </span>
       </div>
 
-      <h2 className="mb-2.5 mt-3.5 select-text font-display text-[26px] font-semibold leading-[1.2] tracking-[-0.02em] text-text-strong text-pretty">
+      <h2 className="mb-2.5 mt-3.5 select-text px-6 font-display text-[26px] font-semibold leading-[1.2] tracking-[-0.02em] text-text-strong text-pretty">
         {issue.title}
       </h2>
 
-      <div className="mb-[18px] select-text font-sans text-body text-text-body text-pretty">
-        {/* rehypeRaw must run before rehypeSanitize: raw parses embedded HTML
-            (e.g. the <img> tags GitHub inserts for pasted screenshots) into
-            the tree, then sanitize strips anything unsafe from it. Using raw
-            alone would be unsafe; sanitize alone leaves embedded HTML as
-            inert text, which is the bug this fixes. */}
-        <Markdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw, rehypeSanitize]}>
-          {issue.body}
-        </Markdown>
-      </div>
-
-      <dl className="mb-[18px] grid grid-cols-4 gap-3 rounded-[18px] bg-surface-sunken px-4 py-3.5">
-        <div className="flex flex-col gap-1">
-          <dt className="font-sans text-micro text-text-faint">Owner</dt>
-          <dd className="m-0 font-sans text-label font-medium text-text-strong">
-            {issue.assignee?.login ?? 'Unassigned'}
-          </dd>
-        </div>
-        <div className="flex flex-col gap-1">
-          <dt className="font-sans text-micro text-text-faint">Priority</dt>
-          <dd
-            className={cn('m-0 font-sans text-label font-medium', PRIORITY_COLOR[issue.priority])}
+      {/* Everything below the title scrolls; `min-h-0` is required for a
+          flex child to actually shrink and scroll instead of growing to fit
+          its content. */}
+      <div className="min-h-0 flex-1 overflow-y-auto px-6 pb-6">
+        <div className="mb-[18px] select-text font-sans text-body text-text-body text-pretty">
+          {/* rehypeRaw must run before rehypeSanitize: raw parses embedded HTML
+              (e.g. the <img> tags GitHub inserts for pasted screenshots) into
+              the tree, then sanitize strips anything unsafe from it. Using raw
+              alone would be unsafe; sanitize alone leaves embedded HTML as
+              inert text, which is the bug this fixes. */}
+          <Markdown
+            remarkPlugins={[remarkGfm]}
+            rehypePlugins={[rehypeRaw, rehypeSanitize]}
+            components={{
+              // Sized via CSS, not the (possibly sanitize-stripped) HTML
+              // width/height attributes, so a pasted screenshot never
+              // overflows the dialog regardless of its original dimensions.
+              img: (props) => (
+                <img {...props} alt={props.alt ?? ''} className="h-auto max-w-full rounded-lg" />
+              ),
+            }}
           >
-            {issue.priority.toUpperCase()}
-          </dd>
+            {issue.body}
+          </Markdown>
         </div>
-        <div className="flex flex-col gap-1">
-          <dt className="font-sans text-micro text-text-faint">Milestone</dt>
-          <dd className="m-0 font-sans text-label font-medium text-text-strong">
-            {issue.milestone ?? '—'}
-          </dd>
+
+        <dl className="mb-[18px] grid grid-cols-4 gap-3 rounded-[18px] bg-surface-sunken px-4 py-3.5">
+          <div className="flex flex-col gap-1">
+            <dt className="font-sans text-micro text-text-faint">Owner</dt>
+            <dd className="m-0 font-sans text-label font-medium text-text-strong">
+              {issue.assignee?.login ?? 'Unassigned'}
+            </dd>
+          </div>
+          <div className="flex flex-col gap-1">
+            <dt className="font-sans text-micro text-text-faint">Priority</dt>
+            <dd
+              className={cn(
+                'm-0 font-sans text-label font-medium',
+                PRIORITY_COLOR[issue.priority],
+              )}
+            >
+              {issue.priority.toUpperCase()}
+            </dd>
+          </div>
+          <div className="flex flex-col gap-1">
+            <dt className="font-sans text-micro text-text-faint">Milestone</dt>
+            <dd className="m-0 font-sans text-label font-medium text-text-strong">
+              {issue.milestone ?? '—'}
+            </dd>
+          </div>
+          <div className="flex flex-col gap-1">
+            <dt className="font-sans text-micro text-text-faint">Due</dt>
+            <dd className="m-0 font-sans text-label font-medium text-text-strong">
+              {formatLongDate(issue.dueDate)}
+            </dd>
+          </div>
+        </dl>
+
+        <div className="mb-3 flex items-center gap-2.5">
+          <h3 className="font-display text-title-s font-semibold text-text-strong">Subtasks</h3>
+          <span className="font-sans text-micro text-text-faint">
+            {done} of {subtasks.length} · local, not pushed to GitHub
+          </span>
+          <ProgressTrack value={percent} height={6} className="ml-auto w-[90px]" />
         </div>
-        <div className="flex flex-col gap-1">
-          <dt className="font-sans text-micro text-text-faint">Due</dt>
-          <dd className="m-0 font-sans text-label font-medium text-text-strong">
-            {formatLongDate(issue.dueDate)}
-          </dd>
+
+        <div className="mb-4 flex flex-col gap-2.5">
+          {subtasks.map((task) => (
+            <Checkbox
+              key={task.id}
+              checked={task.done}
+              label={task.title}
+              onCheckedChange={() => toggleSubtask(task.id)}
+            />
+          ))}
         </div>
-      </dl>
 
-      <div className="mb-3 flex items-center gap-2.5">
-        <h3 className="font-display text-title-s font-semibold text-text-strong">Subtasks</h3>
-        <span className="font-sans text-micro text-text-faint">
-          {done} of {subtasks.length} · local, not pushed to GitHub
-        </span>
-        <ProgressTrack value={percent} height={6} className="ml-auto w-[90px]" />
-      </div>
-
-      <div className="mb-4 flex flex-col gap-2.5">
-        {subtasks.map((task) => (
-          <Checkbox
-            key={task.id}
-            checked={task.done}
-            label={task.title}
-            onCheckedChange={() => toggleSubtask(task.id)}
-          />
-        ))}
-      </div>
-
-      <div className="flex items-center gap-2">
-        <Button variant="secondary" size="sm" iconLeft={Plus}>
-          Subtask
-        </Button>
-        <span className="ml-auto font-sans text-micro text-text-faint">
-          Opened {formatLongDate(issue.createdAt)} by {issue.assignee?.login ?? 'unknown'}
-        </span>
+        <div className="flex items-center gap-2">
+          <Button variant="secondary" size="sm" iconLeft={Plus}>
+            Subtask
+          </Button>
+          <span className="ml-auto font-sans text-micro text-text-faint">
+            Opened {formatLongDate(issue.createdAt)} by {issue.assignee?.login ?? 'unknown'}
+          </span>
+        </div>
       </div>
     </Dialog>
   );
