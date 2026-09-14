@@ -86,7 +86,16 @@ export function App() {
       .then((next) => {
         if (cancelled) return;
         setRepos(next);
-        setActiveRepo((current) => current ?? next.find((repo) => repo.tracked)?.fullName ?? null);
+        // Keep the current active repo only if it's still tracked after
+        // refetch — a leftover `activeRepo` from a previous session
+        // (sign-out doesn't clear it) must not be trusted just because
+        // it's truthy; it needs to still exist in the newly-fetched
+        // tracked set (as in `confirmTracked` below).
+        setActiveRepo((current) =>
+          current && next.some((repo) => repo.tracked && repo.fullName === current)
+            ? current
+            : (next.find((repo) => repo.tracked)?.fullName ?? null),
+        );
       })
       .catch((error: unknown) => {
         console.error('Failed to load repositories', error);
