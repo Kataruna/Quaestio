@@ -33,7 +33,13 @@ export function Dialog({
       // padding applied to the <dialog> itself sits inside its own border box, so
       // clicks in that band would hit `ref.current` and be misread as backdrop
       // clicks — silently closing the modal mid-interaction.
-      className="rounded-card bg-surface-card p-0 shadow-modal backdrop:bg-ink-900/55 open:flex open:flex-col"
+      //
+      // `fixed inset-0 m-auto` explicitly centers the dialog rather than relying
+      // on the browser's default UA centering for <dialog> (auto margins within
+      // the native top layer) — Tailwind's preflight reset zeroes margins
+      // broadly, which strips that default with nothing to replace it, leaving
+      // the dialog pinned to the top-left corner instead of centered.
+      className="fixed inset-0 m-auto rounded-card bg-surface-card p-0 shadow-modal backdrop:bg-ink-900/55 open:flex open:flex-col"
     >
       {open ? <div className={cn('flex flex-col', className)}>{children}</div> : null}
     </dialog>

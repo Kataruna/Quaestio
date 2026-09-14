@@ -20,9 +20,14 @@ export function BoardScreen({
   const [search, setSearch] = useState('');
 
   const visible = useMemo(() => {
+    // The board is a working view of open issues, not a full history — a
+    // repo synced from GitHub (state=all) includes closed issues, which
+    // would otherwise pile up here forever with no way to distinguish them
+    // from active work.
+    const open = issues.filter((issue) => issue.state === 'open');
     const needle = search.trim().toLowerCase();
-    if (!needle) return issues;
-    return issues.filter(
+    if (!needle) return open;
+    return open.filter(
       (issue) =>
         issue.title.toLowerCase().includes(needle) || issue.body.toLowerCase().includes(needle),
     );

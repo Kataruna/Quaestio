@@ -28,7 +28,7 @@ When scaffolding, install the **latest stable** version of each package, pin exa
 - **GitHub:** Octokit (`@octokit/rest`, `@octokit/plugin-throttling`, `@octokit/plugin-retry`, `@octokit/auth-oauth-device`)
 - **Local cache:** SQLite via `better-sqlite3` + Drizzle ORM (with migrations)
 - **Validation:** zod (for all IPC inputs)
-- **Markdown:** `react-markdown` + `remark-gfm` + `rehype-sanitize`
+- **Markdown:** `react-markdown` + `remark-gfm` + `rehype-raw` + `rehype-sanitize` (`rehype-raw` parses embedded raw HTML — e.g. the `<img>` tags GitHub inserts for pasted screenshots — into the tree; `rehype-sanitize` must always run after it to strip anything unsafe. `rehype-raw` alone would be unsafe; skipping it leaves embedded HTML as inert text.)
 - **Tests:** Vitest
 - **Quality:** TypeScript `strict: true`, ESLint, Prettier
 
@@ -144,6 +144,20 @@ tests/
 ## Decisions log
 
 <!-- Record pinned versions and key decisions here, newest first. -->
+
+### Post-Slice-3 bug fixes (2026-09-14)
+
+Three bugs reported after real GitHub data started flowing through the board and issue detail dialog:
+
+- **Board showed closed issues alongside open ones.** `BoardScreen`'s `visible` list only ever filtered by search text — fixtures were always `state: 'open'`, so this never showed up until Slice 3 synced real repos with closed-issue history. Fixed by filtering to `state === 'open'` before the type-column split. The board is a working view of active issues, not a full history.
+- **Dialogs (`IssueDetailDialog`, `RepoPickerDialog`) rendered pinned to the top-left corner instead of centered.** The shared `Dialog` component relies on the native `<dialog>` element's default UA centering (auto margins in the top layer via `showModal()`), but never set that explicitly — Tailwind's preflight reset zeroes margins broadly, stripping the default with nothing to replace it. Fixed by adding `fixed inset-0 m-auto` explicitly to `dialog.tsx`.
+- **Pasted images in issue bodies rendered as literal text instead of images.** GitHub embeds pasted screenshots as raw `<img>` HTML tags in the markdown source, not `![]()` syntax — `react-markdown` doesn't render embedded raw HTML unless paired with `rehype-raw`, which wasn't installed. Added `rehype-raw@7.0.0` (pinned exact), placed *before* `rehype-sanitize` in `IssueDetailDialog.tsx`'s `rehypePlugins` array — `rehype-raw` parses the HTML into the tree, `rehype-sanitize` then strips anything unsafe from it. `rehype-raw` alone would violate CLAUDE.md's markdown-safety rule; the pair together is the documented-safe pattern.
+
+**Pinned versions** (exact, no ranges — see `package.json`):
+
+| Package | Version |
+| --- | --- |
+| rehype-raw | 7.0.0 |
 
 ### Slice 3 — Repos + first sync (2026-09-14)
 

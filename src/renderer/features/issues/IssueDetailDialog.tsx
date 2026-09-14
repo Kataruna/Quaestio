@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { ExternalLink, MoreHorizontal, Plus } from 'lucide-react';
 import Markdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import rehypeRaw from 'rehype-raw';
 import rehypeSanitize from 'rehype-sanitize';
 import type { Issue, Subtask } from '@shared/types';
 import { Dialog } from '@/components/ui/dialog';
@@ -96,7 +97,12 @@ export function IssueDetailDialog({
       </h2>
 
       <div className="mb-[18px] select-text font-sans text-body text-text-body text-pretty">
-        <Markdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeSanitize]}>
+        {/* rehypeRaw must run before rehypeSanitize: raw parses embedded HTML
+            (e.g. the <img> tags GitHub inserts for pasted screenshots) into
+            the tree, then sanitize strips anything unsafe from it. Using raw
+            alone would be unsafe; sanitize alone leaves embedded HTML as
+            inert text, which is the bug this fixes. */}
+        <Markdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw, rehypeSanitize]}>
           {issue.body}
         </Markdown>
       </div>
