@@ -3,7 +3,7 @@ import { createOAuthDeviceAuth } from '@octokit/auth-oauth-device';
 import { mapGitHubUser } from '@shared/map-github-user';
 import type { User } from '@shared/types';
 import type { DeviceFlowStarted } from '@shared/ipc-contract';
-import { createGitHubClient } from './client';
+import { createGitHubClient, type GitHubClient } from './client';
 import {
   saveToken,
   loadToken,
@@ -135,6 +135,15 @@ export async function getCurrentUser(): Promise<User | null> {
     // again for a problem that isn't theirs.
     return loadLastKnownUser();
   }
+}
+
+/**
+ * Returns a client for the current session, or `null` if signed out. Other
+ * main-process modules (repo and issue sync) need a client but must never
+ * see the raw token — this is the one sanctioned way to get one.
+ */
+export function getAuthenticatedClient(): GitHubClient | null {
+  return currentToken ? createGitHubClient(currentToken) : null;
 }
 
 /** Validates the token against GitHub before accepting it — a token that
