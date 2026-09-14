@@ -17,6 +17,20 @@ import { SignInScreen } from '@/features/auth/SignInScreen';
 import { DeviceCodeScreen } from '@/features/auth/DeviceCodeScreen';
 import { searchResults, syncStatus as initialStatus } from '@/lib/fixtures';
 
+/**
+ * Keeps `current` as the active repo only if it's still tracked in `repos`;
+ * otherwise falls back to the first tracked repo, or `null` if none are
+ * tracked. Used everywhere `activeRepo` needs to survive (or be replaced
+ * after) a repos list change — a fresh fetch, tracking/untracking a repo, or
+ * a sign-out/sign-in-as-different-user cycle leaving a stale value behind.
+ */
+function pickActiveRepo(repos: Repo[], current: string | null): string | null {
+  if (current && repos.some((repo) => repo.tracked && repo.fullName === current)) {
+    return current;
+  }
+  return repos.find((repo) => repo.tracked)?.fullName ?? null;
+}
+
 export function App() {
   const [authChecked, setAuthChecked] = useState(false);
   const [user, setUser] = useState<User | null>(null);
@@ -65,6 +79,8 @@ export function App() {
       })
       .finally(() => setAuthChecked(true));
 
+    // Fires when sign-in, sign-out, or a background device-flow login
+    // changes who's signed in — re-check who that is now.
     return window.api.auth.onUpdated(() => {
       void window.api.auth
         .getUser()
@@ -91,11 +107,7 @@ export function App() {
         // (sign-out doesn't clear it) must not be trusted just because
         // it's truthy; it needs to still exist in the newly-fetched
         // tracked set (as in `confirmTracked` below).
-        setActiveRepo((current) =>
-          current && next.some((repo) => repo.tracked && repo.fullName === current)
-            ? current
-            : (next.find((repo) => repo.tracked)?.fullName ?? null),
-        );
+        setActiveRepo((current) => pickActiveRepo(next, current));
       })
       .catch((error: unknown) => {
         console.error('Failed to load repositories', error);
@@ -172,9 +184,7 @@ export function App() {
       .setTracked({ repoIds })
       .then((next) => {
         setRepos(next);
-        setActiveRepo((current) =>
-          current === fullName ? (next.find((repo) => repo.tracked)?.fullName ?? null) : current,
-        );
+        setActiveRepo((current) => pickActiveRepo(next, current));
       })
       .catch((error: unknown) => {
         console.error('Failed to untrack repository', error);
@@ -192,11 +202,7 @@ export function App() {
         // a different one in the same picker session, in which case
         // `current` would otherwise point at a repo no longer in `tracked`
         // and no tab would render as active.
-        setActiveRepo((current) =>
-          current && updated.some((repo) => repo.tracked && repo.fullName === current)
-            ? current
-            : (updated.find((repo) => repo.tracked)?.fullName ?? null),
-        );
+        setActiveRepo((current) => pickActiveRepo(updated, current));
         setPickerOpen(false);
       })
       .catch((error: unknown) => {
@@ -241,6 +247,10 @@ export function App() {
     );
   }
 
+  // Belt-and-suspenders fallback that should be unreachable in practice: the
+  // repo-loading effect normalizes `activeRepo` to a valid tracked fullName or
+  // `null` before `reposLoading` goes false, so this rendering an empty string
+  // instead of `tracked[0]?.fullName` would signal an upstream invariant breach.
   const activeFullName = activeRepo ?? tracked[0]?.fullName ?? '';
 
   return (
