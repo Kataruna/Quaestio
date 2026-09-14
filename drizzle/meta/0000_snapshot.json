@@ -1,7 +1,7 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "08b56d2c-62a2-4d35-8247-3e3f241b22d4",
+  "id": "244dae84-ef09-4d1e-a1d3-42ecc15a63e3",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "issues": {
@@ -202,15 +202,7 @@
           "default": false
         }
       },
-      "indexes": {
-        "repos_fullName_unique": {
-          "name": "repos_fullName_unique",
-          "columns": [
-            "fullName"
-          ],
-          "isUnique": true
-        }
-      },
+      "indexes": {},
       "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {},

@@ -29,5 +29,3 @@ CREATE TABLE `repos` (
 	`updatedAt` text NOT NULL,
 	`tracked` integer DEFAULT false NOT NULL
 );
---> statement-breakpoint
-CREATE UNIQUE INDEX `repos_fullName_unique` ON `repos` (`fullName`);

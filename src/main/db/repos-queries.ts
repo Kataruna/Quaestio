@@ -8,29 +8,36 @@ export function listRepos(db: BetterSQLite3Database): Repo[] {
 }
 
 /**
- * Upserts the GitHub-derived fields for each repo, preserving whatever
- * `tracked` value already exists locally (or defaulting to `false` for a
- * repo seen for the first time) — GitHub has no concept of "tracked," so a
- * refresh must never clobber this app's own local state.
+ * Upserts the GitHub-derived fields for each repo. `tracked` is never
+ * clobbered on a refresh: it's omitted from `onConflictDoUpdate`'s `set`
+ * clause entirely, so SQLite leaves the existing row's value untouched on
+ * conflict, and its own `.default(false)` in the schema handles a repo seen
+ * for the first time. GitHub has no concept of "tracked" — that guarantee is
+ * the only thing that makes this safe to call on every sync.
+ *
+ * Runs as a single transaction so any mid-batch failure (a constraint
+ * violation, an I/O error, or anything else that throws) rolls back instead
+ * of leaving the repo list half-updated.
  */
 export function upsertRepos(db: BetterSQLite3Database, incoming: Omit<Repo, 'tracked'>[]): void {
-  const existingTracked = new Map(listRepos(db).map((repo) => [repo.id, repo.tracked]));
-  for (const repo of incoming) {
-    db.insert(repos)
-      .values({ ...repo, tracked: existingTracked.get(repo.id) ?? false })
-      .onConflictDoUpdate({
-        target: repos.id,
-        set: {
-          owner: repo.owner,
-          name: repo.name,
-          fullName: repo.fullName,
-          isPrivate: repo.isPrivate,
-          openIssueCount: repo.openIssueCount,
-          updatedAt: repo.updatedAt,
-        },
-      })
-      .run();
-  }
+  db.transaction((tx) => {
+    for (const repo of incoming) {
+      tx.insert(repos)
+        .values({ ...repo })
+        .onConflictDoUpdate({
+          target: repos.id,
+          set: {
+            owner: repo.owner,
+            name: repo.name,
+            fullName: repo.fullName,
+            isPrivate: repo.isPrivate,
+            openIssueCount: repo.openIssueCount,
+            updatedAt: repo.updatedAt,
+          },
+        })
+        .run();
+    }
+  });
 }
 
 /**

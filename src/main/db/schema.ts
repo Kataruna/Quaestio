@@ -10,7 +10,7 @@ export const repos = sqliteTable('repos', {
   id: integer('id').primaryKey(),
   owner: text('owner').notNull(),
   name: text('name').notNull(),
-  fullName: text('fullName').notNull().unique(),
+  fullName: text('fullName').notNull(),
   isPrivate: integer('isPrivate', { mode: 'boolean' }).notNull(),
   openIssueCount: integer('openIssueCount').notNull(),
   updatedAt: text('updatedAt').notNull(),
