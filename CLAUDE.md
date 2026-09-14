@@ -131,7 +131,8 @@ tests/
   *Done when:* an issue edited on github.com shows up in the app within about 60 s.
 - [x] **Slice 5 — Issue detail + edits.** Load comments. Support editing the title and body, open/close (with `state_reason`), labels, assignees, and adding comments. Use optimistic updates with rollback, plus the conflict check.
   *Done when:* edits appear on github.com, and a failed edit rolls back with an error toast.
-- [ ] **Slice 6 — Create + find.** Add new-issue creation, local search/filter/sort using SQLite queries, and keyboard shortcuts.
+- [x] **Slice 6 — Create + find.** Add new-issue creation, local search/filter/sort using SQLite queries, and keyboard shortcuts.
+  *Done when:* a new issue created in the app appears on github.com, and Search finds an issue by title/body text across every tracked repo.
 - [ ] **Slice 7 — Release.** Add app icons and Forge makers (Windows installer and macOS DMG). Add a GitHub Actions release workflow that builds on version tags.
   *Done when:* installers downloaded from GitHub Releases install and run on both OSes.
 
@@ -142,6 +143,18 @@ tests/
 - `npm run make` — build installers
 
 ## Decisions log
+
+### Slice 6 — Create + find (2026-09-15)
+
+- **The board's per-repo issue query stays unfiltered — search/sort/assignee are client-side there, not pushed into SQL.** `App.tsx`'s `['issues', activeRepo]` query cache is the substrate `IssueDetailDialog` writes optimistic updates into (`setQueryData` in five places: onMutate, onError rollback, the deleted-issue filter, onSuccess, reloadConflict) and that `App.tsx` derives `openIssue` from. Adding filter/sort params to that query key would make every one of those writes target a key that no longer matches what's on screen; filtering inside the queryFn without changing the key would serve stale results for the wrong params. Either way breaks Slice 5's optimistic-update flow, which its own log already flagged as never manually clicked through. `BoardScreen` filters and sorts the already-loaded array instead (`sortIssues`, a pure function with its own unit tests in `tests/sort-issues.test.ts`).
+- **SQLite-backed search is real, but only for `SearchScreen`.** `listIssues`'s `search` param (`src/main/db/issues-queries.ts`) was validated and silently discarded since Slice 3's stub — it now does a SQL `LIKE` match against title and body. `SearchScreen` has no optimistic-update cache to protect (it's read-only, cross-repo), so it fans out one `issues.list({ repoFullName, search })` call per tracked repo via `Promise.all` and merges — reusing the existing single-repo IPC endpoint rather than adding a new one. No debounce: each call is a local synchronous SQLite read, cheap enough at this app's scale (see CLAUDE.md's own gotchas about who this app targets) that the extra state wasn't worth it.
+- **Search now includes closed issues.** The board hiding closed issues is a "working view of active issues" board concern (Slice 4's own reasoning); global search has no such reason to hide history, so it was never filtered by state.
+- **New-issue creation is title + body only** — no type/labels/assignee picker in the create dialog. GitHub Issue Types, labels, and assignee are all editable immediately after creation via the existing Slice 5 edit flow, so the create form doesn't duplicate that UI. A created issue with no labels lands in the board's "Unlabeled" column, same as any other label-less issue.
+- **`issues:create` follows the exact write-handler shape every sibling IPC handler already uses**: offline gate first (`isOnline()` check, CLAUDE.md's "writes are disabled while offline"), then `getAuthenticatedClient()`, then the GitHub call, then `mapGitHubIssue` + `upsertIssues` so SQLite stays the source of truth for the renderer. The renderer's `CreateIssueDialog` doesn't hand-insert the returned issue into the query cache — it invalidates `['issues', repoFullName]` and lets the existing unfiltered query re-read from SQLite.
+- **The fake `SearchScreen` filter chips (`repo: atlas-web`, `priority: P1`, `+ filter`) were deleted, not wired up.** They were static fixture decoration with a working "remove" button that filtered nothing — worse than no filter UI, since it looked functional and wasn't. Filtering by repo or priority in Search is a plausible future addition, but wasn't asked for here; the dead chips were removed rather than left as a trap.
+- **Keyboard shortcuts: Cmd+N / Ctrl+N (new issue) and Cmd+K / Ctrl+K (jump to Search)**, both in `App.tsx` on a single `window`-level `keydown` listener. Checks `isMac ? event.metaKey : event.ctrlKey` specifically (never `metaKey || ctrlKey`), matching CLAUDE.md's "Cmd on macOS and Ctrl on Windows" literally rather than accepting either modifier on either platform. Escape-to-close on both dialogs comes for free from the native `<dialog>` element (Slice 1's decision), so it needed no new code.
+- **`fixtures.ts`'s `searchResults` export was deleted.** It was the last fixture-only data SearchScreen depended on; once Search reads real IPC data, keeping it around as dead code would violate CLAUDE.md's own "From Slice 3 onward, real IPC data replaces the fixtures" line.
+- **Verification gap, stated plainly, same as Slice 5's:** typecheck/lint/test (124 tests) all pass, and `npm start` boots against real tracked repos without error from any of this slice's code. The actual UI — creating an issue, the Cmd+N/Cmd+K shortcuts, the sort/assignee pills, cross-repo search — was **not** clicked through in a running window this session (no display available in this environment). `listIssues`'s search filter and `sortIssues` both have direct unit coverage; the React wiring around them does not.
 
 ### Slice 5 — Issue detail + edits (2026-09-15)
 

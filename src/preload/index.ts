@@ -24,6 +24,7 @@ const api: Api = {
   issues: {
     list: (input) => ipcRenderer.invoke(CHANNELS.issuesList, input),
     get: (input) => ipcRenderer.invoke(CHANNELS.issuesGet, input),
+    create: (input) => ipcRenderer.invoke(CHANNELS.issuesCreate, input),
     update: (input) => ipcRenderer.invoke(CHANNELS.issuesUpdate, input),
     getComments: (input) => ipcRenderer.invoke(CHANNELS.issuesGetComments, input),
     addComment: (input) => ipcRenderer.invoke(CHANNELS.issuesAddComment, input),

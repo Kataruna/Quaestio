@@ -1,8 +1,8 @@
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import type { Issue } from '@shared/types';
 import { Badge, type BadgeTone } from '@/components/ui/badge';
 import { SearchField } from '@/components/ui/search-field';
-import { Tag } from '@/components/ui/tag';
 import { TYPE_LABEL } from '@/features/board/IssueCard';
 import { cn } from '@/lib/cn';
 
@@ -32,18 +32,28 @@ function highlight(title: string, needle: string) {
   ];
 }
 
-export function SearchScreen({ results }: { results: Issue[] }) {
-  const [query, setQuery] = useState('refresh');
-  const [filters, setFilters] = useState(['repo: atlas-web', 'priority: P1']);
+/** Searches every tracked repo's cached issues via SQLite (`listIssues`'s
+ * `search` param), not a client-side filter — unlike the board, this screen
+ * has no optimistic-update cache to keep unfiltered, so pushing the match
+ * into SQL is free. One IPC round trip per tracked repo per keystroke; each
+ * is a local synchronous SQLite read, cheap enough at this app's scale that
+ * debouncing isn't worth the extra state. Includes closed issues — that
+ * filter is the board's own "working view" concern, not search's. */
+export function SearchScreen({ repoFullNames }: { repoFullNames: string[] }) {
+  const [query, setQuery] = useState('');
+  const needle = query.trim();
 
-  const matches = useMemo(() => {
-    const needle = query.trim().toLowerCase();
-    if (!needle) return [];
-    return results.filter(
-      (issue) =>
-        issue.title.toLowerCase().includes(needle) || issue.body.toLowerCase().includes(needle),
-    );
-  }, [query, results]);
+  const resultsQuery = useQuery({
+    queryKey: ['search', needle, repoFullNames],
+    queryFn: async () => {
+      const perRepo = await Promise.all(
+        repoFullNames.map((repoFullName) => window.api.issues.list({ repoFullName, search: needle })),
+      );
+      return perRepo.flat();
+    },
+    enabled: needle !== '' && repoFullNames.length > 0,
+  });
+  const matches = resultsQuery.data ?? [];
 
   return (
     <div className="flex max-w-[620px] flex-col gap-3.5">
@@ -52,26 +62,18 @@ export function SearchScreen({ results }: { results: Issue[] }) {
         placeholder="Search all tracked repos"
         value={query}
         onChange={(event) => setQuery(event.target.value)}
+        autoFocus
       />
 
-      <div className="flex flex-wrap gap-1.5">
-        {filters.map((filter) => (
-          <Tag
-            key={filter}
-            onRemove={() => setFilters((current) => current.filter((item) => item !== filter))}
-          >
-            {filter}
-          </Tag>
-        ))}
-        <Tag>+ filter</Tag>
-        <span className="ml-auto self-center font-sans text-micro text-text-faint">
+      {needle ? (
+        <span className="font-sans text-micro text-text-faint">
           {matches.length} result{matches.length === 1 ? '' : 's'}
         </span>
-      </div>
+      ) : null}
 
       {matches.length === 0 ? (
         <p className="py-12 text-center font-sans text-body text-text-muted">
-          {query.trim() ? `Nothing matches “${query}”` : 'Type to search your tracked repos'}
+          {needle ? `Nothing matches “${query}”` : 'Type to search your tracked repos'}
         </p>
       ) : (
         <div className="mt-1 flex flex-col gap-3.5">
@@ -89,13 +91,15 @@ export function SearchScreen({ results }: { results: Issue[] }) {
               <div className="rounded-[4px_18px_18px_18px] bg-surface-card px-4 py-3.5 shadow-card">
                 <div className="flex items-center gap-2.5">
                   <span className="font-display text-body font-semibold leading-[1.3] text-text-strong">
-                    {highlight(issue.title, query.trim())}
+                    {highlight(issue.title, needle)}
                   </span>
-                  <span className="ml-auto">
+                  {issue.state === 'closed' ? (
+                    <Badge tone="neutral">Closed</Badge>
+                  ) : (
                     <Badge tone={PRIORITY_TONE[issue.priority]} dot={issue.priority !== 'p3'}>
                       {issue.priority.toUpperCase()}
                     </Badge>
-                  </span>
+                  )}
                 </div>
                 <p className="mb-0 mt-1.5 font-sans text-body text-text-muted">
                   {issue.assignee?.login ?? 'unassigned'} · #{issue.number} ·{' '}

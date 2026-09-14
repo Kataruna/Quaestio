@@ -28,6 +28,17 @@ export async function updateIssue(
   return data;
 }
 
+export async function createIssue(
+  client: GitHubClient,
+  owner: string,
+  repo: string,
+  title: string,
+  body: string | undefined,
+) {
+  const { data } = await client.rest.issues.create({ owner, repo, title, body });
+  return data;
+}
+
 export async function createIssueComment(
   client: GitHubClient,
   owner: string,

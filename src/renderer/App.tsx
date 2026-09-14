@@ -11,13 +11,15 @@ import { BoardScreen } from '@/features/board/BoardScreen';
 import { RepoPickerDialog } from '@/features/repos/RepoPickerDialog';
 import { EmptyState } from '@/features/repos/EmptyState';
 import { IssueDetailDialog } from '@/features/issues/IssueDetailDialog';
+import { CreateIssueDialog } from '@/features/issues/CreateIssueDialog';
 import { SettingsScreen } from '@/features/settings/SettingsScreen';
 import { SearchScreen } from '@/features/search/SearchScreen';
 import { StateGallery } from '@/features/StateGallery';
 import { SignInScreen } from '@/features/auth/SignInScreen';
 import { DeviceCodeScreen } from '@/features/auth/DeviceCodeScreen';
 import { ToastHost } from '@/components/ui/toast';
-import { searchResults, syncStatus as initialStatus } from '@/lib/fixtures';
+import { isMac } from '@/lib/platform';
+import { syncStatus as initialStatus } from '@/lib/fixtures';
 
 /**
  * Keeps `current` as the active repo only if it's still tracked in `repos`;
@@ -60,6 +62,7 @@ export function App() {
   // background sync) updating that cache is actually visible in the open
   // dialog instead of the stale snapshot captured at click time.
   const [openIssueNumber, setOpenIssueNumber] = useState<number | null>(null);
+  const [createOpen, setCreateOpen] = useState(false);
   const [devLoading, setDevLoading] = useState(false);
   const [devToolsOpen, setDevToolsOpen] = useState(false);
   const [online, setOnline] = useState(true);
@@ -187,6 +190,26 @@ export function App() {
       window.removeEventListener('offline', handleOffline);
     };
   }, []);
+
+  // CLAUDE.md: "Keyboard shortcuts use Cmd on macOS and Ctrl on Windows" —
+  // checks the platform-specific modifier only, never `metaKey || ctrlKey`,
+  // so a Windows Ctrl+N doesn't also fire for a stray Cmd+N and vice versa.
+  useEffect(() => {
+    function handleKeyDown(event: KeyboardEvent) {
+      const mod = isMac ? event.metaKey : event.ctrlKey;
+      if (!mod) return;
+      if (event.key.toLowerCase() === 'n') {
+        if (!activeRepo || createOpen || openIssueNumber !== null) return;
+        event.preventDefault();
+        setCreateOpen(true);
+      } else if (event.key.toLowerCase() === 'k') {
+        event.preventDefault();
+        setScreen('search');
+      }
+    }
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [activeRepo, createOpen, openIssueNumber]);
 
   function handleUseToken(token: string) {
     setAuthBusy(true);
@@ -350,9 +373,12 @@ export function App() {
                   issues={issues}
                   loading={issuesLoading || devLoading}
                   onOpenIssue={(issue) => setOpenIssueNumber(issue.number)}
+                  onNewIssue={() => setCreateOpen(true)}
                 />
               ) : null}
-              {screen === 'search' ? <SearchScreen results={searchResults} /> : null}
+              {screen === 'search' ? (
+                <SearchScreen repoFullNames={tracked.map((repo) => repo.fullName)} />
+              ) : null}
               {screen === 'settings' ? <SettingsScreen /> : null}
               {screen === 'milestones' ? <PlaceholderScreen title="Milestones" /> : null}
               {screen === 'people' ? <PlaceholderScreen title="People" /> : null}
@@ -372,6 +398,12 @@ export function App() {
         issue={openIssue}
         online={online}
         onClose={() => setOpenIssueNumber(null)}
+      />
+      <CreateIssueDialog
+        open={createOpen}
+        repoFullName={activeFullName}
+        online={online}
+        onClose={() => setCreateOpen(false)}
       />
       <ToastHost />
     </div>

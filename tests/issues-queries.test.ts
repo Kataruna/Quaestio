@@ -159,4 +159,22 @@ describe('issues-queries', () => {
   it('getMaxUpdatedAt returns null when the repo has no cached issues', () => {
     expect(getMaxUpdatedAt(db, 'acme/empty')).toBeNull();
   });
+
+  it('listIssues with a search term matches the title or the body, case-insensitively', () => {
+    upsertIssues(db, [
+      issue({ id: 1, number: 1, repoFullName: 'acme/web', title: 'Fix the Login flow', body: 'unrelated' }),
+      issue({ id: 2, number: 2, repoFullName: 'acme/web', title: 'Unrelated', body: 'touches login internals' }),
+      issue({ id: 3, number: 3, repoFullName: 'acme/web', title: 'Nothing here', body: 'nor here' }),
+    ]);
+    expect(listIssues(db, 'acme/web', 'login').map((i) => i.id).sort()).toEqual([1, 2]);
+  });
+
+  it('listIssues with an empty or missing search term returns every issue for the repo', () => {
+    upsertIssues(db, [
+      issue({ id: 1, number: 1, repoFullName: 'acme/web' }),
+      issue({ id: 2, number: 2, repoFullName: 'acme/web' }),
+    ]);
+    expect(listIssues(db, 'acme/web')).toHaveLength(2);
+    expect(listIssues(db, 'acme/web', '  ')).toHaveLength(2);
+  });
 });

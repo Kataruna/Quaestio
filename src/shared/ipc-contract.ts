@@ -30,6 +30,13 @@ export const getIssueInput = z.object({
 });
 export type GetIssueInput = z.infer<typeof getIssueInput>;
 
+export const createIssueInput = z.object({
+  repoFullName: z.string().min(1),
+  title: z.string().min(1, 'A title is required'),
+  body: z.string().optional(),
+});
+export type CreateIssueInput = z.infer<typeof createIssueInput>;
+
 /**
  * A field left `undefined` means "don't touch this field"; `labels`/
  * `assigneeLogin` present-but-empty/null means "clear it." `assigneeLogin`
@@ -127,6 +134,7 @@ export interface Api {
   issues: {
     list(input: ListIssuesInput): Promise<Issue[]>;
     get(input: GetIssueInput): Promise<Issue | null>;
+    create(input: CreateIssueInput): Promise<Issue>;
     update(input: UpdateIssueInput): Promise<UpdateIssueResult>;
     getComments(input: GetCommentsInput): Promise<GetCommentsResult>;
     addComment(input: AddCommentInput): Promise<Comment>;

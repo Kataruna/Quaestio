@@ -17,6 +17,7 @@ export const CHANNELS = {
   reposSetTracked: 'repos:set-tracked',
   issuesList: 'issues:list',
   issuesGet: 'issues:get',
+  issuesCreate: 'issues:create',
   issuesUpdate: 'issues:update',
   issuesGetComments: 'issues:get-comments',
   issuesAddComment: 'issues:add-comment',

@@ -2,6 +2,7 @@ import { ipcMain } from 'electron';
 import {
   listIssuesInput,
   getIssueInput,
+  createIssueInput,
   updateIssueInput,
   getCommentsInput,
   addCommentInput,
@@ -9,12 +10,13 @@ import {
 } from '@shared/ipc-contract';
 import { CHANNELS } from '@shared/channels';
 import { mapGitHubComment } from '@shared/map-github-comment';
+import { mapGitHubIssue } from '@shared/map-github-issue';
 import { getDb } from '../db/client';
-import { listIssues, getIssue, deleteIssue } from '../db/issues-queries';
+import { listIssues, getIssue, upsertIssues, deleteIssue } from '../db/issues-queries';
 import { listComments, replaceComments, insertComment } from '../db/comments-queries';
 import { getAuthenticatedClient } from '../github/auth';
 import { fetchIssueComments } from '../github/issues';
-import { createIssueComment } from '../github/issue-writes';
+import { createIssue, createIssueComment } from '../github/issue-writes';
 import { isOnline } from '../sync/scheduler';
 import { isGone, performIssueUpdate } from '../sync/issue-update';
 
@@ -31,17 +33,25 @@ export function registerIssuesHandlers(): void {
   // synchronous, so there's nothing to `await` — but `ipcMain.handle`
   // accepts a plain return value just as well as a promise.
   ipcMain.handle(CHANNELS.issuesList, (_event, rawInput: unknown) => {
-    // `search` is validated but intentionally unused — Slice 6 owns turning
-    // it into a real filter. Until then this always returns every cached
-    // issue for the repo, matching how `BoardScreen` already does its own
-    // client-side text filtering.
-    const { repoFullName } = listIssuesInput.parse(rawInput);
-    return listIssues(getDb(), repoFullName);
+    const { repoFullName, search } = listIssuesInput.parse(rawInput);
+    return listIssues(getDb(), repoFullName, search);
   });
 
   ipcMain.handle(CHANNELS.issuesGet, (_event, rawInput: unknown) => {
     const { repoFullName, number } = getIssueInput.parse(rawInput);
     return getIssue(getDb(), repoFullName, number);
+  });
+
+  ipcMain.handle(CHANNELS.issuesCreate, async (_event, rawInput: unknown) => {
+    const { repoFullName, title, body } = createIssueInput.parse(rawInput);
+    if (!isOnline()) throw new Error('Writes are disabled while offline');
+    const client = getAuthenticatedClient();
+    if (!client) throw new Error('Not signed in');
+    const [owner, repo] = splitRepoFullName(repoFullName);
+    const raw = await createIssue(client, owner, repo, title, body);
+    const issue = mapGitHubIssue(raw, repoFullName);
+    upsertIssues(getDb(), [issue]);
+    return issue;
   });
 
   ipcMain.handle(CHANNELS.issuesUpdate, async (_event, rawInput: unknown) => {

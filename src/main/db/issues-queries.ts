@@ -1,4 +1,4 @@
-import { and, eq, sql } from 'drizzle-orm';
+import { and, eq, like, or, sql } from 'drizzle-orm';
 import type { BetterSQLite3Database } from 'drizzle-orm/better-sqlite3';
 import { issues } from './schema';
 import type { Issue } from '@shared/types';
@@ -30,11 +30,25 @@ function rowToIssue(row: typeof issues.$inferSelect): Issue {
   };
 }
 
-export function listIssues(db: BetterSQLite3Database, repoFullName: string): Issue[] {
+/**
+ * `search`, given, matches title or body via SQL `LIKE` — the SQLite-backed
+ * filter Slice 6 owns (`ipc/issues.ts`'s `issues:list` handler used to
+ * validate and discard it). The board's own search box stays client-side
+ * (see BoardScreen) since its query key can't change without breaking the
+ * optimistic-update cache IssueDetailDialog writes into; this is for
+ * SearchScreen's cross-repo search, which has no such cache to protect.
+ */
+export function listIssues(db: BetterSQLite3Database, repoFullName: string, search?: string): Issue[] {
+  const needle = search?.trim();
   return db
     .select()
     .from(issues)
-    .where(eq(issues.repoFullName, repoFullName))
+    .where(
+      and(
+        eq(issues.repoFullName, repoFullName),
+        needle ? or(like(issues.title, `%${needle}%`), like(issues.body, `%${needle}%`)) : undefined,
+      ),
+    )
     .all()
     .map(rowToIssue);
 }

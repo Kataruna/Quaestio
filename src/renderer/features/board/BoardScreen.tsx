@@ -1,8 +1,9 @@
 import { useMemo, useState } from 'react';
 import type { Issue, IssueType } from '@shared/types';
 import { BoardColumn } from './BoardColumn';
-import { BoardToolbar } from './BoardToolbar';
+import { BoardToolbar, ASSIGNEE_ALL } from './BoardToolbar';
 import { TYPE_DOT, TYPE_LABEL } from './IssueCard';
+import { SORT_OPTIONS, sortIssues, type SortOption } from './sort-issues';
 import { Skeleton } from '@/components/ui/skeleton';
 
 const COLUMNS: IssueType[] = ['bug', 'feature', 'task'];
@@ -13,27 +14,39 @@ export function BoardScreen({
   issues,
   loading = false,
   onOpenIssue,
+  onNewIssue,
 }: {
   repoFullName: string;
   issues: Issue[];
   loading?: boolean;
   onOpenIssue: (issue: Issue) => void;
+  onNewIssue: () => void;
 }) {
   const [search, setSearch] = useState('');
+  const [sort, setSort] = useState<SortOption>(SORT_OPTIONS[0]);
+  const [assignee, setAssignee] = useState(ASSIGNEE_ALL);
+
+  const assigneeOptions = useMemo(
+    () => [ASSIGNEE_ALL, ...new Set(issues.flatMap((issue) => (issue.assignee ? [issue.assignee.login] : [])))],
+    [issues],
+  );
 
   const visible = useMemo(() => {
     // The board is a working view of open issues, not a full history — a
     // repo synced from GitHub (state=all) includes closed issues, which
     // would otherwise pile up here forever with no way to distinguish them
     // from active work.
-    const open = issues.filter((issue) => issue.state === 'open');
+    let open = issues.filter((issue) => issue.state === 'open');
+    if (assignee !== ASSIGNEE_ALL) open = open.filter((issue) => issue.assignee?.login === assignee);
     const needle = search.trim().toLowerCase();
-    if (!needle) return open;
-    return open.filter(
-      (issue) =>
-        issue.title.toLowerCase().includes(needle) || issue.body.toLowerCase().includes(needle),
-    );
-  }, [issues, search]);
+    if (needle) {
+      open = open.filter(
+        (issue) =>
+          issue.title.toLowerCase().includes(needle) || issue.body.toLowerCase().includes(needle),
+      );
+    }
+    return sortIssues(open, sort);
+  }, [issues, search, assignee, sort]);
 
   // Issues with no labels at all fall out of `type`'s bug/feature/task
   // classification (the mapper defaults label-less issues to 'task') into
@@ -54,6 +67,12 @@ export function BoardScreen({
         openCount={issues.filter((issue) => issue.state === 'open').length}
         search={search}
         onSearchChange={setSearch}
+        sort={sort}
+        onSortChange={setSort}
+        assignee={assignee}
+        onAssigneeChange={setAssignee}
+        assigneeOptions={assigneeOptions}
+        onNewIssue={onNewIssue}
       />
 
       {loading ? (

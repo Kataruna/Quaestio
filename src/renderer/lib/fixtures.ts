@@ -81,13 +81,6 @@ function issue(partial: Omit<Issue, 'repoFullName' | 'state' | 'createdAt' | 'ht
   };
 }
 
-/**
- * Hoisted into named consts (instead of read back out of `issues` by index)
- * because `searchResults` below reuses these three, with overrides. Indexing
- * `issues[n]` types as `Issue | undefined` under the project's
- * `noUncheckedIndexedAccess`, which would force a cast; a direct variable
- * reference doesn't have that problem.
- */
 const tokenRefreshLoopIssue = issue({
   id: 482,
   number: 482,
@@ -240,48 +233,6 @@ export const issues: Issue[] = [
     ],
   }),
   bumpLucideIssue,
-];
-
-/** Cross-repo results for the Search screen (design 1h). */
-export const searchResults: Issue[] = [
-  tokenRefreshLoopIssue,
-  {
-    ...bumpLucideIssue,
-    id: 112,
-    number: 112,
-    repoFullName: 'acme/cli-tools',
-    title: 'Rotate the refresh secret in CI',
-    body: 'The CI refresh secret is still the one from the original bootstrap.',
-    type: 'task',
-    priority: 'p2',
-    labels: ['p2'],
-    assignee: people['dpatel'] ?? null,
-    dueDate: null,
-    subtasks: [
-      { id: '112-1', title: 'Generate a new refresh secret', done: false },
-      { id: '112-2', title: 'Update the CI secret store', done: false },
-    ],
-    htmlUrl: 'https://github.com/acme/cli-tools/issues/112',
-  },
-  {
-    ...keyboardShortcutsIssue,
-    id: 493,
-    number: 493,
-    repoFullName: 'acme/design-system',
-    title: 'Silent refresh on window focus',
-    body: 'Refresh the session quietly when the window regains focus.',
-    type: 'feature',
-    priority: 'p3',
-    labels: ['enhancement'],
-    assignee: people['ravi-n'] ?? null,
-    milestone: '1.5',
-    dueDate: null,
-    subtasks: [
-      { id: '493-1', title: 'Detect focus regain in the renderer', done: false },
-      { id: '493-2', title: 'Debounce repeated focus events', done: false },
-    ],
-    htmlUrl: 'https://github.com/acme/design-system/issues/493',
-  },
 ];
 
 export const syncStatus: SyncStatus = { kind: 'synced', at: '2026-03-26T10:28:00Z' };
