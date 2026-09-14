@@ -21,5 +21,11 @@ export default defineConfig({
       fileName: () => 'main.js',
       formats: ['cjs'],
     },
+    rollupOptions: {
+      // Native modules can't be bundled — Rollup would try to parse the
+      // compiled .node binary as JS. `better-sqlite3` is required at
+      // runtime from the packaged app's node_modules instead.
+      external: ['better-sqlite3'],
+    },
   },
 });

@@ -111,7 +111,7 @@ tests/
 - **`better-sqlite3` is a native module:**
   - Mark it `external` in the Vite main-process config.
   - Make sure Electron Forge rebuilds it for Electron.
-  - A `NODE_MODULE_VERSION` error means the rebuild didn't happen.
+  - A `NODE_MODULE_VERSION` error means the rebuild didn't happen. The reverse also happens: once Forge has rebuilt it for Electron's ABI (via `npm start`/`package`/`make`), a later `npm test` run (plain Node, via Vitest) fails the same `NODE_MODULE_VERSION` way until you run `npm rebuild better-sqlite3` to restore plain-Node compatibility.
 - **Drizzle migrations** must be included in the packaged app and run at startup.
 - **`safeStorage`** only works after the app's `ready` event.
 - **macOS builds** must run on a macOS machine or CI runner. Unsigned builds show a Gatekeeper warning on macOS and a SmartScreen warning on Windows, which is acceptable for now.
@@ -143,6 +143,17 @@ tests/
 ## Decisions log
 
 <!-- Record pinned versions and key decisions here, newest first. -->
+
+### Slice 3 — Repos + first sync (2026-09-14)
+
+**Pinned versions** (exact, no ranges — see `package.json`):
+
+| Package | Version |
+| --- | --- |
+| better-sqlite3 | 13.0.3 |
+| drizzle-orm | 0.45.2 |
+| drizzle-kit | 0.31.10 (dev) |
+| @types/better-sqlite3 | 9.6.0 (dev) |
 
 ### Slice 2 — Auth (2026-09-13)
 
