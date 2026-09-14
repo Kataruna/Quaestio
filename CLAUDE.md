@@ -124,7 +124,7 @@ tests/
   *Done when:* every screen from `design/` is reachable and visually matches.
 - [x] **Slice 2 — Auth.** Add PAT login, then Device Flow. Store the token with safeStorage. Show the user's avatar and name, and add sign-out.
   *Done when:* login survives a restart, and sign-out clears the token.
-- [ ] **Slice 3 — Repos + first sync.** Let the user pick tracked repos from their repo list. Run the initial sync into SQLite. The issue list reads from SQLite through IPC.
+- [x] **Slice 3 — Repos + first sync.** Let the user pick tracked repos from their repo list. Run the initial sync into SQLite. The issue list reads from SQLite through IPC.
   *Done when:* after quitting and reopening the app **offline**, issues still show.
 - [ ] **Slice 4 — Live sync.** Add `since` + ETag syncing, the polling schedule, rate-limit handling, a sync-status indicator, offline detection, and unit tests.
   *Done when:* an issue edited on github.com shows up in the app within about 60 s.
