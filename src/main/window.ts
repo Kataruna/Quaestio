@@ -1,5 +1,6 @@
 import { BrowserWindow } from 'electron';
 import path from 'node:path';
+import { setWindowFocused } from './sync/scheduler';
 
 const isMac = process.platform === 'darwin';
 
@@ -23,6 +24,10 @@ export function createMainWindow(): BrowserWindow {
   });
 
   window.once('ready-to-show', () => window.show());
+  // CLAUDE.md: "Active repo: every 60s while the window is focused" and
+  // "Sync immediately when window regains focus."
+  window.on('focus', () => setWindowFocused(true));
+  window.on('blur', () => setWindowFocused(false));
 
   if (MAIN_WINDOW_VITE_DEV_SERVER_URL) {
     void window.loadURL(MAIN_WINDOW_VITE_DEV_SERVER_URL);

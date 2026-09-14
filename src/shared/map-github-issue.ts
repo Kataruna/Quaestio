@@ -1,6 +1,6 @@
 import { mapGitHubUser } from './map-github-user';
-import { issueTypeFromLabels, priorityFromLabels } from './label-mapping';
-import type { Issue, IssueState } from './types';
+import { priorityFromLabels } from './label-mapping';
+import type { Issue, IssueState, IssueType } from './types';
 
 /**
  * The real `components["schemas"]["issue"].labels[number]` object type
@@ -36,6 +36,12 @@ interface GitHubIssueResponse {
   body?: string | null;
   state: string;
   labels: (string | GitHubLabel)[];
+  /**
+   * GitHub's native Issue Type (Settings → Issue Types on the repo/org),
+   * not a label. `null` for repos that don't have Issue Types enabled, or
+   * an issue that hasn't been given one.
+   */
+  type?: { name: string } | null;
   assignee: { login: string; avatar_url: string } | null;
   milestone: { title: string } | null;
   created_at: string;
@@ -74,6 +80,19 @@ function normaliseState(state: string): IssueState {
 }
 
 /**
+ * GitHub's Issue Type is independent of labels — an issue's `type.name` is
+ * whatever the repo's Issue Types are configured as. This app only has
+ * columns for the three built-in names GitHub ships by default; anything
+ * else (a custom type, or Issue Types not enabled) falls back to `task`.
+ */
+function issueTypeFromGitHub(type: { name: string } | null | undefined): IssueType {
+  const name = type?.name.trim().toLowerCase();
+  if (name === 'bug') return 'bug';
+  if (name === 'feature') return 'feature';
+  return 'task';
+}
+
+/**
  * Maps a raw GitHub issue onto this app's `Issue` type. `repoFullName` isn't
  * part of GitHub's issue response (it's implied by which endpoint you
  * called), so the caller supplies it. `dueDate` is always null — GitHub has
@@ -90,7 +109,7 @@ export function mapGitHubIssue(raw: GitHubIssueResponse, repoFullName: string): 
     title: raw.title,
     body: raw.body ?? '',
     state: normaliseState(raw.state),
-    type: issueTypeFromLabels(labels),
+    type: issueTypeFromGitHub(raw.type),
     priority: priorityFromLabels(labels),
     labels,
     assignee: raw.assignee

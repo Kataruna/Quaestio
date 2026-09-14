@@ -6,7 +6,7 @@ import { getDb } from '../db/client';
 import { listRepos, upsertRepos, setTrackedRepos } from '../db/repos-queries';
 import { getAuthenticatedClient } from '../github/auth';
 import { fetchUserRepos } from '../github/repos';
-import { syncRepoIssues } from '../sync/initial-sync';
+import { syncRepoIssuesIncremental } from '../sync/incremental-sync';
 
 export function registerReposHandlers(): void {
   ipcMain.handle(CHANNELS.reposList, async () => {
@@ -37,13 +37,16 @@ export function registerReposHandlers(): void {
     if (client) {
       for (const repo of listRepos(db).filter((repo) => newlyTrackedIds.has(repo.id))) {
         try {
-          await syncRepoIssues(client, db, repo.fullName);
+          // A newly-tracked repo always has a null cursor, so this is a full
+          // sync (same as before) that also seeds the cursor incremental
+          // polling needs from here on — see `incremental-sync.ts`.
+          await syncRepoIssuesIncremental(client, db, repo.fullName);
         } catch (error) {
           // Tracking still succeeds even if the first sync fails (e.g.
           // offline) — the repo just starts with no cached issues until a
-          // later successful sync. There's no abort-the-whole-operation
-          // here, and no per-repo error surfaced to the renderer yet —
-          // that's part of Slice 4's sync-status work.
+          // later successful sync (the scheduler's own poll loop will pick
+          // it up once it's tracked, and report the failure via the global
+          // sync-status indicator then). No abort-the-whole-operation here.
           console.warn(
             `Failed to sync issues for ${repo.fullName}:`,
             error instanceof Error ? error.message : error,

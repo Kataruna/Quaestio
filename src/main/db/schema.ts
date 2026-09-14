@@ -15,6 +15,14 @@ export const repos = sqliteTable('repos', {
   openIssueCount: integer('openIssueCount').notNull(),
   updatedAt: text('updatedAt').notNull(),
   tracked: integer('tracked', { mode: 'boolean' }).notNull().default(false),
+  /**
+   * The `since` cursor for this repo's incremental issue sync — the maximum
+   * `updated_at` seen from GitHub across every issue fetched so far, never
+   * the local clock (CLAUDE.md's sync rules). `null` means this repo has
+   * never been synced (or only ever full-synced): the next poll should fall
+   * back to a full sync instead of asking GitHub for `since=null`.
+   */
+  syncCursor: text('syncCursor'),
 });
 
 /**
@@ -33,7 +41,7 @@ export const issues = sqliteTable('issues', {
   title: text('title').notNull(),
   body: text('body').notNull(),
   state: text('state').notNull().$type<'open' | 'closed'>(),
-  type: text('type').notNull().$type<'bug' | 'feature' | 'chore'>(),
+  type: text('type').notNull().$type<'bug' | 'feature' | 'task'>(),
   priority: text('priority').notNull().$type<'p1' | 'p2' | 'p3'>(),
   labels: text('labels').notNull(),
   assigneeLogin: text('assigneeLogin'),
@@ -45,4 +53,33 @@ export const issues = sqliteTable('issues', {
   createdAt: text('createdAt').notNull(),
   updatedAt: text('updatedAt').notNull(),
   htmlUrl: text('htmlUrl').notNull(),
+});
+
+/**
+ * One row per polled request URL (CLAUDE.md: "store the ETag for each
+ * request URL"). A 304 response means nothing changed and doesn't count
+ * against the rate limit, so the incremental sync sends `If-None-Match`
+ * with whatever's stored here before falling back to a real fetch.
+ */
+export const syncEtags = sqliteTable('sync_etags', {
+  url: text('url').primaryKey(),
+  etag: text('etag').notNull(),
+});
+
+/**
+ * `issueId` is GitHub's numeric issue id (matches `issues.id`). Comments are
+ * fetched only when an issue is opened, never background-synced (CLAUDE.md)
+ * — `comments-queries.ts`'s `replaceComments` deletes and re-inserts a
+ * repo's full comment set on every fetch rather than diffing, since there's
+ * no incremental cursor for them the way there is for issues.
+ */
+export const comments = sqliteTable('comments', {
+  id: integer('id').primaryKey(),
+  issueId: integer('issueId').notNull(),
+  authorLogin: text('authorLogin'),
+  authorName: text('authorName'),
+  authorAvatarUrl: text('authorAvatarUrl'),
+  body: text('body').notNull(),
+  createdAt: text('createdAt').notNull(),
+  updatedAt: text('updatedAt').notNull(),
 });

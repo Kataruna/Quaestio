@@ -11,6 +11,7 @@ import {
 import { getDb } from '../db/client';
 import { clearAllRepos } from '../db/repos-queries';
 import { clearAllIssues } from '../db/issues-queries';
+import { clearAllComments } from '../db/comments-queries';
 
 /**
  * Registers every auth:* IPC handler exactly once. Call this once at app
@@ -40,11 +41,12 @@ export function registerAuthHandlers(): void {
     // correct than silently clearing the cache underneath a session that
     // might still be considered signed in in some other reload of the app.
     await signOut();
-    // Issues cleared before repos: `issues` has no declared foreign key to
-    // `repos` today (checked in schema.ts), so this order has no functional
-    // effect right now, but clearing the child-shaped table first is the
-    // defensive ordering if one is ever added later.
+    // Comments and issues cleared before repos: neither has a declared
+    // foreign key to `repos` today (checked in schema.ts), so this order has
+    // no functional effect right now, but clearing the child-shaped tables
+    // first is the defensive ordering if one is ever added later.
     const db = getDb();
+    clearAllComments(db);
     clearAllIssues(db);
     clearAllRepos(db);
   });

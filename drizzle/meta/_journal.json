@@ -8,6 +8,20 @@
       "when": 1789355910692,
       "tag": "0000_swift_joystick",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1789405449786,
+      "tag": "0001_low_stardust",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1789406646743,
+      "tag": "0002_premium_plazm",
+      "breakpoints": true
     }
   ]
 }

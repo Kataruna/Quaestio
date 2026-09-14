@@ -2,9 +2,11 @@ import { useMemo, useState } from 'react';
 import type { Issue, IssueType } from '@shared/types';
 import { BoardColumn } from './BoardColumn';
 import { BoardToolbar } from './BoardToolbar';
+import { TYPE_DOT, TYPE_LABEL } from './IssueCard';
 import { Skeleton } from '@/components/ui/skeleton';
 
-const COLUMNS: IssueType[] = ['bug', 'feature', 'chore'];
+const COLUMNS: IssueType[] = ['bug', 'feature', 'task'];
+const SKELETON_COLUMNS = COLUMNS.length + 1;
 
 export function BoardScreen({
   repoFullName,
@@ -33,6 +35,12 @@ export function BoardScreen({
     );
   }, [issues, search]);
 
+  // Issues with no labels at all fall out of `type`'s bug/feature/task
+  // classification (the mapper defaults label-less issues to 'task') into
+  // their own column, so a truly untagged issue doesn't get miscounted as
+  // deliberately a task.
+  const unlabeled = useMemo(() => visible.filter((issue) => issue.labels.length === 0), [visible]);
+
   const repoName = repoFullName.split('/')[1] ?? repoFullName;
 
   return (
@@ -49,9 +57,12 @@ export function BoardScreen({
       />
 
       {loading ? (
-        <div className="grid grid-cols-3 items-start gap-4">
-          {COLUMNS.map((type) => (
-            <div key={type} className="flex flex-col gap-[22px]">
+        <div
+          className="grid items-start gap-4"
+          style={{ gridTemplateColumns: `repeat(${SKELETON_COLUMNS}, minmax(0, 1fr))` }}
+        >
+          {Array.from({ length: SKELETON_COLUMNS }, (_, i) => (
+            <div key={i} className="flex flex-col gap-[22px]">
               <Skeleton className="h-5 w-24" />
               <Skeleton className="h-[168px] rounded-[4px_22px_22px_22px]" />
               <Skeleton className="h-[168px] rounded-[4px_22px_22px_22px]" />
@@ -63,17 +74,30 @@ export function BoardScreen({
         // scrolls its own cards independently (see BoardColumn), so this
         // grid row must stretch (the default) to give every column the same
         // full height to scroll within, not just size to its own content.
-        <div className="grid min-h-0 flex-1 grid-cols-3 gap-4">
+        <div
+          className="grid min-h-0 flex-1 gap-4"
+          style={{ gridTemplateColumns: `repeat(${SKELETON_COLUMNS}, minmax(0, 1fr))` }}
+        >
           {COLUMNS.map((type) => (
             <BoardColumn
               key={type}
-              type={type}
-              issues={visible.filter((issue) => issue.type === type)}
+              heading={TYPE_LABEL[type]}
+              dotClassName={TYPE_DOT[type]}
+              issues={visible.filter(
+                (issue) => issue.type === type && issue.labels.length > 0,
+              )}
               // Exactly one lime card per view, as the design system requires.
               activeIssueNumber={489}
               onOpenIssue={onOpenIssue}
             />
           ))}
+          <BoardColumn
+            heading="Unlabeled"
+            dotClassName="bg-neutral-400"
+            issues={unlabeled}
+            activeIssueNumber={489}
+            onOpenIssue={onOpenIssue}
+          />
         </div>
       )}
     </div>

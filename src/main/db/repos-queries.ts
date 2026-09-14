@@ -3,8 +3,25 @@ import type { BetterSQLite3Database } from 'drizzle-orm/better-sqlite3';
 import { repos } from './schema';
 import type { Repo } from '@shared/types';
 
+/**
+ * Selects only the columns `Repo` (the shared, IPC-exposed type) declares —
+ * `syncCursor` is a main-process-internal sync detail (see `sync-queries.ts`)
+ * that has no business leaking to the renderer.
+ */
 export function listRepos(db: BetterSQLite3Database): Repo[] {
-  return db.select().from(repos).all();
+  return db
+    .select({
+      id: repos.id,
+      owner: repos.owner,
+      name: repos.name,
+      fullName: repos.fullName,
+      isPrivate: repos.isPrivate,
+      openIssueCount: repos.openIssueCount,
+      updatedAt: repos.updatedAt,
+      tracked: repos.tracked,
+    })
+    .from(repos)
+    .all();
 }
 
 /** Deletes every row — called on sign-out so a different GitHub account

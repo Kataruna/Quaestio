@@ -17,10 +17,18 @@ export const CHANNELS = {
   reposSetTracked: 'repos:set-tracked',
   issuesList: 'issues:list',
   issuesGet: 'issues:get',
+  issuesUpdate: 'issues:update',
+  issuesGetComments: 'issues:get-comments',
+  issuesAddComment: 'issues:add-comment',
   syncNow: 'sync:now',
   syncGetStatus: 'sync:get-status',
+  syncSetActiveRepo: 'sync:set-active-repo',
+  syncSetOnline: 'sync:set-online',
   /** Main -> renderer push after a sync changes data. */
   syncUpdated: 'sync:updated',
+  /** Main -> renderer push whenever the sync-status indicator changes. */
+  syncStatusChanged: 'sync:status-changed',
+  imagesFetch: 'images:fetch',
 } as const;
 
 export type Channel = (typeof CHANNELS)[keyof typeof CHANNELS];

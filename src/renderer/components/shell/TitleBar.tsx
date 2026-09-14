@@ -1,4 +1,4 @@
-import { RefreshCw } from 'lucide-react';
+import { Bug, RefreshCw } from 'lucide-react';
 import type { SyncStatus } from '@shared/types';
 import { IconButton } from '@/components/ui/icon-button';
 import { isMac } from '@/lib/platform';
@@ -25,7 +25,18 @@ function relativeLabel(status: SyncStatus): string {
   return STATUS_TEXT[status.kind];
 }
 
-export function TitleBar({ status, onSync }: { status: SyncStatus; onSync: () => void }) {
+export function TitleBar({
+  status,
+  onSync,
+  devToolsOpen,
+  onToggleDevTools,
+}: {
+  status: SyncStatus;
+  onSync: () => void;
+  /** Dev-build only — the state-preview panel's open/closed state. */
+  devToolsOpen?: boolean;
+  onToggleDevTools?: () => void;
+}) {
   return (
     <header
       className={cn(
@@ -52,6 +63,18 @@ export function TitleBar({ status, onSync }: { status: SyncStatus; onSync: () =>
           onClick={onSync}
           className="text-white/70 hover:bg-white/10 hover:text-white"
         />
+        {import.meta.env.DEV && onToggleDevTools ? (
+          <IconButton
+            icon={Bug}
+            label="Dev tools"
+            size="sm"
+            onClick={onToggleDevTools}
+            className={cn(
+              devToolsOpen ? 'bg-white/10 text-white' : 'text-white/70',
+              'hover:bg-white/10 hover:text-white',
+            )}
+          />
+        ) : null}
       </span>
     </header>
   );

@@ -1,4 +1,4 @@
-export type IssueType = 'bug' | 'feature' | 'chore';
+export type IssueType = 'bug' | 'feature' | 'task';
 export type Priority = 'p1' | 'p2' | 'p3';
 export type IssueState = 'open' | 'closed';
 
@@ -36,7 +36,7 @@ export interface Issue {
   title: string;
   body: string;
   state: IssueState;
-  /** Derived from labels — see label-mapping.ts */
+  /** GitHub's native Issue Type field, not a label — see map-github-issue.ts */
   type: IssueType;
   /** Derived from labels — see label-mapping.ts */
   priority: Priority;
@@ -49,6 +49,16 @@ export interface Issue {
   createdAt: string;
   updatedAt: string;
   htmlUrl: string;
+}
+
+/** A GitHub issue comment. Fetched (and cached) only when the issue is
+ * opened — comments are never background-synced (CLAUDE.md). */
+export interface Comment {
+  id: number;
+  author: User | null;
+  body: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export type SyncStatus =

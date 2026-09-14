@@ -20,8 +20,8 @@ const TOGGLE_ROWS: Row[] = [
   },
   {
     id: 'mapLabels',
-    title: 'Map labels to types',
-    detail: 'bug → Bug · enhancement → Feature · everything else → Chore',
+    title: 'Use GitHub Issue Type',
+    detail: "Bug/Feature/Task comes from GitHub's Issue Type field, not labels",
   },
   {
     id: 'notifyP1',

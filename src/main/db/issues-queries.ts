@@ -1,4 +1,4 @@
-import { and, eq } from 'drizzle-orm';
+import { and, eq, sql } from 'drizzle-orm';
 import type { BetterSQLite3Database } from 'drizzle-orm/better-sqlite3';
 import { issues } from './schema';
 import type { Issue } from '@shared/types';
@@ -43,6 +43,27 @@ export function listIssues(db: BetterSQLite3Database, repoFullName: string): Iss
  * signing in afterward never sees a previous account's cached issues. */
 export function clearAllIssues(db: BetterSQLite3Database): void {
   db.delete(issues).run();
+}
+
+/** A 404/410/301 fetching this issue by number means it's gone (deleted,
+ * or transferred somewhere this app doesn't track) — CLAUDE.md's sync rules. */
+export function deleteIssue(db: BetterSQLite3Database, id: number): void {
+  db.delete(issues).where(eq(issues.id, id)).run();
+}
+
+/**
+ * The newest `updatedAt` cached for a repo — used to seed the incremental
+ * sync cursor right after a full sync, since `updatedAt` is a plain text
+ * column (ISO 8601 sorts lexicographically the same as chronologically) and
+ * `mapGitHubIssue` never invents this value locally.
+ */
+export function getMaxUpdatedAt(db: BetterSQLite3Database, repoFullName: string): string | null {
+  const row = db
+    .select({ max: sql<string | null>`max(${issues.updatedAt})` })
+    .from(issues)
+    .where(eq(issues.repoFullName, repoFullName))
+    .get();
+  return row?.max ?? null;
 }
 
 export function getIssue(

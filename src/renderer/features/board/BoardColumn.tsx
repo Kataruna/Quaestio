@@ -1,14 +1,16 @@
-import type { Issue, IssueType } from '@shared/types';
-import { IssueCard, TYPE_DOT, TYPE_LABEL } from './IssueCard';
+import type { Issue } from '@shared/types';
+import { IssueCard } from './IssueCard';
 import { cn } from '@/lib/cn';
 
 export function BoardColumn({
-  type,
+  heading,
+  dotClassName,
   issues,
   activeIssueNumber,
   onOpenIssue,
 }: {
-  type: IssueType;
+  heading: string;
+  dotClassName: string;
   issues: Issue[];
   activeIssueNumber: number | null;
   onOpenIssue: (issue: Issue) => void;
@@ -21,9 +23,9 @@ export function BoardColumn({
     <section className="flex h-full min-h-0 flex-col gap-[9px]">
       {/* Frozen: each column's own header never scrolls with its cards. */}
       <header className="flex shrink-0 items-center gap-2">
-        <span className={cn('h-2 w-2 rounded-pill', TYPE_DOT[type])} />
+        <span className={cn('h-2 w-2 rounded-pill', dotClassName)} />
         <h2 className="font-display text-title-m font-semibold tracking-[-0.02em] text-text-strong">
-          {TYPE_LABEL[type]}
+          {heading}
         </h2>
         <span className="border-b-[1.5px] border-lime-400 pb-0.5 font-sans text-label font-medium text-text-strong">
           {issues.length}

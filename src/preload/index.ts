@@ -24,16 +24,30 @@ const api: Api = {
   issues: {
     list: (input) => ipcRenderer.invoke(CHANNELS.issuesList, input),
     get: (input) => ipcRenderer.invoke(CHANNELS.issuesGet, input),
+    update: (input) => ipcRenderer.invoke(CHANNELS.issuesUpdate, input),
+    getComments: (input) => ipcRenderer.invoke(CHANNELS.issuesGetComments, input),
+    addComment: (input) => ipcRenderer.invoke(CHANNELS.issuesAddComment, input),
   },
   sync: {
     now: () => ipcRenderer.invoke(CHANNELS.syncNow),
     getStatus: () => ipcRenderer.invoke(CHANNELS.syncGetStatus),
+    setActiveRepo: (input) => ipcRenderer.invoke(CHANNELS.syncSetActiveRepo, input),
+    setOnline: (input) => ipcRenderer.invoke(CHANNELS.syncSetOnline, input),
     onUpdated: (listener) => {
       const handler = (_event: Electron.IpcRendererEvent, repoFullName: string) =>
         listener(repoFullName);
       ipcRenderer.on(CHANNELS.syncUpdated, handler);
       return () => ipcRenderer.removeListener(CHANNELS.syncUpdated, handler);
     },
+    onStatusChanged: (listener) => {
+      const handler = (_event: Electron.IpcRendererEvent, status: Parameters<typeof listener>[0]) =>
+        listener(status);
+      ipcRenderer.on(CHANNELS.syncStatusChanged, handler);
+      return () => ipcRenderer.removeListener(CHANNELS.syncStatusChanged, handler);
+    },
+  },
+  images: {
+    fetch: (input) => ipcRenderer.invoke(CHANNELS.imagesFetch, input),
   },
 };
 

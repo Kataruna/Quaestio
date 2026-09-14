@@ -19,6 +19,7 @@ describe('mapGitHubIssue', () => {
     body: 'Client retries indefinitely.' as string | null,
     state: 'open' as const,
     labels: ['bug', 'p1'],
+    type: { name: 'Bug' } as { name: string } | null | undefined,
     assignee: { login: 'sarah-kwan', avatar_url: 'https://avatars.githubusercontent.com/u/1' } as {
       login: string;
       avatar_url: string;
@@ -69,8 +70,33 @@ describe('mapGitHubIssue', () => {
   it('normalises label objects to their names', () => {
     const result = mapGitHubIssue({ ...base, labels: [{ name: 'enhancement' }, 'p2'] }, 'acme/atlas-web');
     expect(result.labels).toEqual(['enhancement', 'p2']);
-    expect(result.type).toBe('feature');
     expect(result.priority).toBe('p2');
+  });
+
+  it("maps GitHub's Issue Type to feature, independent of labels", () => {
+    const result = mapGitHubIssue({ ...base, type: { name: 'Feature' } }, 'acme/atlas-web');
+    expect(result.type).toBe('feature');
+  });
+
+  it('ignores Issue Type name casing', () => {
+    expect(mapGitHubIssue({ ...base, type: { name: 'FEATURE' } }, 'acme/atlas-web').type).toBe('feature');
+  });
+
+  it('falls back to task when Issue Type is null (not enabled, or unset)', () => {
+    expect(mapGitHubIssue({ ...base, type: null }, 'acme/atlas-web').type).toBe('task');
+  });
+
+  it('falls back to task when Issue Type is absent from the response', () => {
+    expect(mapGitHubIssue({ ...base, type: undefined }, 'acme/atlas-web').type).toBe('task');
+  });
+
+  it('falls back to task for a custom Issue Type name this app has no column for', () => {
+    expect(mapGitHubIssue({ ...base, type: { name: 'Epic' } }, 'acme/atlas-web').type).toBe('task');
+  });
+
+  it("does not derive type from the bug label when Issue Type disagrees", () => {
+    const result = mapGitHubIssue({ ...base, labels: ['bug'], type: { name: 'Task' } }, 'acme/atlas-web');
+    expect(result.type).toBe('task');
   });
 
   it('always maps dueDate to null and subtasks to an empty array', () => {

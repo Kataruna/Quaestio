@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import type { DeviceFlowStarted } from '@shared/ipc-contract';
-import type { Issue, Repo, SyncStatus, User } from '@shared/types';
+import type { Repo, SyncStatus, User } from '@shared/types';
 import { TitleBar } from '@/components/shell/TitleBar';
 import { SidebarRail, type ScreenId } from '@/components/shell/SidebarRail';
 import { RepoTabs } from '@/components/shell/RepoTabs';
@@ -15,6 +16,7 @@ import { SearchScreen } from '@/features/search/SearchScreen';
 import { StateGallery } from '@/features/StateGallery';
 import { SignInScreen } from '@/features/auth/SignInScreen';
 import { DeviceCodeScreen } from '@/features/auth/DeviceCodeScreen';
+import { ToastHost } from '@/components/ui/toast';
 import { searchResults, syncStatus as initialStatus } from '@/lib/fixtures';
 
 /**
@@ -51,14 +53,18 @@ export function App() {
   // config enables and CLAUDE.md forbids silencing with eslint-disable.
   const [reposLoadedFor, setReposLoadedFor] = useState<string | null>(null);
   const [activeRepo, setActiveRepo] = useState<string | null>(null);
-  const [issues, setIssues] = useState<Issue[]>([]);
-  // Same derived-loading approach as `reposLoadedFor`, keyed on the repo the
-  // current `issues` array was fetched for instead of `activeRepo` itself.
-  const [issuesLoadedFor, setIssuesLoadedFor] = useState<string | null>(null);
   const [status, setStatus] = useState<SyncStatus>(initialStatus);
   const [pickerOpen, setPickerOpen] = useState(false);
-  const [openIssue, setOpenIssue] = useState<Issue | null>(null);
+  // The issue's number, not the object — IssueDetailDialog derives the live
+  // issue from the react-query cache below, so an optimistic write (or a
+  // background sync) updating that cache is actually visible in the open
+  // dialog instead of the stale snapshot captured at click time.
+  const [openIssueNumber, setOpenIssueNumber] = useState<number | null>(null);
   const [devLoading, setDevLoading] = useState(false);
+  const [devToolsOpen, setDevToolsOpen] = useState(false);
+  const [online, setOnline] = useState(true);
+
+  const queryClient = useQueryClient();
 
   const tracked = repos.filter((repo) => repo.tracked);
   // A stable primitive to key the repo-loading effect on, instead of the
@@ -68,7 +74,15 @@ export function App() {
   // person.
   const userLogin = user?.login ?? null;
   const reposLoading = userLogin !== null && reposLoadedFor !== userLogin;
-  const issuesLoading = activeRepo !== null && issuesLoadedFor !== activeRepo;
+
+  const issuesQuery = useQuery({
+    queryKey: ['issues', activeRepo],
+    queryFn: () => window.api.issues.list({ repoFullName: activeRepo as string }),
+    enabled: activeRepo !== null,
+  });
+  const issues = issuesQuery.data ?? [];
+  const issuesLoading = activeRepo !== null && issuesQuery.isPending;
+  const openIssue = issues.find((issue) => issue.number === openIssueNumber) ?? null;
 
   useEffect(() => {
     void window.api.auth
@@ -120,32 +134,59 @@ export function App() {
     };
   }, [userLogin]);
 
+  // Tells the main-process scheduler which repo tab is currently being
+  // viewed, so it knows to poll it every 60s instead of every 5 min
+  // (CLAUDE.md's polling schedule) and to sync it immediately on switch.
   useEffect(() => {
-    if (!activeRepo) return;
-    let cancelled = false;
-    void window.api.issues
-      .list({ repoFullName: activeRepo })
-      .then((next) => {
-        if (!cancelled) setIssues(next);
-      })
-      .catch((error: unknown) => {
-        console.error('Failed to load issues', error);
-        // Degrade to the documented "false empty state" limitation instead
-        // of leaving the previously-active repo's issues on screen mislabeled
-        // as this repo's — wrong data reads as correct, an empty board reads
-        // as "nothing to show." Guarded by `cancelled` (checked below, same
-        // as the `.then` branch) so a stale rejection from a repo the user
-        // has already navigated away from can't clobber issues that a newer,
-        // still-in-flight request for the current repo already set.
-        if (!cancelled) setIssues([]);
-      })
-      .finally(() => {
-        if (!cancelled) setIssuesLoadedFor(activeRepo);
-      });
-    return () => {
-      cancelled = true;
-    };
+    void window.api.sync.setActiveRepo({ repoFullName: activeRepo }).catch((error: unknown) => {
+      console.error('Failed to update the active repo for sync', error);
+    });
   }, [activeRepo]);
+
+  // The sync status indicator is driven by the main-process scheduler, not
+  // local UI state — pull the current value once (a fresh window created via
+  // macOS `activate` would otherwise start blank until the next change), then
+  // stay live via the push channel.
+  useEffect(() => {
+    void window.api.sync.getStatus().then(setStatus);
+    return window.api.sync.onStatusChanged(setStatus);
+  }, []);
+
+  // Invalidates the matching TanStack Query key whenever a background sync
+  // actually changed a repo's cached data (CLAUDE.md: "after a sync changes
+  // data, the main process emits sync:updated ... the renderer invalidates
+  // the matching TanStack Query keys"). react-query only refetches this if
+  // `['issues', repoFullName]` is currently observed — an inactive tab's
+  // query is just marked stale and refetches next time it's opened.
+  useEffect(() => {
+    return window.api.sync.onUpdated((repoFullName) => {
+      void queryClient.invalidateQueries({ queryKey: ['issues', repoFullName] });
+    });
+  }, [queryClient]);
+
+  // GitHub sync rules: "Pause polling while offline" and "Writes are
+  // disabled while offline (MVP)." The renderer is the only place that can
+  // observe connectivity (Electron's main process has no built-in
+  // online/offline signal), so it reports `navigator.onLine` to the
+  // scheduler on every change, and also tracks it locally to gate the
+  // issue-detail edit controls.
+  useEffect(() => {
+    function report(nextOnline: boolean) {
+      setOnline(nextOnline);
+      void window.api.sync.setOnline({ online: nextOnline }).catch((error: unknown) => {
+        console.error('Failed to report online status', error);
+      });
+    }
+    report(navigator.onLine);
+    const handleOnline = () => report(true);
+    const handleOffline = () => report(false);
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, []);
 
   function handleUseToken(token: string) {
     setAuthBusy(true);
@@ -218,6 +259,15 @@ export function App() {
       });
   }
 
+  function handleSyncNow() {
+    // Optimistic — the real status (synced/rate-limited/offline/error)
+    // arrives shortly after via the `sync.onStatusChanged` push.
+    setStatus({ kind: 'syncing' });
+    void window.api.sync.now().catch((error: unknown) => {
+      console.error('Manual sync failed', error);
+    });
+  }
+
   if (!authChecked) {
     return (
       <div className="flex h-full items-center justify-center bg-surface-app">
@@ -263,7 +313,12 @@ export function App() {
 
   return (
     <div className="flex h-full flex-col overflow-hidden">
-      <TitleBar status={status} onSync={() => setStatus({ kind: 'syncing' })} />
+      <TitleBar
+        status={status}
+        onSync={handleSyncNow}
+        devToolsOpen={devToolsOpen}
+        onToggleDevTools={() => setDevToolsOpen((current) => !current)}
+      />
 
       {tracked.length === 0 ? (
         <EmptyState onTrack={() => setPickerOpen(true)} userLogin={user.login} />
@@ -276,7 +331,7 @@ export function App() {
             onUntrack={untrack}
             onAdd={() => setPickerOpen(true)}
           />
-          {import.meta.env.DEV ? (
+          {import.meta.env.DEV && devToolsOpen ? (
             <div className="px-5 pt-4">
               <StateGallery
                 onPick={setStatus}
@@ -285,7 +340,7 @@ export function App() {
               />
             </div>
           ) : null}
-          <StateBanner status={status} onRetry={() => setStatus({ kind: 'syncing' })} />
+          <StateBanner status={status} onRetry={handleSyncNow} />
           <div className="flex min-h-0 flex-1 gap-4 px-5 pb-6 pt-4">
             <SidebarRail active={screen} onSelect={setScreen} user={user} onSignOut={handleSignOut} />
             <main className="min-w-0 flex-1 overflow-y-auto">
@@ -294,7 +349,7 @@ export function App() {
                   repoFullName={activeFullName}
                   issues={issues}
                   loading={issuesLoading || devLoading}
-                  onOpenIssue={setOpenIssue}
+                  onOpenIssue={(issue) => setOpenIssueNumber(issue.number)}
                 />
               ) : null}
               {screen === 'search' ? <SearchScreen results={searchResults} /> : null}
@@ -313,7 +368,12 @@ export function App() {
         onClose={() => setPickerOpen(false)}
         onConfirm={confirmTracked}
       />
-      <IssueDetailDialog issue={openIssue} onClose={() => setOpenIssue(null)} />
+      <IssueDetailDialog
+        issue={openIssue}
+        online={online}
+        onClose={() => setOpenIssueNumber(null)}
+      />
+      <ToastHost />
     </div>
   );
 }

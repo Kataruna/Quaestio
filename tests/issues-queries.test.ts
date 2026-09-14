@@ -4,7 +4,13 @@ import { drizzle } from 'drizzle-orm/better-sqlite3';
 import { migrate } from 'drizzle-orm/better-sqlite3/migrator';
 import type { BetterSQLite3Database } from 'drizzle-orm/better-sqlite3';
 import type { Issue } from '@shared/types';
-import { listIssues, getIssue, upsertIssues, clearAllIssues } from '../src/main/db/issues-queries';
+import {
+  listIssues,
+  getIssue,
+  upsertIssues,
+  clearAllIssues,
+  getMaxUpdatedAt,
+} from '../src/main/db/issues-queries';
 
 function freshDb(): BetterSQLite3Database {
   const sqlite = new Database(':memory:');
@@ -18,7 +24,7 @@ function issue(partial: Partial<Issue> & Pick<Issue, 'id' | 'number' | 'repoFull
     title: 'Untitled',
     body: '',
     state: 'open',
-    type: 'chore',
+    type: 'task',
     priority: 'p3',
     labels: [],
     assignee: null,
@@ -131,5 +137,26 @@ describe('issues-queries', () => {
     // Calling it again on an already-empty table must not throw.
     expect(() => clearAllIssues(db)).not.toThrow();
     expect(listIssues(db, 'acme/web')).toEqual([]);
+  });
+
+  it('getMaxUpdatedAt returns the newest updatedAt cached for a repo', () => {
+    upsertIssues(db, [
+      issue({ id: 1, number: 1, repoFullName: 'acme/web', updatedAt: '2026-01-01T00:00:00Z' }),
+      issue({ id: 2, number: 2, repoFullName: 'acme/web', updatedAt: '2026-03-01T00:00:00Z' }),
+      issue({ id: 3, number: 3, repoFullName: 'acme/web', updatedAt: '2026-02-01T00:00:00Z' }),
+    ]);
+    expect(getMaxUpdatedAt(db, 'acme/web')).toBe('2026-03-01T00:00:00Z');
+  });
+
+  it('getMaxUpdatedAt only considers the requested repo', () => {
+    upsertIssues(db, [
+      issue({ id: 1, number: 1, repoFullName: 'acme/web', updatedAt: '2026-01-01T00:00:00Z' }),
+      issue({ id: 2, number: 1, repoFullName: 'acme/other', updatedAt: '2026-12-01T00:00:00Z' }),
+    ]);
+    expect(getMaxUpdatedAt(db, 'acme/web')).toBe('2026-01-01T00:00:00Z');
+  });
+
+  it('getMaxUpdatedAt returns null when the repo has no cached issues', () => {
+    expect(getMaxUpdatedAt(db, 'acme/empty')).toBeNull();
   });
 });
