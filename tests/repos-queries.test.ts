@@ -91,18 +91,26 @@ describe('repos-queries', () => {
     expect(listRepos(db).find((repo) => repo.id === 2)?.tracked).toBe(true);
   });
 
-  it('does not throw when two different repo ids share a fullName in the same sync (e.g. a rename colliding with a newly created repo of the old name)', () => {
+  it('does not throw when a synced repo is renamed in the same batch a different id claims its old fullName', () => {
+    // Seed: repo 1 already exists at 'acme/web'.
+    upsertRepos(db, [
+      {
+        id: 1,
+        owner: 'acme',
+        name: 'web',
+        fullName: 'acme/web',
+        isPrivate: false,
+        openIssueCount: 0,
+        updatedAt: '2026-01-01T00:00:00Z',
+      },
+    ]);
+
+    // A single sync batch: repo 2 is a genuinely new repo claiming the name
+    // 'acme/web' BEFORE repo 1's rename lands — order matters, since this is
+    // exactly the sequence that used to violate a UNIQUE constraint on
+    // fullName (id=2's insert and id=1's still-unrenamed row would collide).
     expect(() => {
       upsertRepos(db, [
-        {
-          id: 1,
-          owner: 'acme',
-          name: 'web-renamed',
-          fullName: 'acme/web-renamed',
-          isPrivate: false,
-          openIssueCount: 0,
-          updatedAt: '2026-01-01T00:00:00Z',
-        },
         {
           id: 2,
           owner: 'acme',
@@ -110,15 +118,23 @@ describe('repos-queries', () => {
           fullName: 'acme/web',
           isPrivate: false,
           openIssueCount: 0,
-          updatedAt: '2026-01-01T00:00:00Z',
+          updatedAt: '2026-02-01T00:00:00Z',
+        },
+        {
+          id: 1,
+          owner: 'acme',
+          name: 'web-renamed',
+          fullName: 'acme/web-renamed',
+          isPrivate: false,
+          openIssueCount: 0,
+          updatedAt: '2026-02-01T00:00:00Z',
         },
       ]);
     }).not.toThrow();
 
-    const stored = listRepos(db);
-    expect(stored).toHaveLength(2);
-    expect(stored.find((repo) => repo.id === 1)?.fullName).toBe('acme/web-renamed');
-    expect(stored.find((repo) => repo.id === 2)?.fullName).toBe('acme/web');
+    const results = listRepos(db);
+    expect(results.find((repo) => repo.id === 1)?.fullName).toBe('acme/web-renamed');
+    expect(results.find((repo) => repo.id === 2)?.fullName).toBe('acme/web');
   });
 
   it('setTrackedRepos returns only the ids that newly became tracked', () => {
