@@ -36,7 +36,9 @@ export function BoardScreen({
   const repoName = repoFullName.split('/')[1] ?? repoFullName;
 
   return (
-    <div className="flex flex-col gap-[18px]">
+    <div className="flex h-full flex-col gap-[18px]">
+      {/* Frozen: the toolbar (repo name, search, sort) never scrolls with
+          the columns below it. */}
       <BoardToolbar
         repoName={repoName}
         // The repo-level open count, so it stays put while the user searches —
@@ -46,30 +48,34 @@ export function BoardScreen({
         onSearchChange={setSearch}
       />
 
-      {loading ? (
-        <div className="grid grid-cols-3 items-start gap-4">
-          {COLUMNS.map((type) => (
-            <div key={type} className="flex flex-col gap-[22px]">
-              <Skeleton className="h-5 w-24" />
-              <Skeleton className="h-[168px] rounded-[4px_22px_22px_22px]" />
-              <Skeleton className="h-[168px] rounded-[4px_22px_22px_22px]" />
-            </div>
-          ))}
-        </div>
-      ) : (
-        <div className="grid grid-cols-3 items-start gap-4">
-          {COLUMNS.map((type) => (
-            <BoardColumn
-              key={type}
-              type={type}
-              issues={visible.filter((issue) => issue.type === type)}
-              // Exactly one lime card per view, as the design system requires.
-              activeIssueNumber={489}
-              onOpenIssue={onOpenIssue}
-            />
-          ))}
-        </div>
-      )}
+      {/* `min-h-0` is required for a flex child to actually shrink and
+          scroll instead of growing to fit its content. */}
+      <div className="min-h-0 flex-1 overflow-y-auto">
+        {loading ? (
+          <div className="grid grid-cols-3 items-start gap-4">
+            {COLUMNS.map((type) => (
+              <div key={type} className="flex flex-col gap-[22px]">
+                <Skeleton className="h-5 w-24" />
+                <Skeleton className="h-[168px] rounded-[4px_22px_22px_22px]" />
+                <Skeleton className="h-[168px] rounded-[4px_22px_22px_22px]" />
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="grid grid-cols-3 items-start gap-4">
+            {COLUMNS.map((type) => (
+              <BoardColumn
+                key={type}
+                type={type}
+                issues={visible.filter((issue) => issue.type === type)}
+                // Exactly one lime card per view, as the design system requires.
+                activeIssueNumber={489}
+                onOpenIssue={onOpenIssue}
+              />
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
