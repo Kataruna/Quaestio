@@ -51,7 +51,7 @@ export function SettingsScreen() {
           <span className="flex flex-col gap-0.5">
             <span className="font-sans text-label font-medium text-text-strong">Pull interval</span>
             <span className="font-sans text-micro text-text-muted">
-              How often Issue Desk checks GitHub for changes
+              How often Quaestio checks GitHub for changes
             </span>
           </span>
           <SelectPill className="ml-auto" options={INTERVAL_OPTIONS} aria-label="Pull interval" />

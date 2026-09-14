@@ -22,7 +22,7 @@ export function SignInScreen({
           Sign in to GitHub
         </h1>
         <p className="mb-6 mt-1.5 font-sans text-body text-text-muted">
-          Issue Desk needs access to read and write the issues in your repositories.
+          Quaestio needs access to read and write the issues in your repositories.
         </p>
 
         <Button variant="primary" className="w-full" onClick={onUseDeviceFlow} disabled={busy}>

@@ -5,7 +5,7 @@ import { migrate } from 'drizzle-orm/better-sqlite3/migrator';
 import type { BetterSQLite3Database } from 'drizzle-orm/better-sqlite3';
 import path from 'node:path';
 
-const DB_FILE_NAME = 'issue-desk.db';
+const DB_FILE_NAME = 'quaestio.db';
 
 let db: BetterSQLite3Database | null = null;
 

@@ -37,7 +37,7 @@ export function TitleBar({ status, onSync }: { status: SyncStatus; onSync: () =>
       )}
     >
       <span className="font-display text-micro font-semibold tracking-[0.14em] text-white">
-        ISSUE DESK
+        QUAESTIO
       </span>
 
       <span className="ml-auto flex items-center gap-2.5 [-webkit-app-region:no-drag]">

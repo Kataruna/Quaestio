@@ -1,6 +1,6 @@
 {
-  "name": "issue-desk",
-  "productName": "Issue Desk",
+  "name": "quaestio",
+  "productName": "Quaestio",
   "version": "1.0.0",
   "description": "My Electron application description",
   "main": ".vite/build/main.js",

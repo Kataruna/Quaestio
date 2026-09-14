@@ -1,6 +1,6 @@
-# Issue Desk — Project Rules for Claude Code
+# Quaestio — Project Rules for Claude Code
 
-Issue Desk (working name) is a desktop app for managing GitHub Issues on **Windows and macOS**.
+Quaestio is a desktop app for managing GitHub Issues on **Windows and macOS**.
 GitHub is always the source of truth. The app keeps a local SQLite cache so it opens instantly and can be read offline.
 Edits are written to GitHub immediately.
 
@@ -144,6 +144,10 @@ tests/
 ## Decisions log
 
 <!-- Record pinned versions and key decisions here, newest first. -->
+
+### App renamed to Quaestio (2026-09-14)
+
+Renamed from the "Issue Desk" working name to **Quaestio**. Updated `package.json` (`name`/`productName`), `package-lock.json`, `index.html` `<title>`, the title bar wordmark, the DB filename (`quaestio.db`), and user-facing copy referencing the app by name in the sign-in, repo empty-state, settings, and main-process error dialog. `design/` was left untouched (read-only reference).
 
 ### Post-Slice-3 bug fixes (2026-09-14)
 

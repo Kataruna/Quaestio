@@ -40,7 +40,7 @@ void app.whenReady().then(async () => {
     await bootstrap();
   } catch (error) {
     dialog.showErrorBox(
-      'Issue Desk failed to start',
+      'Quaestio failed to start',
       error instanceof Error ? error.message : String(error),
     );
     app.quit();

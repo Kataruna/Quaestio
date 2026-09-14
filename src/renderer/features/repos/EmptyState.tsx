@@ -12,7 +12,7 @@ export function EmptyState({ onTrack, userLogin }: { onTrack: () => void; userLo
         No repositories tracked
       </h2>
       <p className="m-0 max-w-[320px] font-sans text-body text-text-muted">
-        Pick the repos you want on the board. Issue Desk pulls their open issues and leaves the rest
+        Pick the repos you want on the board. Quaestio pulls their open issues and leaves the rest
         alone.
       </p>
       <span className="mt-1.5">
