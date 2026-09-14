@@ -115,6 +115,7 @@ tests/
 - **Drizzle migrations** must be included in the packaged app and run at startup.
 - **`safeStorage`** only works after the app's `ready` event.
 - **macOS builds** must run on a macOS machine or CI runner. Unsigned builds show a Gatekeeper warning on macOS and a SmartScreen warning on Windows, which is acceptable for now.
+- **`npm run package` needs a Node version electron-packager's zip extraction actually works with.** On a machine with a very new/bleeding-edge default `node` (observed: v26.8.2), `npm run package` exits 0 and silently produces no `out/` directory at all — electron-packager's async extraction of the cached Electron zip (via `extract-zip`/`yauzl`) truncates partway through with no error surfaced, so the failure looks like nothing happened rather than like a crash. Running the same command with Node 22.23.2 (`PATH="/opt/homebrew/opt/node@22/bin:$PATH"`) packages correctly. This will matter for Slice 7's release workflow and for anyone packaging locally on a too-new Node — open question for the owner: pin a Node version for this project (`.nvmrc`/`engines`) or just document the workaround? Not decided yet, so nothing was pinned.
 
 ## Roadmap (one slice per session; check it off when done)
 
