@@ -151,6 +151,17 @@ tests/
 
 ## Decisions log
 
+### Repo tab groups (2026-09-15)
+
+Opera-Islands-style tab grouping, off by default — see `docs/superpowers/specs/2026-09-15-repo-tab-groups-design.md` for the full design (brainstormed and approved before implementation) and `docs/superpowers/plans/2026-09-15-repo-tab-groups.md` for the implementation plan.
+
+- **Two new SQLite tables, both single-row:** `settings` (`tabGroupsEnabled`, the first real piece of app-settings persistence — the other three `SettingsScreen` toggles stay exactly as they were, unwired fixture `useState`) and `tab_layout` (a JSON-encoded `TabSlot[]`).
+- **All the interesting logic is three pure, fully unit-tested functions** in `src/shared/tab-layout.ts`: `buildInitialTabLayout` (one-shot owner-grouping, runs only when no layout has ever been saved), `reconcileTabLayout` (runs on every later read — drops untracked repos, dissolves groups down to <2 members, and joins a genuinely new repo to an *existing* matching-owner group but never manufactures a new one from two standalones, so a group the user broke up stays broken up), and `applyDrop` (every drag gesture, driven by a 25/50/25 left/center/right zone split per tab — edges reorder, center merges into a group).
+- **No new dependency** — drag-and-drop is native HTML5 DnD (`draggable`/`onDragStart`/`onDragOver`/`onDrop`), the same mechanism every browser tab strip already uses.
+- **`RepoTabChip` was extracted out of `RepoTabs`** so the new `RepoTabIslands` (rendered instead of `RepoTabs` when the setting is on) doesn't duplicate the tab markup — `RepoTabs` itself is otherwise behaviorally unchanged.
+- **Turning the toggle off never clears `tab_layout`** — reconciliation only runs while the grouped view is actually being read, so a saved arrangement sits untouched and reappears exactly as left when the toggle goes back on.
+- **Verification gap:** typecheck/lint/test all pass (171 tests, 47 new). No display was available in this environment to run the manual test checklist — the app built successfully with no TypeScript or JavaScript errors, but the drag-and-drop interactions (dragging tabs between groups, verifying visual grouping, toggling the setting, quitting and relaunching) were not exercised against a live window.
+
 ### Post-Slice-7: QoL — issue detail dialog (2026-09-15)
 
 All four items off `IMPROVEMENTS.md`'s "QoL — Issue detail dialog" list:
