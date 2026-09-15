@@ -166,4 +166,10 @@ describe('applyDrop', () => {
     const result = applyDrop(slots, 'a/1', { fullName: 'a/2', zone: 'before' });
     expect(result).toEqual([{ kind: 'repo', fullName: 'a/1' }, { kind: 'repo', fullName: 'a/2' }]);
   });
+
+  it('dropping a tab onto itself (same dragged and target fullName) leaves the slots unchanged, not duplicated', () => {
+    const slots: TabSlot[] = [{ kind: 'repo', fullName: 'a/1' }, { kind: 'repo', fullName: 'a/2' }];
+    const result = applyDrop(slots, 'a/1', { fullName: 'a/1', zone: 'center' });
+    expect(result).toEqual(slots);
+  });
 });

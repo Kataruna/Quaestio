@@ -189,6 +189,8 @@ function insertAdjacent(
 /** Computes the new layout after dragging `draggedFullName` onto `target`.
  * See the design spec's "Drag-and-drop" section for the exact zone rules. */
 export function applyDrop(slots: TabSlot[], draggedFullName: string, target: DropTarget): TabSlot[] {
+  if (!('end' in target) && target.fullName === draggedFullName) return slots;
+
   const withoutDragged = removeFromSlots(slots, draggedFullName);
 
   if ('end' in target) {

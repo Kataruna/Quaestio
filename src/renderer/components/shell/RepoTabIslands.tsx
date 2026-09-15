@@ -123,13 +123,26 @@ export function RepoTabIslands({
         commitDrop({ end: true });
       }}
     >
+      {layoutQuery.isError ? (
+        <span className="mb-2 font-sans text-micro text-text-muted">Couldn't load tab layout.</span>
+      ) : null}
       {slots.map((slot) => {
         if (slot.kind === 'repo') return renderChip(slot.fullName);
         const label = groupOwnerLabel(slot.repoFullNames);
+        const anchor = slot.repoFullNames[0];
         return (
           <div
             key={slot.id}
             className="flex flex-col gap-1 rounded-[14px] border border-line-hairline bg-white/70 p-1"
+            onDragOver={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+            }}
+            onDrop={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              if (anchor) commitDrop({ fullName: anchor, zone: 'center' });
+            }}
           >
             {label ? (
               <span className="px-1.5 font-mono text-[9px] font-bold uppercase tracking-[0.07em] text-text-faint">

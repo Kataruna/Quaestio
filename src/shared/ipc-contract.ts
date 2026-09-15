@@ -118,7 +118,7 @@ export type SetActiveRepoInput = z.infer<typeof setActiveRepoInput>;
 export const setTabGroupsEnabledInput = z.object({ enabled: z.boolean() });
 export type SetTabGroupsEnabledInput = z.infer<typeof setTabGroupsEnabledInput>;
 
-const tabSlotSchema = z.discriminatedUnion('kind', [
+export const tabSlotSchema = z.discriminatedUnion('kind', [
   z.object({ kind: z.literal('repo'), fullName: z.string().min(1) }),
   z.object({
     kind: z.literal('group'),
