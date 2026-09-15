@@ -153,6 +153,12 @@ describe('toGitHubPatch', () => {
   it('omits fields that were not present in the patch at all', () => {
     expect(toGitHubPatch({ title: 'x' })).toEqual({ title: 'x' });
   });
+
+  it('maps type to GitHub\'s capitalized default type name', () => {
+    expect(toGitHubPatch({ type: 'bug' })).toEqual({ type: 'Bug' });
+    expect(toGitHubPatch({ type: 'feature' })).toEqual({ type: 'Feature' });
+    expect(toGitHubPatch({ type: 'task' })).toEqual({ type: 'Task' });
+  });
 });
 
 describe('isGone', () => {

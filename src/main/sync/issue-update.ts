@@ -1,7 +1,7 @@
 import type { BetterSQLite3Database } from 'drizzle-orm/better-sqlite3';
 import type { GitHubClient } from '../github/client';
 import type { IssuePatch, UpdateIssueResult } from '@shared/ipc-contract';
-import { mapGitHubIssue } from '@shared/map-github-issue';
+import { mapGitHubIssue, GITHUB_TYPE_NAME } from '@shared/map-github-issue';
 import { hasSyncConflict } from '@shared/sync-conflict';
 import { getIssue, upsertIssues, deleteIssue } from '../db/issues-queries';
 import { fetchIssue } from '../github/issues';
@@ -30,6 +30,7 @@ export function toGitHubPatch(patch: IssuePatch): IssueWritePatch {
   if (patch.assigneeLogin !== undefined) {
     out.assignees = patch.assigneeLogin ? [patch.assigneeLogin] : [];
   }
+  if (patch.type !== undefined) out.type = GITHUB_TYPE_NAME[patch.type];
   return out;
 }
 

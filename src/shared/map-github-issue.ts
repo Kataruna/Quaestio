@@ -92,6 +92,17 @@ function issueTypeFromGitHub(type: { name: string } | null | undefined): IssueTy
   return 'task';
 }
 
+/** The reverse of `issueTypeFromGitHub` — GitHub's default Issue Type names,
+ * exactly as it expects them on a write (`PATCH .../issues/{n}`'s `type`
+ * field takes the type's name as a plain string). Only the three built-in
+ * default type names this app has columns for are supported for writing,
+ * matching what it already reads. */
+export const GITHUB_TYPE_NAME: Record<IssueType, string> = {
+  bug: 'Bug',
+  feature: 'Feature',
+  task: 'Task',
+};
+
 /**
  * Maps a raw GitHub issue onto this app's `Issue` type. `repoFullName` isn't
  * part of GitHub's issue response (it's implied by which endpoint you

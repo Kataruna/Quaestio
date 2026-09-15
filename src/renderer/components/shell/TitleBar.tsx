@@ -3,6 +3,7 @@ import type { SyncStatus } from '@shared/types';
 import { IconButton } from '@/components/ui/icon-button';
 import { isMac } from '@/lib/platform';
 import { cn } from '@/lib/cn';
+import { formatRelativeTime } from '@/lib/relative-time';
 
 const STATUS_TEXT: Record<SyncStatus['kind'], string> = {
   synced: 'Synced',
@@ -20,8 +21,11 @@ const STATUS_DOT: Record<SyncStatus['kind'], string> = {
   error: 'bg-status-hot',
 };
 
+/** Previously hardcoded to the literal string "Synced 2 min ago" regardless
+ * of when the last sync actually happened — the sync button worked, but
+ * looked broken because the status text never changed. */
 function relativeLabel(status: SyncStatus): string {
-  if (status.kind === 'synced') return 'Synced 2 min ago';
+  if (status.kind === 'synced') return `Synced ${formatRelativeTime(status.at)}`;
   return STATUS_TEXT[status.kind];
 }
 

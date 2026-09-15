@@ -51,6 +51,7 @@ export const issuePatchSchema = z.object({
   stateReason: z.enum(['completed', 'not_planned', 'reopened']).nullable().optional(),
   labels: z.array(z.string()).optional(),
   assigneeLogin: z.string().nullable().optional(),
+  type: z.enum(['bug', 'feature', 'task']).optional(),
 });
 export type IssuePatch = z.infer<typeof issuePatchSchema>;
 

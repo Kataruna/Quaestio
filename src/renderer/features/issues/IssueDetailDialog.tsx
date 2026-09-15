@@ -7,6 +7,7 @@ import rehypeRaw from 'rehype-raw';
 import rehypeSanitize from 'rehype-sanitize';
 import type { Issue, Subtask } from '@shared/types';
 import type { IssuePatch } from '@shared/ipc-contract';
+import { priorityFromLabels } from '@shared/label-mapping';
 import { Dialog } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -295,6 +296,11 @@ export function IssueDetailDialog({
     updateMutation.mutate({ patch: { state, stateReason }, expectedUpdatedAt: currentIssue.updatedAt });
   }
 
+  function changeType(type: Issue['type']) {
+    if (type === currentIssue.type) return;
+    updateMutation.mutate({ patch: { type }, expectedUpdatedAt: currentIssue.updatedAt });
+  }
+
   function addLabel() {
     const label = labelDraft.trim();
     if (!label || currentIssue.labels.includes(label)) {
@@ -361,15 +367,24 @@ export function IssueDetailDialog({
     <Dialog open onClose={onClose} className="max-h-[85vh] w-[620px] p-0">
       {/* Frozen header: never scrolls. Only the content below it does. */}
       <div className="flex items-center gap-2.5 px-6 pb-0 pt-6">
-        <span
+        <select
+          value={issue.type}
+          onChange={(e) => changeType(e.target.value as Issue['type'])}
+          disabled={disabled}
+          aria-label="Issue type"
           className={cn(
-            'inline-flex items-center rounded-pill px-3 py-1.5',
+            'appearance-none rounded-pill border-0 px-3 py-1.5',
             'font-sans text-[9px] font-bold uppercase tracking-[0.07em]',
+            'cursor-pointer disabled:pointer-events-none disabled:opacity-60',
             TYPE_CHIP[issue.type],
           )}
         >
-          {TYPE_LABEL[issue.type]}
-        </span>
+          {(Object.keys(TYPE_LABEL) as Issue['type'][]).map((type) => (
+            <option key={type} value={type}>
+              {TYPE_LABEL[type]}
+            </option>
+          ))}
+        </select>
         <span className="select-text font-mono text-[11px] font-medium text-text-faint">
           {issue.repoFullName} #{issue.number}
         </span>
@@ -619,9 +634,18 @@ function patchToOptimisticIssue(patch: IssuePatch): Partial<Issue> {
   if (patch.title !== undefined) out.title = patch.title;
   if (patch.body !== undefined) out.body = patch.body;
   if (patch.state !== undefined) out.state = patch.state;
-  if (patch.labels !== undefined) out.labels = patch.labels;
+  if (patch.labels !== undefined) {
+    out.labels = patch.labels;
+    // Priority is derived from labels (GitHub has no native priority field)
+    // — without recomputing it here, the priority badge would show the
+    // pre-edit value until the write round-trips and the server's mapped
+    // issue overwrites the cache, instead of updating immediately like
+    // every other optimistic field.
+    out.priority = priorityFromLabels(patch.labels);
+  }
   if (patch.assigneeLogin !== undefined) {
     out.assignee = patch.assigneeLogin ? { login: patch.assigneeLogin, name: patch.assigneeLogin, avatarUrl: null } : null;
   }
+  if (patch.type !== undefined) out.type = patch.type;
   return out;
 }
