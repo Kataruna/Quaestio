@@ -1,8 +1,10 @@
 import { useState } from 'react';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { SelectPill } from '@/components/ui/select-pill';
 import { Switch } from '@/components/ui/switch';
+import { showToast } from '@/components/ui/toast';
 
 const INTERVAL_OPTIONS = ['Every 5 min', 'Every 15 min', 'Hourly', 'Manual only'] as const;
 
@@ -37,6 +39,19 @@ export function SettingsScreen() {
     notifyP1: true,
   });
 
+  const queryClient = useQueryClient();
+  const settingsQuery = useQuery({ queryKey: ['settings'], queryFn: () => window.api.settings.get() });
+  const tabGroupsEnabled = settingsQuery.data?.tabGroupsEnabled ?? false;
+  const setTabGroupsMutation = useMutation({
+    mutationFn: (enabled: boolean) => window.api.settings.setTabGroupsEnabled({ enabled }),
+    onSuccess: (_data, enabled) => {
+      queryClient.setQueryData(['settings'], { tabGroupsEnabled: enabled });
+    },
+    onError: (error) => {
+      showToast(`Failed to save setting: ${error instanceof Error ? error.message : 'unknown error'}`, 'error');
+    },
+  });
+
   return (
     <div className="max-w-[560px] rounded-card bg-surface-card p-6 shadow-card">
       <h1 className="mb-1 font-display text-title-m font-semibold tracking-[-0.02em] text-text-strong">
@@ -55,6 +70,22 @@ export function SettingsScreen() {
             </span>
           </span>
           <SelectPill className="ml-auto" options={INTERVAL_OPTIONS} aria-label="Pull interval" />
+        </div>
+
+        <div className="flex items-center gap-3.5 border-b border-line-hairline py-3.5">
+          <span className="flex flex-col gap-0.5">
+            <span className="font-sans text-label font-medium text-text-strong">Group tabs by owner</span>
+            <span className="font-sans text-micro text-text-muted">
+              Drag tabs to rearrange or group them, Opera-Islands style. Off by default.
+            </span>
+          </span>
+          <span className="ml-auto">
+            <Switch
+              label="Group tabs by owner"
+              checked={tabGroupsEnabled}
+              onCheckedChange={(next) => setTabGroupsMutation.mutate(next)}
+            />
+          </span>
         </div>
 
         {TOGGLE_ROWS.map((row, index) => (

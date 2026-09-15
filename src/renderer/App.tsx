@@ -5,6 +5,7 @@ import type { Repo, SyncStatus, User } from '@shared/types';
 import { TitleBar } from '@/components/shell/TitleBar';
 import { SidebarRail, type ScreenId } from '@/components/shell/SidebarRail';
 import { RepoTabs } from '@/components/shell/RepoTabs';
+import { RepoTabIslands } from '@/components/shell/RepoTabIslands';
 import { StateBanner } from '@/components/shell/StateBanner';
 import { PlaceholderScreen } from '@/features/PlaceholderScreen';
 import { BoardScreen } from '@/features/board/BoardScreen';
@@ -86,6 +87,9 @@ export function App() {
   const issues = issuesQuery.data ?? [];
   const issuesLoading = activeRepo !== null && issuesQuery.isPending;
   const openIssue = issues.find((issue) => issue.number === openIssueNumber) ?? null;
+
+  const settingsQuery = useQuery({ queryKey: ['settings'], queryFn: () => window.api.settings.get() });
+  const tabGroupsEnabled = settingsQuery.data?.tabGroupsEnabled ?? false;
 
   useEffect(() => {
     void window.api.auth
@@ -257,6 +261,7 @@ export function App() {
       .then((next) => {
         setRepos(next);
         setActiveRepo((current) => pickActiveRepo(next, current));
+        void queryClient.invalidateQueries({ queryKey: ['tab-layout'] });
       })
       .catch((error: unknown) => {
         console.error('Failed to untrack repository', error);
@@ -275,6 +280,7 @@ export function App() {
         // `current` would otherwise point at a repo no longer in `tracked`
         // and no tab would render as active.
         setActiveRepo((current) => pickActiveRepo(updated, current));
+        void queryClient.invalidateQueries({ queryKey: ['tab-layout'] });
         setPickerOpen(false);
       })
       .catch((error: unknown) => {
@@ -347,13 +353,23 @@ export function App() {
         <EmptyState onTrack={() => setPickerOpen(true)} userLogin={user.login} />
       ) : (
         <>
-          <RepoTabs
-            repos={tracked}
-            activeFullName={activeFullName}
-            onSelect={setActiveRepo}
-            onUntrack={untrack}
-            onAdd={() => setPickerOpen(true)}
-          />
+          {tabGroupsEnabled ? (
+            <RepoTabIslands
+              repos={tracked}
+              activeFullName={activeFullName}
+              onSelect={setActiveRepo}
+              onUntrack={untrack}
+              onAdd={() => setPickerOpen(true)}
+            />
+          ) : (
+            <RepoTabs
+              repos={tracked}
+              activeFullName={activeFullName}
+              onSelect={setActiveRepo}
+              onUntrack={untrack}
+              onAdd={() => setPickerOpen(true)}
+            />
+          )}
           {import.meta.env.DEV && devToolsOpen ? (
             <div className="px-5 pt-4">
               <StateGallery
