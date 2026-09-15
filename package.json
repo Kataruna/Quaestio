@@ -9,6 +9,7 @@
     "start": "electron-forge start",
     "package": "electron-forge package",
     "make": "electron-forge make",
+    "make:mac": "electron-forge make --targets=@electron-forge/maker-zip && electron-forge make --targets=@electron-forge/maker-dmg",
     "publish": "electron-forge publish",
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
