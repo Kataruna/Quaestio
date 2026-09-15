@@ -1,4 +1,7 @@
+import { useState } from 'react';
+import { Check, Copy } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { IconButton } from '@/components/ui/icon-button';
 
 export function DeviceCodeScreen({
   userCode,
@@ -9,6 +12,15 @@ export function DeviceCodeScreen({
   verificationUri: string;
   onCancel: () => void;
 }) {
+  const [copied, setCopied] = useState(false);
+
+  function copyCode() {
+    void navigator.clipboard.writeText(userCode).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    });
+  }
+
   return (
     <div className="flex flex-1 items-center justify-center px-10">
       <div className="w-[420px] rounded-card bg-surface-card p-7 text-center shadow-floating">
@@ -19,10 +31,16 @@ export function DeviceCodeScreen({
           Your browser is opening {verificationUri}. Type the code below to finish signing in.
         </p>
 
-        <div className="rounded-tile bg-surface-sunken px-5 py-4">
+        <div className="flex items-center justify-center gap-2 rounded-tile bg-surface-sunken px-5 py-4">
           <span className="select-text font-mono text-[28px] font-medium tracking-[0.12em] text-text-strong">
             {userCode}
           </span>
+          <IconButton
+            icon={copied ? Check : Copy}
+            label={copied ? 'Copied' : 'Copy code'}
+            size="sm"
+            onClick={copyCode}
+          />
         </div>
 
         <p className="mt-4 font-sans text-micro text-text-faint">
