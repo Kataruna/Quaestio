@@ -33,6 +33,10 @@ export const CHANNELS = {
   /** Main -> renderer push whenever the sync-status indicator changes. */
   syncStatusChanged: 'sync:status-changed',
   imagesFetch: 'images:fetch',
+  settingsGet: 'settings:get',
+  settingsSetTabGroupsEnabled: 'settings:set-tab-groups-enabled',
+  tabLayoutGet: 'tab-layout:get',
+  tabLayoutSet: 'tab-layout:set',
 } as const;
 
 export type Channel = (typeof CHANNELS)[keyof typeof CHANNELS];
