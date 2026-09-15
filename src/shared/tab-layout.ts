@@ -5,17 +5,52 @@ function ownerOf(fullName: string): string {
   return owner ?? fullName;
 }
 
+function nameOf(fullName: string): string {
+  const slash = fullName.indexOf('/');
+  return slash === -1 ? fullName : fullName.slice(slash + 1);
+}
+
 /**
- * The label shown above a group — the shared owner, but only when every
- * member actually has one. A manually-created mixed-owner group (owner is
- * just the default starting point, not a hard rule — see the design spec)
- * renders with no label at all rather than a misleading one.
+ * The label shown above a group — the owner shared by the most members
+ * (a plurality, not necessarily all of them: a group that started as a
+ * same-owner group still shows that owner even after one differently-owned
+ * repo gets dragged in). Only a genuine tie for most-common owner (e.g. two
+ * members with two different owners, one each) yields no label — that's a
+ * "custom" group with no owner to reference at all.
  */
 export function groupOwnerLabel(repoFullNames: readonly string[]): string | null {
-  const first = repoFullNames[0];
-  if (first === undefined) return null;
-  const owner = ownerOf(first);
-  return repoFullNames.every((fullName) => ownerOf(fullName) === owner) ? owner : null;
+  const counts = new Map<string, number>();
+  for (const fullName of repoFullNames) {
+    const owner = ownerOf(fullName);
+    counts.set(owner, (counts.get(owner) ?? 0) + 1);
+  }
+  let best: string | null = null;
+  let bestCount = 0;
+  let tied = false;
+  for (const [owner, count] of counts) {
+    if (count > bestCount) {
+      best = owner;
+      bestCount = count;
+      tied = false;
+    } else if (count === bestCount) {
+      tied = true;
+    }
+  }
+  return tied ? null : best;
+}
+
+/**
+ * What a chip inside a group should display: just the repo name when it
+ * matches the group's owner label (that owner is already shown once, at
+ * the group's header, so repeating it on every chip is redundant) — the
+ * full "owner/name" otherwise, either because this repo doesn't match the
+ * group's (plurality) owner, or because the group has no owner label at
+ * all (a tied/custom group, `groupLabel: null`). A standalone (non-grouped)
+ * tab always passes `groupLabel: null`, so it always gets the full name.
+ */
+export function chipDisplayName(fullName: string, groupLabel: string | null): string {
+  if (groupLabel === null || ownerOf(fullName) !== groupLabel) return fullName;
+  return nameOf(fullName);
 }
 
 /**

@@ -19,6 +19,7 @@ export function RepoTabChip({
   onUntrack,
   dragHandlers,
   dropIndicator = null,
+  displayName,
 }: {
   repo: Repo;
   active: boolean;
@@ -28,6 +29,10 @@ export function RepoTabChip({
   dragHandlers?: RepoTabDragHandlers;
   /** Visual feedback for the current drag-hover zone, driven by `RepoTabIslands`. */
   dropIndicator?: 'before' | 'center' | 'after' | null;
+  /** Overrides the label text — `RepoTabIslands` passes a bare repo name
+   * for a chip that matches its group's owner label. Defaults to the full
+   * `owner/name`, which is what a plain `RepoTabs` chip always shows. */
+  displayName?: string;
 }) {
   return (
     <div
@@ -51,7 +56,7 @@ export function RepoTabChip({
           active ? 'font-semibold text-text-strong' : 'font-medium text-text-muted',
         )}
       >
-        {repo.fullName}
+        {displayName ?? repo.fullName}
       </button>
       <span className="font-sans text-micro text-text-faint">{repo.openIssueCount}</span>
       {active ? (

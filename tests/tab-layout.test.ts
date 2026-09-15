@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { groupOwnerLabel, buildInitialTabLayout, reconcileTabLayout, applyDrop } from '@shared/tab-layout';
+import { groupOwnerLabel, chipDisplayName, buildInitialTabLayout, reconcileTabLayout, applyDrop } from '@shared/tab-layout';
 import type { TabSlot } from '@shared/types';
 
 function repo(fullName: string) {
@@ -11,7 +11,7 @@ describe('groupOwnerLabel', () => {
     expect(groupOwnerLabel(['acme/web', 'acme/api'])).toBe('acme');
   });
 
-  it('returns null when owners differ', () => {
+  it('returns null when two owners tie (a genuine custom group)', () => {
     expect(groupOwnerLabel(['acme/web', 'other/api'])).toBeNull();
   });
 
@@ -21,6 +21,32 @@ describe('groupOwnerLabel', () => {
 
   it('returns the owner for a single repo', () => {
     expect(groupOwnerLabel(['acme/web'])).toBe('acme');
+  });
+
+  it('returns the plurality owner when one member is a different owner (an outlier dragged into an owner group)', () => {
+    expect(groupOwnerLabel(['acme/web', 'acme/api', 'other/docs'])).toBe('acme');
+  });
+
+  it('returns null when two owners are tied even with more than two members (e.g. 2 vs 2)', () => {
+    expect(groupOwnerLabel(['acme/web', 'acme/api', 'other/docs', 'other/tools'])).toBeNull();
+  });
+});
+
+describe('chipDisplayName', () => {
+  it('shows the bare repo name when it matches the group owner', () => {
+    expect(chipDisplayName('acme/web', 'acme')).toBe('web');
+  });
+
+  it('shows the full owner/name when it does not match the group owner', () => {
+    expect(chipDisplayName('other/docs', 'acme')).toBe('other/docs');
+  });
+
+  it('shows the full owner/name when the group has no owner label (custom group)', () => {
+    expect(chipDisplayName('acme/web', null)).toBe('acme/web');
+  });
+
+  it('shows the full owner/name for a standalone tab (no group)', () => {
+    expect(chipDisplayName('acme/web', null)).toBe('acme/web');
   });
 });
 

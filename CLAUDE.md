@@ -151,6 +151,15 @@ tests/
 
 ## Decisions log
 
+### Repo tab groups — chip names redundant with the group label (2026-09-15)
+
+Owner feedback after the feature shipped: inside an owner-labeled group, every chip still showed its full `owner/name`, repeating the owner the group header already states. Fixed by changing what a chip displays, not what's stored — `TabSlot`/the drag logic are untouched.
+
+- **`groupOwnerLabel` changed from "unanimous or nothing" to "plurality, tie goes to nothing."** Previously a group only got an owner label if *every* member shared it; one differently-owned repo dragged into an otherwise-single-owner group silently dropped the label entirely. Now it's the owner shared by the *most* members — a group that's mostly `acme` with one outlier still shows `acme`. A genuine tie (two members, two different owners — the two-standalone-repos-merged case) still yields no label, which is exactly the "custom group" case this app has no owner to reference for. Verified this doesn't change any existing passing test: every prior test case was either fully-unanimous (trivially still a plurality) or an exact 2-way tie (still null) — added new cases for the outlier and 2-vs-2-tie scenarios that the old code never had to handle.
+- **New pure function `chipDisplayName(fullName, groupLabel)`** (`src/shared/tab-layout.ts`) is the actual display rule: bare repo name when the chip's owner matches the group's (plurality) label, full `owner/name` otherwise — including for the outlier chip in a mostly-one-owner group (that's the one place a full name is still useful, since it's the exception), and always full name for a standalone tab or a label-less custom group (`groupLabel: null`).
+- **`RepoTabChip` gained one new optional prop, `displayName`**, defaulting to `repo.fullName` — `RepoTabs` (the ungrouped strip) never passes it, so its output is unchanged; `RepoTabIslands` computes it per chip via `chipDisplayName`, threading each group's `groupOwnerLabel` result down to `renderChip`.
+- **Verification:** `npm run typecheck && npm run lint && npm test` all pass — 180 tests (6 new: 2 for `groupOwnerLabel`'s plurality/tie cases, 4 for `chipDisplayName`). Not clicked through in a live window (no display in this environment, same stated gap as every entry for this feature) — verified by hand-tracing the plurality algorithm against the exact scenario described (an owner-group with one dragged-in outlier) and by the new unit tests.
+
 ### Repo tab groups (2026-09-15)
 
 Opera-Islands-style tab grouping, off by default — see `docs/superpowers/specs/2026-09-15-repo-tab-groups-design.md` for the full design (brainstormed and approved before implementation) and `docs/superpowers/plans/2026-09-15-repo-tab-groups.md` for the implementation plan.

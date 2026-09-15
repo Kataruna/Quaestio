@@ -3,7 +3,7 @@ import type { DragEvent } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Plus } from 'lucide-react';
 import type { Repo, TabSlot } from '@shared/types';
-import { applyDrop, groupOwnerLabel, type DropTarget } from '@shared/tab-layout';
+import { applyDrop, groupOwnerLabel, chipDisplayName, type DropTarget } from '@shared/tab-layout';
 import { showToast } from '@/components/ui/toast';
 import { RepoTabChip } from './RepoTabChip';
 
@@ -74,7 +74,7 @@ export function RepoTabIslands({
     return repos.find((repo) => repo.fullName === fullName);
   }
 
-  function renderChip(fullName: string) {
+  function renderChip(fullName: string, groupLabel: string | null = null) {
     const repo = repoByFullName(fullName);
     if (!repo) return null;
     return (
@@ -84,6 +84,7 @@ export function RepoTabIslands({
         active={fullName === activeFullName}
         onSelect={onSelect}
         onUntrack={onUntrack}
+        displayName={chipDisplayName(fullName, groupLabel)}
         dropIndicator={hover?.fullName === fullName ? hover.zone : null}
         dragHandlers={{
           draggable: true,
@@ -150,7 +151,7 @@ export function RepoTabIslands({
               </span>
             ) : null}
             <div className="flex items-end gap-1">
-              {slot.repoFullNames.map((fullName) => renderChip(fullName))}
+              {slot.repoFullNames.map((fullName) => renderChip(fullName, label))}
             </div>
           </div>
         );
