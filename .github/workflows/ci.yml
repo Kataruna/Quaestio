@@ -25,8 +25,19 @@ jobs:
       - name: Use HTTPS for git dependencies
         run: git config --global url."https://github.com/".insteadOf ssh://git@github.com/
 
+      # --ignore-scripts: better-sqlite3 ships a binding.gyp with no explicit
+      # install script, so npm's own convention auto-runs `node-gyp rebuild`
+      # for it — via the Electron-flavored node-gyp this project's Forge
+      # toolchain hoists into node_modules/.bin, which can fail to detect
+      # the runner's installed Visual Studio version (observed: windows-latest
+      # currently reports VS "18", which @electron/node-gyp's version table
+      # doesn't recognize) and aborts `npm ci` outright. The rebuild is
+      # unnecessary either way — better-sqlite3 already ships a matching
+      # prebuilt binary per platform under prebuilds/, which --ignore-scripts
+      # leaves untouched (it's extracted from the tarball, not built). Typecheck/
+      # lint/test don't need any other package's install script to run.
       - name: Install dependencies
-        run: npm ci
+        run: npm ci --ignore-scripts
 
       - name: Typecheck
         run: npm run typecheck
