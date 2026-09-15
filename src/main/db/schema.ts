@@ -26,6 +26,28 @@ export const repos = sqliteTable('repos', {
 });
 
 /**
+ * Single-row table (`id` is always 1) holding app-wide, local-only settings.
+ * The first real piece of persisted app settings in this app — the other
+ * toggles on `SettingsScreen` stay fixture-only `useState`, unwired, as they
+ * were before this feature.
+ */
+export const settings = sqliteTable('settings', {
+  id: integer('id').primaryKey(),
+  tabGroupsEnabled: integer('tabGroupsEnabled', { mode: 'boolean' }).notNull().default(false),
+});
+
+/**
+ * Single-row table (`id` is always 1) holding the repo-tab-strip layout as
+ * JSON — a `TabSlot[]` (see `shared/types.ts`). Local-only view state,
+ * unrelated to GitHub. Kept even while `settings.tabGroupsEnabled` is off,
+ * so turning the feature back on restores exactly what the user had.
+ */
+export const tabLayout = sqliteTable('tab_layout', {
+  id: integer('id').primaryKey(),
+  layout: text('layout').notNull().default('[]'),
+});
+
+/**
  * `id` is GitHub's numeric issue id (globally unique across repos, unlike
  * `number` which only counts within one repo). `labels` and `subtasks` are
  * JSON-encoded arrays — SQLite has no native array type, and neither field
