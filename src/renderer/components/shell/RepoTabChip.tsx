@@ -38,18 +38,23 @@ export function RepoTabChip({
     <div
       {...(dragHandlers ?? {})}
       className={cn(
-        'relative flex items-center gap-2.5 rounded-pill px-4 py-2.5',
+        'relative flex items-stretch rounded-pill',
         active ? 'bg-surface-card shadow-xs' : 'bg-white/45',
         dropIndicator === 'center' ? 'ring-2 ring-inset ring-lime-500' : null,
       )}
     >
       {dropIndicator === 'before' ? <span className="absolute inset-y-0 left-0 w-0.5 bg-lime-500" /> : null}
       {dropIndicator === 'after' ? <span className="absolute inset-y-0 right-0 w-0.5 bg-lime-500" /> : null}
-      {/* Everything except the untrack button is one click target — the dot,
-          name, and issue count used to be separate elements with only the
-          name itself wrapped in a <button>, so clicking anywhere else in
-          the chip did nothing. */}
-      <button type="button" onClick={() => onSelect(repo.fullName)} className="flex items-center gap-2.5">
+      {/* Everything except the untrack button is one click target. The
+          chip's own padding lives on these buttons (not on the outer div)
+          so the clickable box is the full visible chip, not just the text
+          line inside it — a div with padding around a smaller button only
+          makes the button itself clickable, not the padding around it. */}
+      <button
+        type="button"
+        onClick={() => onSelect(repo.fullName)}
+        className={cn('flex items-center gap-2.5 rounded-pill py-2.5 pl-4', active ? 'pr-2.5' : 'pr-4')}
+      >
         {active ? <span className="h-1.5 w-1.5 rounded-pill bg-lime-400" /> : null}
         <span
           className={cn(
@@ -66,7 +71,7 @@ export function RepoTabChip({
           type="button"
           onClick={() => onUntrack(repo.fullName)}
           aria-label={`Stop tracking ${repo.fullName}`}
-          className="text-text-faint transition-colors hover:text-text-strong"
+          className="flex items-center py-2.5 pl-1 pr-4 text-text-faint transition-colors hover:text-text-strong"
         >
           <X size={12} strokeWidth={2} />
         </button>
