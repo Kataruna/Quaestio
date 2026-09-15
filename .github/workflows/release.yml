@@ -34,10 +34,35 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Make installers
+      # Windows only ever runs one maker here (MakerSquirrel — MakerZIP is
+      # scoped to darwin in forge.config.ts, MakerDMG defaults to
+      # darwin/mas), so a single `make` is safe: there's no sibling maker
+      # for a failure to take down.
+      - name: Make installer (Windows)
+        if: runner.os == 'Windows'
         run: npm run make
 
+      # macOS runs zip and dmg together. Forge's `make()` runs every
+      # matched maker in one process and an unhandled rejection from any
+      # one of them (observed locally: dmg, when the machine's Xcode
+      # license isn't accepted) aborts the whole thing before a sibling
+      # maker's in-flight output finishes writing — a combined run can
+      # come out of `out/make/zip` empty even though zip's own step never
+      # itself errored. Separate `--targets` invocations isolate them: zip
+      # always has to succeed (it's simple, dependency-free, and this job
+      # shouldn't ship nothing if it fails), dmg is best-effort so one
+      # macOS-specific dmg hiccup can't erase an already-built zip.
+      - name: Make zip (macOS)
+        if: runner.os == 'macOS'
+        run: npx electron-forge make --targets=@electron-forge/maker-zip
+
+      - name: Make dmg (macOS)
+        if: runner.os == 'macOS'
+        continue-on-error: true
+        run: npx electron-forge make --targets=@electron-forge/maker-dmg
+
       - name: Upload to GitHub Release
+        if: always()
         uses: softprops/action-gh-release@v2
         with:
           draft: true
