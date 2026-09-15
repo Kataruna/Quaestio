@@ -20,12 +20,15 @@ const api: Api = {
   repos: {
     list: () => ipcRenderer.invoke(CHANNELS.reposList),
     setTracked: (input) => ipcRenderer.invoke(CHANNELS.reposSetTracked, input),
+    listLabels: (input) => ipcRenderer.invoke(CHANNELS.reposListLabels, input),
+    listCollaborators: (input) => ipcRenderer.invoke(CHANNELS.reposListCollaborators, input),
   },
   issues: {
     list: (input) => ipcRenderer.invoke(CHANNELS.issuesList, input),
     get: (input) => ipcRenderer.invoke(CHANNELS.issuesGet, input),
     create: (input) => ipcRenderer.invoke(CHANNELS.issuesCreate, input),
     update: (input) => ipcRenderer.invoke(CHANNELS.issuesUpdate, input),
+    setDueDate: (input) => ipcRenderer.invoke(CHANNELS.issuesSetDueDate, input),
     getComments: (input) => ipcRenderer.invoke(CHANNELS.issuesGetComments, input),
     addComment: (input) => ipcRenderer.invoke(CHANNELS.issuesAddComment, input),
   },

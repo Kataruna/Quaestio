@@ -80,6 +80,15 @@ export function getMaxUpdatedAt(db: BetterSQLite3Database, repoFullName: string)
   return row?.max ?? null;
 }
 
+/**
+ * `dueDate` is local-only (like `subtasks`) — GitHub has no issue due-date
+ * field, so this never touches the network and is excluded from
+ * `upsertIssues`'s `onConflictDoUpdate` set for the same reason `subtasks` is.
+ */
+export function setIssueDueDate(db: BetterSQLite3Database, id: number, dueDate: string | null): void {
+  db.update(issues).set({ dueDate }).where(eq(issues.id, id)).run();
+}
+
 export function getIssue(
   db: BetterSQLite3Database,
   repoFullName: string,
@@ -94,13 +103,18 @@ export function getIssue(
 }
 
 /**
- * `subtasks` and `createdAt` are intentionally excluded from the `onConflictDoUpdate` set.
+ * `subtasks`, `dueDate`, and `createdAt` are intentionally excluded from the `onConflictDoUpdate` set.
  *
  * `subtasks` is local-only and GitHub never supplies it, so a re-sync must never erase a
  * user's local checklist progress once that becomes editable in a later slice. Every
  * incoming `Issue` currently has `subtasks: []` anyway (see `map-github-issue.ts`), so
  * this has no visible effect yet — it's a guard against future drift, not a workaround
  * for a bug today.
+ *
+ * `dueDate` is the same story, except it's no longer hypothetical: it's genuinely
+ * editable now (`setIssueDueDate`), and `mapGitHubIssue` always maps incoming issues to
+ * `dueDate: null` — without this exclusion, the very next sync after a user picks a due
+ * date would silently wipe it back out.
  *
  * `createdAt` is pinned to its original value because a future locally-constructed `Issue`
  * (e.g. new-issue creation or an optimistic update) could otherwise let a subsequent sync
@@ -149,7 +163,6 @@ export function upsertIssues(db: BetterSQLite3Database, incoming: Issue[]): void
             assigneeName: row.assigneeName,
             assigneeAvatarUrl: row.assigneeAvatarUrl,
             milestone: row.milestone,
-            dueDate: row.dueDate,
             updatedAt: row.updatedAt,
             htmlUrl: row.htmlUrl,
           },

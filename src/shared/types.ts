@@ -43,7 +43,12 @@ export interface Issue {
   labels: string[];
   assignee: User | null;
   milestone: string | null;
-  /** GitHub has no issue due date; this comes from the milestone in later slices. */
+  /**
+   * Local-only, like `subtasks` — GitHub has no issue due-date field.
+   * Deliberately not derived from the milestone's `due_on`: that's shared
+   * across every issue in the milestone, so a per-issue picker writing to it
+   * would silently move other issues' due dates too.
+   */
   dueDate: string | null;
   subtasks: Subtask[];
   createdAt: string;

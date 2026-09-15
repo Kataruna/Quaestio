@@ -10,7 +10,7 @@ Captured from owner feedback, not yet triaged or estimated. Check items off as t
 
 ## QoL — Issue detail dialog (card expanded)
 
-- [ ] Owner should be pickable from GitHub contributors on the repo (or typed, if they don't show up in the list)
-- [ ] Priority should be changeable
-- [ ] Due date should be pickable
-- [ ] Labels should have a dropdown showing the project's existing labels
+- [x] Owner should be pickable from GitHub contributors on the repo (or typed, if they don't show up in the list) — native `<datalist>` typeahead against the repo's collaborators, free text still works
+- [x] Priority should be changeable — a select that adds/removes the p1/p2/p3 label under the hood
+- [x] Due date should be pickable — local-only field (like subtasks), a native date input; not derived from the milestone since that's shared across every issue in it
+- [x] Labels should have a dropdown showing the project's existing labels — `<datalist>` typeahead on the existing add-label input

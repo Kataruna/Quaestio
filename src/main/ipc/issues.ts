@@ -4,6 +4,7 @@ import {
   getIssueInput,
   createIssueInput,
   updateIssueInput,
+  setDueDateInput,
   getCommentsInput,
   addCommentInput,
   type GetCommentsResult,
@@ -12,7 +13,7 @@ import { CHANNELS } from '@shared/channels';
 import { mapGitHubComment } from '@shared/map-github-comment';
 import { mapGitHubIssue } from '@shared/map-github-issue';
 import { getDb } from '../db/client';
-import { listIssues, getIssue, upsertIssues, deleteIssue } from '../db/issues-queries';
+import { listIssues, getIssue, upsertIssues, deleteIssue, setIssueDueDate } from '../db/issues-queries';
 import { listComments, replaceComments, insertComment } from '../db/comments-queries';
 import { getAuthenticatedClient } from '../github/auth';
 import { fetchIssueComments } from '../github/issues';
@@ -61,6 +62,17 @@ export function registerIssuesHandlers(): void {
     if (!client) throw new Error('Not signed in');
     const [owner, repo] = splitRepoFullName(repoFullName);
     return performIssueUpdate(client, getDb(), owner, repo, repoFullName, number, expectedUpdatedAt, patch);
+  });
+
+  // Local-only, like `subtasks` — GitHub has no issue due-date field, so
+  // there's no GitHub call, no conflict check, and no online gate.
+  ipcMain.handle(CHANNELS.issuesSetDueDate, (_event, rawInput: unknown) => {
+    const { repoFullName, number, dueDate } = setDueDateInput.parse(rawInput);
+    const db = getDb();
+    const cached = getIssue(db, repoFullName, number);
+    if (!cached) return null;
+    setIssueDueDate(db, cached.id, dueDate);
+    return getIssue(db, repoFullName, number);
   });
 
   ipcMain.handle(CHANNELS.issuesGetComments, async (_event, rawInput: unknown): Promise<GetCommentsResult> => {

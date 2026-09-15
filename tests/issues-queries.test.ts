@@ -10,6 +10,7 @@ import {
   upsertIssues,
   clearAllIssues,
   getMaxUpdatedAt,
+  setIssueDueDate,
 } from '../src/main/db/issues-queries';
 
 function freshDb(): BetterSQLite3Database {
@@ -167,6 +168,27 @@ describe('issues-queries', () => {
       issue({ id: 3, number: 3, repoFullName: 'acme/web', title: 'Nothing here', body: 'nor here' }),
     ]);
     expect(listIssues(db, 'acme/web', 'login').map((i) => i.id).sort()).toEqual([1, 2]);
+  });
+
+  it('setIssueDueDate sets and clears the local-only due date', () => {
+    upsertIssues(db, [issue({ id: 1, number: 1, repoFullName: 'acme/web', dueDate: null })]);
+
+    setIssueDueDate(db, 1, '2026-06-01');
+    expect(getIssue(db, 'acme/web', 1)?.dueDate).toBe('2026-06-01');
+
+    setIssueDueDate(db, 1, null);
+    expect(getIssue(db, 'acme/web', 1)?.dueDate).toBeNull();
+  });
+
+  it('preserves a locally-set due date across a re-sync, even though incoming issues always have dueDate: null', () => {
+    upsertIssues(db, [issue({ id: 1, number: 1, repoFullName: 'acme/web' })]);
+    setIssueDueDate(db, 1, '2026-06-01');
+
+    upsertIssues(db, [issue({ id: 1, number: 1, repoFullName: 'acme/web', title: 'Updated from GitHub' })]);
+
+    const result = getIssue(db, 'acme/web', 1);
+    expect(result?.title).toBe('Updated from GitHub');
+    expect(result?.dueDate).toBe('2026-06-01');
   });
 
   it('listIssues with an empty or missing search term returns every issue for the repo', () => {

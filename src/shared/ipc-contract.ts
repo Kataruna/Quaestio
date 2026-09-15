@@ -18,6 +18,11 @@ export const setTrackedInput = z.object({
 });
 export type SetTrackedInput = z.infer<typeof setTrackedInput>;
 
+export const repoFullNameInput = z.object({
+  repoFullName: z.string().min(1),
+});
+export type RepoFullNameInput = z.infer<typeof repoFullNameInput>;
+
 export const listIssuesInput = z.object({
   repoFullName: z.string().min(1),
   search: z.string().optional(),
@@ -77,6 +82,14 @@ export type UpdateIssueResult =
   | { kind: 'conflict'; latest: Issue }
   | { kind: 'deleted' };
 
+export const setDueDateInput = z.object({
+  repoFullName: z.string().min(1),
+  number: z.number().int().positive(),
+  /** ISO 8601 date, or `null` to clear it. Local-only — never sent to GitHub. */
+  dueDate: z.string().min(1).nullable(),
+});
+export type SetDueDateInput = z.infer<typeof setDueDateInput>;
+
 export const getCommentsInput = z.object({
   repoFullName: z.string().min(1),
   number: z.number().int().positive(),
@@ -131,12 +144,18 @@ export interface Api {
   repos: {
     list(): Promise<Repo[]>;
     setTracked(input: SetTrackedInput): Promise<Repo[]>;
+    /** The repo's existing label names, for the labels-dropdown typeahead. Best-effort: [] on any failure. */
+    listLabels(input: { repoFullName: string }): Promise<string[]>;
+    /** The repo's collaborator logins, for the assignee typeahead. Best-effort: [] on any failure. */
+    listCollaborators(input: { repoFullName: string }): Promise<string[]>;
   };
   issues: {
     list(input: ListIssuesInput): Promise<Issue[]>;
     get(input: GetIssueInput): Promise<Issue | null>;
     create(input: CreateIssueInput): Promise<Issue>;
     update(input: UpdateIssueInput): Promise<UpdateIssueResult>;
+    /** Local-only — GitHub has no issue due-date field, so this never calls GitHub. */
+    setDueDate(input: SetDueDateInput): Promise<Issue | null>;
     getComments(input: GetCommentsInput): Promise<GetCommentsResult>;
     addComment(input: AddCommentInput): Promise<Comment>;
   };

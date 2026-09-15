@@ -106,10 +106,11 @@ export const GITHUB_TYPE_NAME: Record<IssueType, string> = {
 /**
  * Maps a raw GitHub issue onto this app's `Issue` type. `repoFullName` isn't
  * part of GitHub's issue response (it's implied by which endpoint you
- * called), so the caller supplies it. `dueDate` is always null — GitHub has
- * no issue due-date field, and a later slice derives one from the milestone
- * instead. `subtasks` is always empty — it's a local-only checklist GitHub
- * knows nothing about.
+ * called), so the caller supplies it. `dueDate` is always null here —
+ * it's local-only (see `Issue.dueDate`'s comment), and `upsertIssues`
+ * excludes it from a re-sync's overwrite set so this null never clobbers a
+ * value the user picked. `subtasks` is always empty for the same reason —
+ * it's a local-only checklist GitHub knows nothing about.
  */
 export function mapGitHubIssue(raw: GitHubIssueResponse, repoFullName: string): Issue {
   const labels = labelNames(raw.labels);

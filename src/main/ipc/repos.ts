@@ -1,12 +1,18 @@
 import { ipcMain } from 'electron';
-import { setTrackedInput } from '@shared/ipc-contract';
+import { setTrackedInput, repoFullNameInput } from '@shared/ipc-contract';
 import { CHANNELS } from '@shared/channels';
 import { mapGitHubRepo } from '@shared/map-github-repo';
 import { getDb } from '../db/client';
 import { listRepos, upsertRepos, setTrackedRepos } from '../db/repos-queries';
 import { getAuthenticatedClient } from '../github/auth';
-import { fetchUserRepos } from '../github/repos';
+import { fetchUserRepos, fetchRepoLabels, fetchRepoCollaborators } from '../github/repos';
 import { syncRepoIssuesIncremental } from '../sync/incremental-sync';
+
+function splitRepoFullName(repoFullName: string): [string, string] {
+  const [owner, repo] = repoFullName.split('/');
+  if (!owner || !repo) throw new Error(`Not a valid "owner/repo" full name: ${repoFullName}`);
+  return [owner, repo];
+}
 
 export function registerReposHandlers(): void {
   ipcMain.handle(CHANNELS.reposList, async () => {
@@ -55,5 +61,38 @@ export function registerReposHandlers(): void {
       }
     }
     return listRepos(db);
+  });
+
+  ipcMain.handle(CHANNELS.reposListLabels, async (_event, rawInput: unknown) => {
+    const { repoFullName } = repoFullNameInput.parse(rawInput);
+    const client = getAuthenticatedClient();
+    if (!client) return [];
+    try {
+      const [owner, repo] = splitRepoFullName(repoFullName);
+      const labels = await fetchRepoLabels(client, owner, repo);
+      return labels.map((label) => label.name);
+    } catch (error) {
+      console.warn(`Failed to list labels for ${repoFullName}:`, error instanceof Error ? error.message : error);
+      return [];
+    }
+  });
+
+  ipcMain.handle(CHANNELS.reposListCollaborators, async (_event, rawInput: unknown) => {
+    const { repoFullName } = repoFullNameInput.parse(rawInput);
+    const client = getAuthenticatedClient();
+    if (!client) return [];
+    try {
+      const [owner, repo] = splitRepoFullName(repoFullName);
+      const collaborators = await fetchRepoCollaborators(client, owner, repo);
+      return collaborators.map((user) => user.login);
+    } catch (error) {
+      // Listing collaborators requires push access — a read-only token 403s here,
+      // which just means "no typeahead suggestions," not a real failure.
+      console.warn(
+        `Failed to list collaborators for ${repoFullName}:`,
+        error instanceof Error ? error.message : error,
+      );
+      return [];
+    }
   });
 }

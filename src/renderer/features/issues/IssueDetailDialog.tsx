@@ -7,7 +7,7 @@ import rehypeRaw from 'rehype-raw';
 import rehypeSanitize from 'rehype-sanitize';
 import type { Issue, Subtask } from '@shared/types';
 import type { IssuePatch } from '@shared/ipc-contract';
-import { priorityFromLabels } from '@shared/label-mapping';
+import { priorityFromLabels, labelsForPriority } from '@shared/label-mapping';
 import { Dialog } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -176,6 +176,20 @@ export function IssueDetailDialog({
   });
   const comments = commentsQuery.data?.kind === 'ok' ? commentsQuery.data.comments : [];
 
+  // Typeahead suggestions for the labels and assignee inputs — best-effort
+  // (both IPC calls degrade to [] on any failure, so free typing always
+  // still works even if these never resolve).
+  const repoLabelsQuery = useQuery({
+    queryKey: ['repo-labels', issue?.repoFullName ?? ''],
+    queryFn: () => window.api.repos.listLabels({ repoFullName: issue?.repoFullName ?? '' }),
+    enabled: issue !== null,
+  });
+  const collaboratorsQuery = useQuery({
+    queryKey: ['repo-collaborators', issue?.repoFullName ?? ''],
+    queryFn: () => window.api.repos.listCollaborators({ repoFullName: issue?.repoFullName ?? '' }),
+    enabled: issue !== null,
+  });
+
   // A 404/410/301 fetching comments means the issue itself is gone — close
   // the dialog rather than show a comment thread for nothing.
   useEffect(() => {
@@ -253,6 +267,24 @@ export function IssueDetailDialog({
     },
   });
 
+  // Local-only field (like subtasks) — no GitHub call, so no conflict check
+  // and no optimistic-rollback dance needed, just write-then-adopt-result.
+  const dueDateMutation = useMutation({
+    mutationFn: async (dueDate: string | null) => {
+      if (!issue) throw new Error('No issue open');
+      return window.api.issues.setDueDate({ repoFullName: issue.repoFullName, number: issue.number, dueDate });
+    },
+    onSuccess: (updated) => {
+      if (!issue || !updated) return;
+      queryClient.setQueryData<Issue[]>(['issues', issue.repoFullName], (old) =>
+        old?.map((i) => (i.number === updated.number ? updated : i)) ?? old,
+      );
+    },
+    onError: (error) => {
+      showToast(`Failed to save due date: ${error instanceof Error ? error.message : 'unknown error'}`, 'error');
+    },
+  });
+
   if (!issue)
     return (
       <Dialog open={false} onClose={onClose}>
@@ -299,6 +331,17 @@ export function IssueDetailDialog({
   function changeType(type: Issue['type']) {
     if (type === currentIssue.type) return;
     updateMutation.mutate({ patch: { type }, expectedUpdatedAt: currentIssue.updatedAt });
+  }
+
+  /** Priority has no GitHub field of its own (label-mapping.ts) — changing
+   * it is really a labels edit, so it goes through the same patch/optimistic
+   * path as every other labels change. */
+  function changePriority(priority: Issue['priority']) {
+    if (priority === currentIssue.priority) return;
+    updateMutation.mutate({
+      patch: { labels: labelsForPriority(priority, currentIssue.labels) },
+      expectedUpdatedAt: currentIssue.updatedAt,
+    });
   }
 
   function addLabel() {
@@ -501,16 +544,36 @@ export function IssueDetailDialog({
                 onKeyDown={(e) => e.key === 'Enter' && e.currentTarget.blur()}
                 placeholder="Unassigned"
                 disabled={disabled}
+                list="assignee-suggestions"
                 className="h-7 px-2 text-micro"
               />
+              <datalist id="assignee-suggestions">
+                {(collaboratorsQuery.data ?? []).map((login) => (
+                  <option key={login} value={login} />
+                ))}
+              </datalist>
             </dd>
           </div>
           <div className="flex flex-col gap-1">
             <dt className="font-sans text-micro text-text-faint">Priority</dt>
-            <dd
-              className={cn('m-0 font-sans text-label font-medium', PRIORITY_COLOR[issue.priority])}
-            >
-              {issue.priority.toUpperCase()}
+            <dd className="m-0">
+              <select
+                value={issue.priority}
+                onChange={(e) => changePriority(e.target.value as Issue['priority'])}
+                disabled={disabled}
+                aria-label="Priority"
+                className={cn(
+                  'h-7 cursor-pointer appearance-none rounded-md border-0 bg-transparent px-0',
+                  'font-sans text-label font-medium disabled:pointer-events-none disabled:opacity-60',
+                  PRIORITY_COLOR[issue.priority],
+                )}
+              >
+                {(['p1', 'p2', 'p3'] as const).map((priority) => (
+                  <option key={priority} value={priority}>
+                    {priority.toUpperCase()}
+                  </option>
+                ))}
+              </select>
             </dd>
           </div>
           <div className="flex flex-col gap-1">
@@ -521,8 +584,19 @@ export function IssueDetailDialog({
           </div>
           <div className="flex flex-col gap-1">
             <dt className="font-sans text-micro text-text-faint">Due</dt>
-            <dd className="m-0 font-sans text-label font-medium text-text-strong">
-              {formatLongDate(issue.dueDate)}
+            <dd className="m-0">
+              <input
+                type="date"
+                value={issue.dueDate ?? ''}
+                onChange={(e) => dueDateMutation.mutate(e.target.value || null)}
+                disabled={disabled}
+                aria-label="Due date"
+                className={cn(
+                  'h-7 w-full rounded-md border-0 bg-transparent p-0',
+                  'font-sans text-label font-medium text-text-strong',
+                  'disabled:pointer-events-none disabled:opacity-60',
+                )}
+              />
             </dd>
           </div>
         </dl>
@@ -539,8 +613,16 @@ export function IssueDetailDialog({
             onKeyDown={(e) => e.key === 'Enter' && addLabel()}
             placeholder="Add label"
             disabled={disabled}
+            list="repo-label-suggestions"
             className="h-[26px] w-28 px-2.5 text-micro"
           />
+          <datalist id="repo-label-suggestions">
+            {(repoLabelsQuery.data ?? [])
+              .filter((label) => !currentIssue.labels.includes(label))
+              .map((label) => (
+                <option key={label} value={label} />
+              ))}
+          </datalist>
         </div>
 
         <div className="mb-3 flex items-center gap-2.5">
