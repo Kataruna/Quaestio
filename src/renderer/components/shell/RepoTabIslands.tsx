@@ -3,7 +3,7 @@ import type { DragEvent } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Plus } from 'lucide-react';
 import type { Repo, TabSlot } from '@shared/types';
-import { applyDrop, groupOwnerLabel, type DropTarget } from '@shared/tab-layout';
+import { applyDrop, groupOwnerLabel, chipDisplayName, type DropTarget } from '@shared/tab-layout';
 import { showToast } from '@/components/ui/toast';
 import { RepoTabChip } from './RepoTabChip';
 
@@ -74,7 +74,7 @@ export function RepoTabIslands({
     return repos.find((repo) => repo.fullName === fullName);
   }
 
-  function renderChip(fullName: string) {
+  function renderChip(fullName: string, groupLabel: string | null = null) {
     const repo = repoByFullName(fullName);
     if (!repo) return null;
     return (
@@ -84,6 +84,7 @@ export function RepoTabIslands({
         active={fullName === activeFullName}
         onSelect={onSelect}
         onUntrack={onUntrack}
+        displayName={chipDisplayName(fullName, groupLabel)}
         dropIndicator={hover?.fullName === fullName ? hover.zone : null}
         dragHandlers={{
           draggable: true,
@@ -116,7 +117,7 @@ export function RepoTabIslands({
 
   return (
     <div
-      className="flex shrink-0 items-end gap-1 bg-surface-sunken px-4 pt-2.5"
+      className="flex shrink-0 items-center gap-1 bg-surface-sunken px-4 py-2.5"
       onDragOver={(e) => e.preventDefault()}
       onDrop={(e) => {
         e.preventDefault();
@@ -124,7 +125,7 @@ export function RepoTabIslands({
       }}
     >
       {layoutQuery.isError ? (
-        <span className="mb-2 font-sans text-micro text-text-muted">Couldn't load tab layout.</span>
+        <span className="font-sans text-micro text-text-muted">Couldn't load tab layout.</span>
       ) : null}
       {slots.map((slot) => {
         if (slot.kind === 'repo') return renderChip(slot.fullName);
@@ -133,7 +134,7 @@ export function RepoTabIslands({
         return (
           <div
             key={slot.id}
-            className="flex flex-col gap-1 rounded-[14px] border border-line-hairline bg-white/70 p-1"
+            className="flex items-center gap-1.5 rounded-[14px] border border-line-hairline bg-white/70 p-1"
             onDragOver={(e) => {
               e.preventDefault();
               e.stopPropagation();
@@ -145,13 +146,11 @@ export function RepoTabIslands({
             }}
           >
             {label ? (
-              <span className="px-1.5 font-mono text-[9px] font-bold uppercase tracking-[0.07em] text-text-faint">
+              <span className="pl-1 font-mono text-[9px] font-bold uppercase tracking-[0.07em] text-text-faint">
                 {label}
               </span>
             ) : null}
-            <div className="flex items-end gap-1">
-              {slot.repoFullNames.map((fullName) => renderChip(fullName))}
-            </div>
+            {slot.repoFullNames.map((fullName) => renderChip(fullName, label))}
           </div>
         );
       })}
@@ -159,7 +158,7 @@ export function RepoTabIslands({
         type="button"
         onClick={onAdd}
         aria-label="Track a repository"
-        className="mb-2 ml-1.5 inline-flex h-[26px] w-[26px] items-center justify-center rounded-pill bg-surface-card text-text-muted shadow-xs transition-colors hover:text-text-strong"
+        className="ml-1.5 inline-flex h-[26px] w-[26px] items-center justify-center rounded-pill bg-surface-card text-text-muted shadow-xs transition-colors hover:text-text-strong"
       >
         <Plus size={14} strokeWidth={1.75} />
       </button>

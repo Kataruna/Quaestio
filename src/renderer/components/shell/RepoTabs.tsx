@@ -16,7 +16,7 @@ export function RepoTabs({
   onAdd: () => void;
 }) {
   return (
-    <div className="flex shrink-0 items-end gap-1 bg-surface-sunken px-4 pt-2.5">
+    <div className="flex shrink-0 items-center gap-1 bg-surface-sunken px-4 py-2.5">
       {repos.map((repo) => (
         <RepoTabChip
           key={repo.fullName}
@@ -30,7 +30,7 @@ export function RepoTabs({
         type="button"
         onClick={onAdd}
         aria-label="Track a repository"
-        className="mb-2 ml-1.5 inline-flex h-[26px] w-[26px] items-center justify-center rounded-pill bg-surface-card text-text-muted shadow-xs transition-colors hover:text-text-strong"
+        className="ml-1.5 inline-flex h-[26px] w-[26px] items-center justify-center rounded-pill bg-surface-card text-text-muted shadow-xs transition-colors hover:text-text-strong"
       >
         <Plus size={14} strokeWidth={1.75} />
       </button>
