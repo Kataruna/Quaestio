@@ -66,6 +66,16 @@ export interface Comment {
   updatedAt: string;
 }
 
+/**
+ * One slot in the repo tab strip's layout — a standalone tab, or a group of
+ * tabs rendered together as one "island." Local-only view state; GitHub has
+ * no concept of it. See `shared/tab-layout.ts` for the functions that build
+ * and update this.
+ */
+export type TabSlot =
+  | { kind: 'repo'; fullName: string }
+  | { kind: 'group'; id: string; repoFullNames: string[] };
+
 export type SyncStatus =
   | { kind: 'synced'; at: string }
   | { kind: 'syncing' }
