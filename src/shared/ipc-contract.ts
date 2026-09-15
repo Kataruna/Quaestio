@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import type { Comment, Issue, Repo, SyncStatus, User } from './types';
+import type { Comment, Issue, Repo, SyncStatus, TabSlot, User } from './types';
 
 // Re-exported so every existing `import { CHANNELS } from '.../ipc-contract'`
 // keeps working. The definitions live in the zod-free `./channels` module, which
@@ -115,6 +115,21 @@ export const setActiveRepoInput = z.object({
 });
 export type SetActiveRepoInput = z.infer<typeof setActiveRepoInput>;
 
+export const setTabGroupsEnabledInput = z.object({ enabled: z.boolean() });
+export type SetTabGroupsEnabledInput = z.infer<typeof setTabGroupsEnabledInput>;
+
+export const tabSlotSchema = z.discriminatedUnion('kind', [
+  z.object({ kind: z.literal('repo'), fullName: z.string().min(1) }),
+  z.object({
+    kind: z.literal('group'),
+    id: z.string().min(1),
+    repoFullNames: z.array(z.string().min(1)).min(2),
+  }),
+]);
+
+export const setTabLayoutInput = z.object({ slots: z.array(tabSlotSchema) });
+export type SetTabLayoutInput = z.infer<typeof setTabLayoutInput>;
+
 export const setOnlineInput = z.object({
   online: z.boolean(),
 });
@@ -179,5 +194,13 @@ export interface Api {
      * signed-in session, or the fetch failed.
      */
     fetch(input: FetchImageInput): Promise<string | null>;
+  };
+  settings: {
+    get(): Promise<{ tabGroupsEnabled: boolean }>;
+    setTabGroupsEnabled(input: SetTabGroupsEnabledInput): Promise<void>;
+  };
+  tabLayout: {
+    get(): Promise<TabSlot[]>;
+    set(input: SetTabLayoutInput): Promise<void>;
   };
 }

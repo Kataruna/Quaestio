@@ -53,6 +53,14 @@ const api: Api = {
   images: {
     fetch: (input) => ipcRenderer.invoke(CHANNELS.imagesFetch, input),
   },
+  settings: {
+    get: () => ipcRenderer.invoke(CHANNELS.settingsGet),
+    setTabGroupsEnabled: (input) => ipcRenderer.invoke(CHANNELS.settingsSetTabGroupsEnabled, input),
+  },
+  tabLayout: {
+    get: () => ipcRenderer.invoke(CHANNELS.tabLayoutGet),
+    set: (input) => ipcRenderer.invoke(CHANNELS.tabLayoutSet, input),
+  },
 };
 
 contextBridge.exposeInMainWorld('api', api);

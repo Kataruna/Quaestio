@@ -1,6 +1,6 @@
-import { Plus, X } from 'lucide-react';
+import { Plus } from 'lucide-react';
 import type { Repo } from '@shared/types';
-import { cn } from '@/lib/cn';
+import { RepoTabChip } from './RepoTabChip';
 
 export function RepoTabs({
   repos,
@@ -17,43 +17,15 @@ export function RepoTabs({
 }) {
   return (
     <div className="flex shrink-0 items-end gap-1 bg-surface-sunken px-4 pt-2.5">
-      {repos.map((repo) => {
-        const active = repo.fullName === activeFullName;
-        return (
-          <div
-            key={repo.fullName}
-            className={cn(
-              'flex items-center gap-2.5 rounded-t-[12px] px-4',
-              active
-                ? 'bg-surface-card pb-2.5 pt-2.5 shadow-[0_-1px_4px_rgba(14,15,16,0.05)]'
-                : 'bg-white/45 pb-2.5 pt-2.5',
-            )}
-          >
-            {active ? <span className="h-1.5 w-1.5 rounded-pill bg-lime-400" /> : null}
-            <button
-              type="button"
-              onClick={() => onSelect(repo.fullName)}
-              className={cn(
-                'font-display text-body-s',
-                active ? 'font-semibold text-text-strong' : 'font-medium text-text-muted',
-              )}
-            >
-              {repo.fullName}
-            </button>
-            <span className="font-sans text-micro text-text-faint">{repo.openIssueCount}</span>
-            {active ? (
-              <button
-                type="button"
-                onClick={() => onUntrack(repo.fullName)}
-                aria-label={`Stop tracking ${repo.fullName}`}
-                className="text-text-faint transition-colors hover:text-text-strong"
-              >
-                <X size={12} strokeWidth={2} />
-              </button>
-            ) : null}
-          </div>
-        );
-      })}
+      {repos.map((repo) => (
+        <RepoTabChip
+          key={repo.fullName}
+          repo={repo}
+          active={repo.fullName === activeFullName}
+          onSelect={onSelect}
+          onUntrack={onUntrack}
+        />
+      ))}
       <button
         type="button"
         onClick={onAdd}
