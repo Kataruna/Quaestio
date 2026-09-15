@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Check, ExternalLink, Pencil, Plus, RotateCcw } from 'lucide-react';
+import { Check, ChevronDown, ExternalLink, Pencil, Plus, RotateCcw } from 'lucide-react';
 import Markdown, { type Components } from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import rehypeRaw from 'rehype-raw';
@@ -14,6 +14,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { IconButton } from '@/components/ui/icon-button';
 import { ProgressTrack } from '@/components/ui/progress-track';
 import { Input } from '@/components/ui/input';
+import { Combobox } from '@/components/ui/combobox';
 import { Textarea } from '@/components/ui/textarea';
 import { Tag } from '@/components/ui/tag';
 import { Avatar } from '@/components/ui/avatar';
@@ -89,10 +90,13 @@ const TYPE_CHIP: Record<Issue['type'], string> = {
   task: 'bg-surface-sunken text-text-muted',
 };
 
-const PRIORITY_COLOR: Record<Issue['priority'], string> = {
-  p1: 'text-status-hot',
-  p2: 'text-status-warm',
-  p3: 'text-text-strong',
+// Matches Badge's `hot`/`warm`/`neutral` tones — the same colors the
+// priority badge already uses on cards and in search, so the select in this
+// dialog reads as the same control instead of a third, unstyled variant.
+const PRIORITY_CHIP: Record<Issue['priority'], string> = {
+  p1: 'bg-status-hot-bg text-status-hot',
+  p2: 'bg-status-warm-bg text-status-warm',
+  p3: 'bg-surface-sunken text-text-muted',
 };
 
 function formatLongDate(iso: string | null): string {
@@ -344,8 +348,10 @@ export function IssueDetailDialog({
     });
   }
 
-  function addLabel() {
-    const label = labelDraft.trim();
+  /** Takes an optional override so picking a suggestion from the Combobox
+   * can commit immediately, without waiting for `labelDraft` state to catch up. */
+  function addLabel(overrideLabel?: string) {
+    const label = (overrideLabel ?? labelDraft).trim();
     if (!label || currentIssue.labels.includes(label)) {
       setLabelDraft('');
       return;
@@ -364,8 +370,9 @@ export function IssueDetailDialog({
     });
   }
 
-  function saveAssignee() {
-    const login = assigneeDraft.trim();
+  /** Same override pattern as `addLabel`, for picking a suggested collaborator. */
+  function saveAssignee(overrideLogin?: string) {
+    const login = (overrideLogin ?? assigneeDraft).trim();
     if (login === (currentIssue.assignee?.login ?? '')) return;
     updateMutation.mutate({
       patch: { assigneeLogin: login || null },
@@ -410,24 +417,31 @@ export function IssueDetailDialog({
     <Dialog open onClose={onClose} className="max-h-[85vh] w-[620px] p-0">
       {/* Frozen header: never scrolls. Only the content below it does. */}
       <div className="flex items-center gap-2.5 px-6 pb-0 pt-6">
-        <select
-          value={issue.type}
-          onChange={(e) => changeType(e.target.value as Issue['type'])}
-          disabled={disabled}
-          aria-label="Issue type"
-          className={cn(
-            'appearance-none rounded-pill border-0 px-3 py-1.5',
-            'font-sans text-[9px] font-bold uppercase tracking-[0.07em]',
-            'cursor-pointer disabled:pointer-events-none disabled:opacity-60',
-            TYPE_CHIP[issue.type],
-          )}
-        >
-          {(Object.keys(TYPE_LABEL) as Issue['type'][]).map((type) => (
-            <option key={type} value={type}>
-              {TYPE_LABEL[type]}
-            </option>
-          ))}
-        </select>
+        <span className="relative inline-flex">
+          <select
+            value={issue.type}
+            onChange={(e) => changeType(e.target.value as Issue['type'])}
+            disabled={disabled}
+            aria-label="Issue type"
+            className={cn(
+              'appearance-none rounded-pill border-0 py-1.5 pl-3 pr-6',
+              'font-sans text-[9px] font-bold uppercase tracking-[0.07em]',
+              'cursor-pointer disabled:pointer-events-none disabled:opacity-60',
+              TYPE_CHIP[issue.type],
+            )}
+          >
+            {(Object.keys(TYPE_LABEL) as Issue['type'][]).map((type) => (
+              <option key={type} value={type}>
+                {TYPE_LABEL[type]}
+              </option>
+            ))}
+          </select>
+          <ChevronDown
+            size={11}
+            strokeWidth={2}
+            className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 opacity-70"
+          />
+        </span>
         <span className="select-text font-mono text-[11px] font-medium text-text-faint">
           {issue.repoFullName} #{issue.number}
         </span>
@@ -537,43 +551,45 @@ export function IssueDetailDialog({
           <div className="flex flex-col gap-1">
             <dt className="font-sans text-micro text-text-faint">Owner</dt>
             <dd className="m-0">
-              <Input
+              <Combobox
                 value={assigneeDraft}
-                onChange={(e) => setAssigneeDraft(e.target.value)}
-                onBlur={saveAssignee}
-                onKeyDown={(e) => e.key === 'Enter' && e.currentTarget.blur()}
+                onChange={setAssigneeDraft}
+                onSelect={(login) => saveAssignee(login)}
+                options={collaboratorsQuery.data ?? []}
+                onBlur={() => saveAssignee()}
                 placeholder="Unassigned"
                 disabled={disabled}
-                list="assignee-suggestions"
                 className="h-7 px-2 text-micro"
               />
-              <datalist id="assignee-suggestions">
-                {(collaboratorsQuery.data ?? []).map((login) => (
-                  <option key={login} value={login} />
-                ))}
-              </datalist>
             </dd>
           </div>
           <div className="flex flex-col gap-1">
             <dt className="font-sans text-micro text-text-faint">Priority</dt>
             <dd className="m-0">
-              <select
-                value={issue.priority}
-                onChange={(e) => changePriority(e.target.value as Issue['priority'])}
-                disabled={disabled}
-                aria-label="Priority"
-                className={cn(
-                  'h-7 cursor-pointer appearance-none rounded-md border-0 bg-transparent px-0',
-                  'font-sans text-label font-medium disabled:pointer-events-none disabled:opacity-60',
-                  PRIORITY_COLOR[issue.priority],
-                )}
-              >
-                {(['p1', 'p2', 'p3'] as const).map((priority) => (
-                  <option key={priority} value={priority}>
-                    {priority.toUpperCase()}
-                  </option>
-                ))}
-              </select>
+              <span className="relative inline-flex">
+                <select
+                  value={issue.priority}
+                  onChange={(e) => changePriority(e.target.value as Issue['priority'])}
+                  disabled={disabled}
+                  aria-label="Priority"
+                  className={cn(
+                    'h-7 cursor-pointer appearance-none rounded-pill border-0 py-1 pl-2.5 pr-6',
+                    'font-sans text-label font-medium disabled:pointer-events-none disabled:opacity-60',
+                    PRIORITY_CHIP[issue.priority],
+                  )}
+                >
+                  {(['p1', 'p2', 'p3'] as const).map((priority) => (
+                    <option key={priority} value={priority}>
+                      {priority.toUpperCase()}
+                    </option>
+                  ))}
+                </select>
+                <ChevronDown
+                  size={11}
+                  strokeWidth={2}
+                  className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 opacity-70"
+                />
+              </span>
             </dd>
           </div>
           <div className="flex flex-col gap-1">
@@ -607,22 +623,16 @@ export function IssueDetailDialog({
               {label}
             </Tag>
           ))}
-          <Input
+          <Combobox
             value={labelDraft}
-            onChange={(e) => setLabelDraft(e.target.value)}
+            onChange={setLabelDraft}
+            onSelect={(label) => addLabel(label)}
+            options={(repoLabelsQuery.data ?? []).filter((label) => !currentIssue.labels.includes(label))}
             onKeyDown={(e) => e.key === 'Enter' && addLabel()}
             placeholder="Add label"
             disabled={disabled}
-            list="repo-label-suggestions"
             className="h-[26px] w-28 px-2.5 text-micro"
           />
-          <datalist id="repo-label-suggestions">
-            {(repoLabelsQuery.data ?? [])
-              .filter((label) => !currentIssue.labels.includes(label))
-              .map((label) => (
-                <option key={label} value={label} />
-              ))}
-          </datalist>
         </div>
 
         <div className="mb-3 flex items-center gap-2.5">
