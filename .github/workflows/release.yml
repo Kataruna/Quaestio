@@ -1,0 +1,49 @@
+name: Release
+
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: write
+
+jobs:
+  make:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+
+      # CLAUDE.md's known gotcha: `npm run make` needs Node 22 — a
+      # bleeding-edge default `node` (observed: v26) makes electron-packager's
+      # zip extraction fail silently with no `out/` produced at all.
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      # Same workaround CI (ci.yml) uses: the Forge lockfile resolves
+      # @electron/node-gyp over git+ssh, which an unauthenticated runner
+      # can't clone.
+      - name: Use HTTPS for git dependencies
+        run: git config --global url."https://github.com/".insteadOf ssh://git@github.com/
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Make installers
+        run: npm run make
+
+      - name: Upload to GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          draft: true
+          files: |
+            out/make/squirrel.windows/**/*.exe
+            out/make/squirrel.windows/**/*.nupkg
+            out/make/squirrel.windows/**/RELEASES
+            out/make/**/*.dmg
+            out/make/zip/**/*.zip
