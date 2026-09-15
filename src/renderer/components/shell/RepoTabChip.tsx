@@ -45,18 +45,22 @@ export function RepoTabChip({
     >
       {dropIndicator === 'before' ? <span className="absolute inset-y-0 left-0 w-0.5 bg-lime-500" /> : null}
       {dropIndicator === 'after' ? <span className="absolute inset-y-0 right-0 w-0.5 bg-lime-500" /> : null}
-      {active ? <span className="h-1.5 w-1.5 rounded-pill bg-lime-400" /> : null}
-      <button
-        type="button"
-        onClick={() => onSelect(repo.fullName)}
-        className={cn(
-          'font-display text-body-s',
-          active ? 'font-semibold text-text-strong' : 'font-medium text-text-muted',
-        )}
-      >
-        {displayName ?? repo.fullName}
+      {/* Everything except the untrack button is one click target — the dot,
+          name, and issue count used to be separate elements with only the
+          name itself wrapped in a <button>, so clicking anywhere else in
+          the chip did nothing. */}
+      <button type="button" onClick={() => onSelect(repo.fullName)} className="flex items-center gap-2.5">
+        {active ? <span className="h-1.5 w-1.5 rounded-pill bg-lime-400" /> : null}
+        <span
+          className={cn(
+            'font-display text-body-s',
+            active ? 'font-semibold text-text-strong' : 'font-medium text-text-muted',
+          )}
+        >
+          {displayName ?? repo.fullName}
+        </span>
+        <span className="font-sans text-micro text-text-faint">{repo.openIssueCount}</span>
       </button>
-      <span className="font-sans text-micro text-text-faint">{repo.openIssueCount}</span>
       {active ? (
         <button
           type="button"
