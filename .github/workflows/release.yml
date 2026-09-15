@@ -31,8 +31,31 @@ jobs:
       - name: Use HTTPS for git dependencies
         run: git config --global url."https://github.com/".insteadOf ssh://git@github.com/
 
-      - name: Install dependencies
+      # macOS: plain `npm ci` is fine — GitHub's macos-latest runner ships
+      # with Xcode's license already accepted, so better-sqlite3's implicit
+      # node-gyp rebuild (see below) succeeds there without help.
+      - name: Install dependencies (macOS)
+        if: runner.os == 'macOS'
         run: npm ci
+
+      # Windows: same bug ci.yml already works around. better-sqlite3 ships
+      # a binding.gyp with no explicit install script, so npm's own
+      # convention auto-runs `node-gyp rebuild` for it on every `npm ci` —
+      # via the Electron-flavored node-gyp this project's Forge toolchain
+      # hoists into node_modules/.bin — and that fails on windows-latest
+      # because its version-detection table doesn't recognize the runner's
+      # installed Visual Studio version. The rebuild is unneeded either way
+      # (better-sqlite3 already ships a matching prebuilt binary). Unlike
+      # ci.yml, this job actually needs *some* install scripts to run
+      # (esbuild's platform binary for the Vite build, electron-winstaller's
+      # 7z-arch selection for the Squirrel maker) — so it's `--ignore-scripts`
+      # followed by a targeted rebuild of just those two, rather than a
+      # blanket skip.
+      - name: Install dependencies (Windows)
+        if: runner.os == 'Windows'
+        run: |
+          npm ci --ignore-scripts
+          npm rebuild esbuild electron-winstaller
 
       # Windows only ever runs one maker here (MakerSquirrel — MakerZIP is
       # scoped to darwin in forge.config.ts, MakerDMG defaults to
