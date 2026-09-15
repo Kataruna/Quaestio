@@ -38,10 +38,8 @@ export function RepoTabChip({
     <div
       {...(dragHandlers ?? {})}
       className={cn(
-        'relative flex items-center gap-2.5 rounded-t-[12px] px-4',
-        active
-          ? 'bg-surface-card pb-2.5 pt-2.5 shadow-[0_-1px_4px_rgba(14,15,16,0.05)]'
-          : 'bg-white/45 pb-2.5 pt-2.5',
+        'relative flex items-center gap-2.5 rounded-pill px-4 py-2.5',
+        active ? 'bg-surface-card shadow-xs' : 'bg-white/45',
         dropIndicator === 'center' ? 'ring-2 ring-inset ring-lime-500' : null,
       )}
     >
