@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { SelectPill } from '@/components/ui/select-pill';
 import { Switch } from '@/components/ui/switch';
 import { showToast } from '@/components/ui/toast';
+import { ColorCustomizationScreen } from './ColorCustomizationScreen';
 
 const INTERVAL_OPTIONS = ['Every 5 min', 'Every 15 min', 'Hourly', 'Manual only'] as const;
 
@@ -44,6 +45,7 @@ export function SettingsScreen() {
     mapLabels: true,
     notifyP1: true,
   });
+  const [showColorPage, setShowColorPage] = useState(false);
 
   const queryClient = useQueryClient();
   const settingsQuery = useQuery({ queryKey: ['settings'], queryFn: () => window.api.settings.get() });
@@ -74,6 +76,10 @@ export function SettingsScreen() {
     },
   });
 
+  if (showColorPage) {
+    return <ColorCustomizationScreen onBack={() => setShowColorPage(false)} />;
+  }
+
   return (
     <div className="max-w-[560px] rounded-card bg-surface-card p-6 shadow-card">
       <h1 className="mb-1 font-display text-title-m font-semibold tracking-[-0.02em] text-text-strong">
@@ -89,13 +95,17 @@ export function SettingsScreen() {
             <span className="font-sans text-label font-medium text-text-strong">Appearance</span>
             <span className="font-sans text-micro text-text-muted">Light, dark, or match the system</span>
           </span>
-          <SelectPill
-            className="ml-auto"
-            options={THEME_OPTIONS}
-            aria-label="Appearance"
-            value={THEME_LABEL[theme]}
-            onChange={(event) => setThemeMutation.mutate(THEME_FROM_LABEL[event.target.value as ThemeOptionLabel])}
-          />
+          <span className="ml-auto flex items-center gap-2">
+            <SelectPill
+              options={THEME_OPTIONS}
+              aria-label="Appearance"
+              value={THEME_LABEL[theme]}
+              onChange={(event) => setThemeMutation.mutate(THEME_FROM_LABEL[event.target.value as ThemeOptionLabel])}
+            />
+            <Button variant="ghost" size="sm" onClick={() => setShowColorPage(true)}>
+              Customize colors
+            </Button>
+          </span>
         </div>
 
         <div className="flex items-center gap-3.5 border-b border-line-hairline py-3.5">
