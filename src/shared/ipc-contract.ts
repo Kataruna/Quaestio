@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import type { Comment, Issue, Repo, SyncStatus, TabSlot, User } from './types';
+import { ALL_TOKENS, type PaletteOverrides } from './palette-tokens';
 
 // Re-exported so every existing `import { CHANNELS } from '.../ipc-contract'`
 // keeps working. The definitions live in the zod-free `./channels` module, which
@@ -56,7 +57,7 @@ export const issuePatchSchema = z.object({
   stateReason: z.enum(['completed', 'not_planned', 'reopened']).nullable().optional(),
   labels: z.array(z.string()).optional(),
   assigneeLogin: z.string().nullable().optional(),
-  type: z.enum(['bug', 'feature', 'task']).optional(),
+  type: z.enum(['bug', 'feature', 'task', 'none']).optional(),
 });
 export type IssuePatch = z.infer<typeof issuePatchSchema>;
 
@@ -117,6 +118,24 @@ export type SetActiveRepoInput = z.infer<typeof setActiveRepoInput>;
 
 export const setTabGroupsEnabledInput = z.object({ enabled: z.boolean() });
 export type SetTabGroupsEnabledInput = z.infer<typeof setTabGroupsEnabledInput>;
+
+export const themeSchema = z.enum(['light', 'dark', 'system']);
+export type Theme = z.infer<typeof themeSchema>;
+
+export const setThemeInput = z.object({ theme: themeSchema });
+export type SetThemeInput = z.infer<typeof setThemeInput>;
+
+export const paletteTokenSchema = z.enum(ALL_TOKENS);
+
+export const setPaletteOverrideInput = z.object({
+  mode: z.enum(['light', 'dark']),
+  token: paletteTokenSchema,
+  value: z.string().nullable(),
+});
+export type SetPaletteOverrideInput = z.infer<typeof setPaletteOverrideInput>;
+
+export const resetPaletteInput = z.object({ mode: z.enum(['light', 'dark']) });
+export type ResetPaletteInput = z.infer<typeof resetPaletteInput>;
 
 export const tabSlotSchema = z.discriminatedUnion('kind', [
   z.object({ kind: z.literal('repo'), fullName: z.string().min(1) }),
@@ -196,8 +215,18 @@ export interface Api {
     fetch(input: FetchImageInput): Promise<string | null>;
   };
   settings: {
-    get(): Promise<{ tabGroupsEnabled: boolean }>;
+    get(): Promise<{ tabGroupsEnabled: boolean; theme: Theme }>;
     setTabGroupsEnabled(input: SetTabGroupsEnabledInput): Promise<void>;
+    setTheme(input: SetThemeInput): Promise<void>;
+  };
+  theme: {
+    getPaletteOverrides(): Promise<PaletteOverrides>;
+    setPaletteOverride(input: SetPaletteOverrideInput): Promise<void>;
+    resetPalette(input: ResetPaletteInput): Promise<void>;
+    /** null means the user canceled the save dialog. */
+    exportPalette(): Promise<{ path: string } | null>;
+    /** null means the user canceled the open dialog; throws on an unreadable/invalid file. */
+    importPalette(): Promise<PaletteOverrides | null>;
   };
   tabLayout: {
     get(): Promise<TabSlot[]>;

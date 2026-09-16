@@ -1,10 +1,12 @@
 import { useState } from 'react';
+import { motion } from 'motion/react';
 import { Calendar, LayoutGrid, Search, SlidersHorizontal, Users } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import type { User } from '@shared/types';
 import { Avatar } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/cn';
+import { quickTransition } from '@/lib/motion';
 
 export type ScreenId = 'board' | 'search' | 'milestones' | 'people' | 'settings';
 
@@ -47,14 +49,19 @@ export function SidebarRail({
             title={label}
             aria-current={active === id ? 'page' : undefined}
             className={cn(
-              'inline-flex h-10 w-10 items-center justify-center rounded-pill',
+              'relative inline-flex h-10 w-10 items-center justify-center rounded-pill',
               'transition-colors duration-[140ms] ease-[var(--ease-standard)] active:scale-[0.97]',
-              active === id
-                ? 'bg-ink-900 text-white'
-                : 'text-text-muted hover:bg-surface-sunken hover:text-text-strong',
+              active === id ? 'text-white' : 'text-text-muted hover:bg-surface-sunken hover:text-text-strong',
             )}
           >
-            <Icon size={17} strokeWidth={1.75} />
+            {active === id ? (
+              <motion.div
+                layoutId="activeRailBg"
+                transition={quickTransition}
+                className="absolute inset-0 rounded-pill bg-ink-900"
+              />
+            ) : null}
+            <Icon size={17} strokeWidth={1.75} className="relative z-10" />
           </button>
         ))}
       </div>

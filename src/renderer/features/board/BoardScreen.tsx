@@ -1,13 +1,15 @@
 import { useMemo, useState } from 'react';
+import { AnimatePresence, motion } from 'motion/react';
 import type { Issue, IssueType } from '@shared/types';
 import { BoardColumn } from './BoardColumn';
 import { BoardToolbar, ASSIGNEE_ALL } from './BoardToolbar';
 import { TYPE_DOT, TYPE_LABEL } from './IssueCard';
 import { SORT_OPTIONS, sortIssues, type SortOption } from './sort-issues';
 import { Skeleton } from '@/components/ui/skeleton';
+import { quickTransition } from '@/lib/motion';
 
-const COLUMNS: IssueType[] = ['bug', 'feature', 'task'];
-const SKELETON_COLUMNS = COLUMNS.length + 1;
+const COLUMNS: IssueType[] = ['bug', 'feature', 'task', 'none'];
+const SKELETON_COLUMNS = COLUMNS.length;
 
 export function BoardScreen({
   repoFullName,
@@ -48,12 +50,6 @@ export function BoardScreen({
     return sortIssues(open, sort);
   }, [issues, search, assignee, sort]);
 
-  // Issues with no labels at all fall out of `type`'s bug/feature/task
-  // classification (the mapper defaults label-less issues to 'task') into
-  // their own column, so a truly untagged issue doesn't get miscounted as
-  // deliberately a task.
-  const unlabeled = useMemo(() => visible.filter((issue) => issue.labels.length === 0), [visible]);
-
   const repoName = repoFullName.split('/')[1] ?? repoFullName;
 
   return (
@@ -75,50 +71,56 @@ export function BoardScreen({
         onNewIssue={onNewIssue}
       />
 
-      {loading ? (
-        <div
-          className="grid items-start gap-4"
-          style={{ gridTemplateColumns: `repeat(${SKELETON_COLUMNS}, minmax(0, 1fr))` }}
-        >
-          {Array.from({ length: SKELETON_COLUMNS }, (_, i) => (
-            <div key={i} className="flex flex-col gap-[22px]">
-              <Skeleton className="h-5 w-24" />
-              <Skeleton className="h-[168px] rounded-[4px_22px_22px_22px]" />
-              <Skeleton className="h-[168px] rounded-[4px_22px_22px_22px]" />
-            </div>
-          ))}
-        </div>
-      ) : (
-        // No `overflow-y-auto` here, and no `items-start` — each column
-        // scrolls its own cards independently (see BoardColumn), so this
-        // grid row must stretch (the default) to give every column the same
-        // full height to scroll within, not just size to its own content.
-        <div
-          className="grid min-h-0 flex-1 gap-4"
-          style={{ gridTemplateColumns: `repeat(${SKELETON_COLUMNS}, minmax(0, 1fr))` }}
-        >
-          {COLUMNS.map((type) => (
-            <BoardColumn
-              key={type}
-              heading={TYPE_LABEL[type]}
-              dotClassName={TYPE_DOT[type]}
-              issues={visible.filter(
-                (issue) => issue.type === type && issue.labels.length > 0,
-              )}
-              // Exactly one lime card per view, as the design system requires.
-              activeIssueNumber={489}
-              onOpenIssue={onOpenIssue}
-            />
-          ))}
-          <BoardColumn
-            heading="Unlabeled"
-            dotClassName="bg-neutral-400"
-            issues={unlabeled}
-            activeIssueNumber={489}
-            onOpenIssue={onOpenIssue}
-          />
-        </div>
-      )}
+      <AnimatePresence mode="wait">
+        {loading ? (
+          <motion.div
+            key="skeleton"
+            exit={{ opacity: 0 }}
+            transition={quickTransition}
+            className="grid items-start gap-4"
+            style={{ gridTemplateColumns: `repeat(${SKELETON_COLUMNS}, minmax(0, 1fr))` }}
+          >
+            {Array.from({ length: SKELETON_COLUMNS }, (_, i) => (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ ...quickTransition, delay: i * 0.05 }}
+                className="flex flex-col gap-[22px]"
+              >
+                <Skeleton className="h-5 w-24" />
+                <Skeleton className="h-[168px] rounded-[4px_22px_22px_22px]" />
+                <Skeleton className="h-[168px] rounded-[4px_22px_22px_22px]" />
+              </motion.div>
+            ))}
+          </motion.div>
+        ) : (
+          // No `overflow-y-auto` here, and no `items-start` — each column
+          // scrolls its own cards independently (see BoardColumn), so this
+          // grid row must stretch (the default) to give every column the same
+          // full height to scroll within, not just size to its own content.
+          <motion.div
+            key="board"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={quickTransition}
+            className="grid min-h-0 flex-1 gap-4"
+            style={{ gridTemplateColumns: `repeat(${SKELETON_COLUMNS}, minmax(0, 1fr))` }}
+          >
+            {COLUMNS.map((type) => (
+              <BoardColumn
+                key={type}
+                heading={TYPE_LABEL[type]}
+                dotClassName={TYPE_DOT[type]}
+                issues={visible.filter((issue) => issue.type === type)}
+                // Exactly one lime card per view, as the design system requires.
+                activeIssueNumber={489}
+                onOpenIssue={onOpenIssue}
+              />
+            ))}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

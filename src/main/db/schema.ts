@@ -34,6 +34,7 @@ export const repos = sqliteTable('repos', {
 export const settings = sqliteTable('settings', {
   id: integer('id').primaryKey(),
   tabGroupsEnabled: integer('tabGroupsEnabled', { mode: 'boolean' }).notNull().default(false),
+  theme: text('theme', { enum: ['light', 'dark', 'system'] }).notNull().default('system'),
 });
 
 /**
@@ -45,6 +46,18 @@ export const settings = sqliteTable('settings', {
 export const tabLayout = sqliteTable('tab_layout', {
   id: integer('id').primaryKey(),
   layout: text('layout').notNull().default('[]'),
+});
+
+/**
+ * Single-row table (`id` is always 1) holding per-mode color-token
+ * overrides as JSON — `{ light: {...}, dark: {...} }` (see
+ * shared/palette-tokens.ts's PaletteOverrides). A JSON blob, not one column
+ * per token, matching `tab_layout`'s precedent — the token set can grow
+ * without a migration.
+ */
+export const customPalette = sqliteTable('custom_palette', {
+  id: integer('id').primaryKey(),
+  overrides: text('overrides').notNull().default('{}'),
 });
 
 /**
@@ -63,7 +76,7 @@ export const issues = sqliteTable('issues', {
   title: text('title').notNull(),
   body: text('body').notNull(),
   state: text('state').notNull().$type<'open' | 'closed'>(),
-  type: text('type').notNull().$type<'bug' | 'feature' | 'task'>(),
+  type: text('type').notNull().$type<'bug' | 'feature' | 'task' | 'none'>(),
   priority: text('priority').notNull().$type<'p1' | 'p2' | 'p3'>(),
   labels: text('labels').notNull(),
   assigneeLogin: text('assigneeLogin'),

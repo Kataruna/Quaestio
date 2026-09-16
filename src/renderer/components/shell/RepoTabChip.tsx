@@ -1,7 +1,9 @@
 import { X } from 'lucide-react';
+import { motion } from 'motion/react';
 import type { DragEvent } from 'react';
 import type { Repo } from '@shared/types';
 import { cn } from '@/lib/cn';
+import { quickTransition } from '@/lib/motion';
 
 export interface RepoTabDragHandlers {
   draggable: boolean;
@@ -39,10 +41,17 @@ export function RepoTabChip({
       {...(dragHandlers ?? {})}
       className={cn(
         'relative flex items-stretch rounded-pill',
-        active ? 'bg-surface-card shadow-xs' : 'bg-white/45',
+        active ? null : 'bg-background-chip',
         dropIndicator === 'center' ? 'ring-2 ring-inset ring-lime-500' : null,
       )}
     >
+      {active ? (
+        <motion.div
+          layoutId="activeTabBg"
+          transition={quickTransition}
+          className="absolute inset-0 rounded-pill bg-surface-chip shadow-xs"
+        />
+      ) : null}
       {dropIndicator === 'before' ? <span className="absolute inset-y-0 left-0 w-0.5 bg-lime-500" /> : null}
       {dropIndicator === 'after' ? <span className="absolute inset-y-0 right-0 w-0.5 bg-lime-500" /> : null}
       {/* Everything except the untrack button is one click target. The
@@ -53,7 +62,10 @@ export function RepoTabChip({
       <button
         type="button"
         onClick={() => onSelect(repo.fullName)}
-        className={cn('flex items-center gap-2.5 rounded-pill py-2.5 pl-4', active ? 'pr-2.5' : 'pr-4')}
+        className={cn(
+          'relative z-10 flex items-center gap-2.5 rounded-pill py-2.5 pl-4',
+          active ? 'pr-2.5' : 'pr-4',
+        )}
       >
         {active ? <span className="h-1.5 w-1.5 rounded-pill bg-lime-400" /> : null}
         <span
@@ -71,7 +83,7 @@ export function RepoTabChip({
           type="button"
           onClick={() => onUntrack(repo.fullName)}
           aria-label={`Stop tracking ${repo.fullName}`}
-          className="flex items-center py-2.5 pl-1 pr-4 text-text-faint transition-colors hover:text-text-strong"
+          className="relative z-10 flex items-center py-2.5 pl-1 pr-4 text-text-faint transition-colors hover:text-text-strong"
         >
           <X size={12} strokeWidth={2} />
         </button>

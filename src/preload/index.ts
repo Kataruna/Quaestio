@@ -56,10 +56,18 @@ const api: Api = {
   settings: {
     get: () => ipcRenderer.invoke(CHANNELS.settingsGet),
     setTabGroupsEnabled: (input) => ipcRenderer.invoke(CHANNELS.settingsSetTabGroupsEnabled, input),
+    setTheme: (input) => ipcRenderer.invoke(CHANNELS.settingsSetTheme, input),
   },
   tabLayout: {
     get: () => ipcRenderer.invoke(CHANNELS.tabLayoutGet),
     set: (input) => ipcRenderer.invoke(CHANNELS.tabLayoutSet, input),
+  },
+  theme: {
+    getPaletteOverrides: () => ipcRenderer.invoke(CHANNELS.themeGetPaletteOverrides),
+    setPaletteOverride: (input) => ipcRenderer.invoke(CHANNELS.themeSetPaletteOverride, input),
+    resetPalette: (input) => ipcRenderer.invoke(CHANNELS.themeResetPalette, input),
+    exportPalette: () => ipcRenderer.invoke(CHANNELS.themeExportPalette),
+    importPalette: () => ipcRenderer.invoke(CHANNELS.themeImportPalette),
   },
 };
 

@@ -44,4 +44,44 @@
     background: var(--color-lime-300);
     color: var(--color-ink-900);
   }
+
+  /* Chromium's default scrollbar is a solid, square-cornered rail — reads as
+     "machine" chrome against this design's soft, minimal-chrome look.
+     Thumb inset from the track via a transparent border + background-clip
+     so it reads as a floating pill, not a solid bar; tokens make it
+     theme-aware automatically. `scrollbar-*` is the standard-track
+     equivalent (unused by Chromium today, harmless to include). */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-line-strong) transparent;
+  }
+
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: var(--color-line-strong);
+    border-radius: var(--radius-pill);
+    border: 2px solid transparent;
+    background-clip: padding-box;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--color-text-faint);
+  }
+}
+
+/* Dark-mode focus ring — value from design/Dark Mode/dark.css's
+   --shadow-focus. Not a CSS variable above because it's used in exactly one
+   place. */
+@media (prefers-color-scheme: dark) {
+  :focus-visible {
+    box-shadow: 0 0 0 3px rgba(199, 242, 76, 0.38);
+  }
 }

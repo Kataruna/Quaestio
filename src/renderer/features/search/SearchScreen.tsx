@@ -10,6 +10,7 @@ const TYPE_TEXT: Record<Issue['type'], string> = {
   bug: 'text-status-hot',
   feature: 'text-status-info',
   task: 'text-neutral-500',
+  none: 'text-neutral-500',
 };
 
 const PRIORITY_TONE: Record<Issue['priority'], BadgeTone> = {

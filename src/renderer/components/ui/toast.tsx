@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react';
+import { AnimatePresence, motion } from 'motion/react';
 import { cn } from '@/lib/cn';
+import { quickTransition } from '@/lib/motion';
 
 type ToastTone = 'error' | 'success';
 
@@ -50,17 +52,23 @@ export function ToastHost() {
       aria-live="polite"
       className="pointer-events-none fixed inset-x-0 bottom-6 z-50 flex flex-col items-center gap-2"
     >
-      {current.map((item) => (
-        <div
-          key={item.id}
-          className={cn(
-            'pointer-events-auto rounded-pill px-4 py-2 font-sans text-label font-medium text-white shadow-card',
-            item.tone === 'error' ? 'bg-status-hot' : 'bg-ink-900',
-          )}
-        >
-          {item.message}
-        </div>
-      ))}
+      <AnimatePresence>
+        {current.map((item) => (
+          <motion.div
+            key={item.id}
+            initial={{ opacity: 0, y: 10, scale: 0.97 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.97 }}
+            transition={quickTransition}
+            className={cn(
+              'pointer-events-auto rounded-pill px-4 py-2 font-sans text-label font-medium text-white shadow-card',
+              item.tone === 'error' ? 'bg-status-hot' : 'bg-ink-900',
+            )}
+          >
+            {item.message}
+          </motion.div>
+        ))}
+      </AnimatePresence>
     </div>
   );
 }
