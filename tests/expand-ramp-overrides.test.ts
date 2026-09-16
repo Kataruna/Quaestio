@@ -39,4 +39,10 @@ describe('expandRampOverrides', () => {
     expect(result.light['ink-900']).toBe('#0e0f10');
     expect(result.dark['ink-900']).toBe('#ffffff');
   });
+
+  it('drops a stale entry for a token that is no longer known, while keeping a known one', () => {
+    const overrides = { light: { 'surface-accent': '#ff0000', 'surface-app': '#123456' }, dark: {} };
+    const result = expandRampOverrides(overrides);
+    expect(result.light).toEqual({ 'surface-app': '#123456' });
+  });
 });

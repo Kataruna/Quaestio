@@ -1,9 +1,10 @@
 import { RAMP_TOKENS, type RampToken } from './ramp-tokens';
 import { deriveRampOverrides } from './derive-ramp-overrides';
 import type { CssVarOverrides } from './build-palette-style';
-import type { PaletteOverrides } from './palette-tokens';
+import { ALL_TOKENS, type PaletteOverrides } from './palette-tokens';
 
 const RAMP_TOKEN_SET = new Set<string>(RAMP_TOKENS);
+const ALL_TOKEN_SET = new Set<string>(ALL_TOKENS);
 
 function expandMode(mode: Partial<Record<string, string>>): Partial<Record<string, string>> {
   const result: Partial<Record<string, string>> = {};
@@ -11,7 +12,7 @@ function expandMode(mode: Partial<Record<string, string>>): Partial<Record<strin
     if (value === undefined) continue;
     if (RAMP_TOKEN_SET.has(key)) {
       Object.assign(result, deriveRampOverrides(key as RampToken, value));
-    } else {
+    } else if (ALL_TOKEN_SET.has(key)) {
       result[key] = value;
     }
   }

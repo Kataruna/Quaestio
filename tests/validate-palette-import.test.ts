@@ -56,4 +56,14 @@ describe('validatePaletteImport', () => {
     const input = { light: { 'surface-accent': '#ff0000', 'surface-app': '#123456' }, dark: {} };
     expect(validatePaletteImport(input)).toEqual({ light: { 'surface-app': '#123456' }, dark: {} });
   });
+
+  it('drops an rgba() value on a ramp token, since ramp math only parses hex', () => {
+    const input = { light: { 'ramp-accent': 'rgba(255, 0, 0, 0.5)' }, dark: {} };
+    expect(validatePaletteImport(input)).toEqual({ light: {}, dark: {} });
+  });
+
+  it('still accepts an rgba() value on a semantic token', () => {
+    const input = { light: { 'surface-app': 'rgba(255, 0, 0, 0.5)' }, dark: {} };
+    expect(validatePaletteImport(input)).toEqual({ light: { 'surface-app': 'rgba(255, 0, 0, 0.5)' }, dark: {} });
+  });
 });
