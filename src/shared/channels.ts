@@ -36,6 +36,11 @@ export const CHANNELS = {
   settingsGet: 'settings:get',
   settingsSetTabGroupsEnabled: 'settings:set-tab-groups-enabled',
   settingsSetTheme: 'settings:set-theme',
+  themeGetPaletteOverrides: 'theme:get-palette-overrides',
+  themeSetPaletteOverride: 'theme:set-palette-override',
+  themeResetPalette: 'theme:reset-palette',
+  themeExportPalette: 'theme:export-palette',
+  themeImportPalette: 'theme:import-palette',
   tabLayoutGet: 'tab-layout:get',
   tabLayoutSet: 'tab-layout:set',
 } as const;

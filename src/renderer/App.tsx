@@ -4,6 +4,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { quickTransition } from '@/lib/motion';
 import type { DeviceFlowStarted } from '@shared/ipc-contract';
 import type { Repo, SyncStatus, User } from '@shared/types';
+import { buildPaletteStyleTag } from '@shared/build-palette-style';
 import { TitleBar } from '@/components/shell/TitleBar';
 import { SidebarRail, type ScreenId } from '@/components/shell/SidebarRail';
 import { RepoTabs } from '@/components/shell/RepoTabs';
@@ -92,6 +93,22 @@ export function App() {
 
   const settingsQuery = useQuery({ queryKey: ['settings'], queryFn: () => window.api.settings.get() });
   const tabGroupsEnabled = settingsQuery.data?.tabGroupsEnabled ?? false;
+
+  const customPaletteQuery = useQuery({
+    queryKey: ['customPalette'],
+    queryFn: () => window.api.theme.getPaletteOverrides(),
+  });
+
+  useEffect(() => {
+    const overrides = customPaletteQuery.data ?? { light: {}, dark: {} };
+    let styleEl = document.getElementById('custom-palette-overrides') as HTMLStyleElement | null;
+    if (!styleEl) {
+      styleEl = document.createElement('style');
+      styleEl.id = 'custom-palette-overrides';
+      document.head.appendChild(styleEl);
+    }
+    styleEl.textContent = buildPaletteStyleTag(overrides);
+  }, [customPaletteQuery.data]);
 
   useEffect(() => {
     void window.api.auth

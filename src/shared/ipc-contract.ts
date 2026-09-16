@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import type { Comment, Issue, Repo, SyncStatus, TabSlot, User } from './types';
+import { PALETTE_TOKENS, type PaletteOverrides } from './palette-tokens';
 
 // Re-exported so every existing `import { CHANNELS } from '.../ipc-contract'`
 // keeps working. The definitions live in the zod-free `./channels` module, which
@@ -124,6 +125,18 @@ export type Theme = z.infer<typeof themeSchema>;
 export const setThemeInput = z.object({ theme: themeSchema });
 export type SetThemeInput = z.infer<typeof setThemeInput>;
 
+export const paletteTokenSchema = z.enum(PALETTE_TOKENS);
+
+export const setPaletteOverrideInput = z.object({
+  mode: z.enum(['light', 'dark']),
+  token: paletteTokenSchema,
+  value: z.string().nullable(),
+});
+export type SetPaletteOverrideInput = z.infer<typeof setPaletteOverrideInput>;
+
+export const resetPaletteInput = z.object({ mode: z.enum(['light', 'dark']) });
+export type ResetPaletteInput = z.infer<typeof resetPaletteInput>;
+
 export const tabSlotSchema = z.discriminatedUnion('kind', [
   z.object({ kind: z.literal('repo'), fullName: z.string().min(1) }),
   z.object({
@@ -205,6 +218,15 @@ export interface Api {
     get(): Promise<{ tabGroupsEnabled: boolean; theme: Theme }>;
     setTabGroupsEnabled(input: SetTabGroupsEnabledInput): Promise<void>;
     setTheme(input: SetThemeInput): Promise<void>;
+  };
+  theme: {
+    getPaletteOverrides(): Promise<PaletteOverrides>;
+    setPaletteOverride(input: SetPaletteOverrideInput): Promise<void>;
+    resetPalette(input: ResetPaletteInput): Promise<void>;
+    /** null means the user canceled the save dialog. */
+    exportPalette(): Promise<{ path: string } | null>;
+    /** null means the user canceled the open dialog; throws on an unreadable/invalid file. */
+    importPalette(): Promise<PaletteOverrides | null>;
   };
   tabLayout: {
     get(): Promise<TabSlot[]>;

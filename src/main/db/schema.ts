@@ -49,6 +49,18 @@ export const tabLayout = sqliteTable('tab_layout', {
 });
 
 /**
+ * Single-row table (`id` is always 1) holding per-mode color-token
+ * overrides as JSON — `{ light: {...}, dark: {...} }` (see
+ * shared/palette-tokens.ts's PaletteOverrides). A JSON blob, not one column
+ * per token, matching `tab_layout`'s precedent — the token set can grow
+ * without a migration.
+ */
+export const customPalette = sqliteTable('custom_palette', {
+  id: integer('id').primaryKey(),
+  overrides: text('overrides').notNull().default('{}'),
+});
+
+/**
  * `id` is GitHub's numeric issue id (globally unique across repos, unlike
  * `number` which only counts within one repo). `labels` and `subtasks` are
  * JSON-encoded arrays — SQLite has no native array type, and neither field
