@@ -36,9 +36,9 @@ export function hslToHex({ h, s, l }: Hsl): string {
   const c = (1 - Math.abs(2 * lFrac - 1)) * sFrac;
   const x = c * (1 - Math.abs(((h / 60) % 2) - 1));
   const m = lFrac - c / 2;
-  let r = 0;
-  let g = 0;
-  let b = 0;
+  let r: number;
+  let g: number;
+  let b: number;
   if (h < 60) {
     r = c;
     g = x;
