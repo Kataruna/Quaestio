@@ -1,4 +1,4 @@
-export type IssueType = 'bug' | 'feature' | 'task';
+export type IssueType = 'bug' | 'feature' | 'task' | 'none';
 export type Priority = 'p1' | 'p2' | 'p3';
 export type IssueState = 'open' | 'closed';
 

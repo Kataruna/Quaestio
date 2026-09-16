@@ -82,12 +82,12 @@ describe('mapGitHubIssue', () => {
     expect(mapGitHubIssue({ ...base, type: { name: 'FEATURE' } }, 'acme/atlas-web').type).toBe('feature');
   });
 
-  it('falls back to task when Issue Type is null (not enabled, or unset)', () => {
-    expect(mapGitHubIssue({ ...base, type: null }, 'acme/atlas-web').type).toBe('task');
+  it('maps to none when Issue Type is null (not enabled, or unset)', () => {
+    expect(mapGitHubIssue({ ...base, type: null }, 'acme/atlas-web').type).toBe('none');
   });
 
-  it('falls back to task when Issue Type is absent from the response', () => {
-    expect(mapGitHubIssue({ ...base, type: undefined }, 'acme/atlas-web').type).toBe('task');
+  it('maps to none when Issue Type is absent from the response', () => {
+    expect(mapGitHubIssue({ ...base, type: undefined }, 'acme/atlas-web').type).toBe('none');
   });
 
   it('falls back to task for a custom Issue Type name this app has no column for', () => {

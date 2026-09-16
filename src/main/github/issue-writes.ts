@@ -10,9 +10,9 @@ export interface IssueWritePatch {
    * type keeps a single `assignee` for display (see CLAUDE.md's Slice 5
    * decision log) — `[]` unassigns, `[login]` assigns. */
   assignees?: string[];
-  /** GitHub's native Issue Type, by name (e.g. `"Bug"`) — see
-   * `GITHUB_TYPE_NAME` in `@shared/map-github-issue`. */
-  type?: string;
+  /** GitHub's native Issue Type, by name (e.g. `"Bug"`), or `null` to clear
+   * it — see `GITHUB_TYPE_NAME` in `@shared/map-github-issue`. */
+  type?: string | null;
 }
 
 export async function updateIssue(

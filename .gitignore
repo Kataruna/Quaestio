@@ -96,3 +96,5 @@ dist/
 
 # Superpowers SDD scratch files (project-local, never committed)
 .superpowers/
+# Added by code-review-graph
+.code-review-graph/

@@ -1,6 +1,8 @@
+import { motion } from 'motion/react';
 import type { Issue } from '@shared/types';
 import { IssueCard } from './IssueCard';
 import { cn } from '@/lib/cn';
+import { quickTransition } from '@/lib/motion';
 
 export function BoardColumn({
   heading,
@@ -39,13 +41,15 @@ export function BoardColumn({
           right at its top edge, a boundary that didn't exist before each
           column scrolled independently. */}
       <div className="flex min-h-0 flex-1 flex-col gap-[22px] overflow-y-auto pt-[13px]">
-        {issues.map((issue) => (
-          <IssueCard
+        {issues.map((issue, i) => (
+          <motion.div
             key={issue.id}
-            issue={issue}
-            active={issue.number === activeIssueNumber}
-            onOpen={onOpenIssue}
-          />
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ ...quickTransition, delay: Math.min(i, 8) * 0.03 }}
+          >
+            <IssueCard issue={issue} active={issue.number === activeIssueNumber} onOpen={onOpenIssue} />
+          </motion.div>
         ))}
 
         {issues.length === 0 ? (

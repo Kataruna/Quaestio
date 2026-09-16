@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react';
+import { AnimatePresence, motion } from 'motion/react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { quickTransition } from '@/lib/motion';
 import type { DeviceFlowStarted } from '@shared/ipc-contract';
 import type { Repo, SyncStatus, User } from '@shared/types';
 import { TitleBar } from '@/components/shell/TitleBar';
@@ -383,21 +385,32 @@ export function App() {
           <div className="flex min-h-0 flex-1 gap-4 px-5 pb-6 pt-4">
             <SidebarRail active={screen} onSelect={setScreen} user={user} onSignOut={handleSignOut} />
             <main className="min-w-0 flex-1 overflow-y-auto">
-              {screen === 'board' ? (
-                <BoardScreen
-                  repoFullName={activeFullName}
-                  issues={issues}
-                  loading={issuesLoading || devLoading}
-                  onOpenIssue={(issue) => setOpenIssueNumber(issue.number)}
-                  onNewIssue={() => setCreateOpen(true)}
-                />
-              ) : null}
-              {screen === 'search' ? (
-                <SearchScreen repoFullNames={tracked.map((repo) => repo.fullName)} />
-              ) : null}
-              {screen === 'settings' ? <SettingsScreen /> : null}
-              {screen === 'milestones' ? <PlaceholderScreen title="Milestones" /> : null}
-              {screen === 'people' ? <PlaceholderScreen title="People" /> : null}
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={screen === 'board' ? `board-${activeFullName}` : screen}
+                  initial={{ opacity: 0, y: 4 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0 }}
+                  transition={quickTransition}
+                  className="h-full"
+                >
+                  {screen === 'board' ? (
+                    <BoardScreen
+                      repoFullName={activeFullName}
+                      issues={issues}
+                      loading={issuesLoading || devLoading}
+                      onOpenIssue={(issue) => setOpenIssueNumber(issue.number)}
+                      onNewIssue={() => setCreateOpen(true)}
+                    />
+                  ) : null}
+                  {screen === 'search' ? (
+                    <SearchScreen repoFullNames={tracked.map((repo) => repo.fullName)} />
+                  ) : null}
+                  {screen === 'settings' ? <SettingsScreen /> : null}
+                  {screen === 'milestones' ? <PlaceholderScreen title="Milestones" /> : null}
+                  {screen === 'people' ? <PlaceholderScreen title="People" /> : null}
+                </motion.div>
+              </AnimatePresence>
             </main>
           </div>
         </>

@@ -38,12 +38,14 @@ export const TYPE_DOT: Record<IssueType, string> = {
   bug: 'bg-status-hot',
   feature: 'bg-status-info',
   task: 'bg-neutral-400',
+  none: 'bg-neutral-400',
 };
 
 export const TYPE_LABEL: Record<IssueType, string> = {
   bug: 'Bug',
   feature: 'Feature',
   task: 'Task',
+  none: 'No type',
 };
 
 const PRIORITY_TONE: Record<Priority, BadgeTone> = {

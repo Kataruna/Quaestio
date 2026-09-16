@@ -64,7 +64,7 @@ export const issues = sqliteTable('issues', {
   title: text('title').notNull(),
   body: text('body').notNull(),
   state: text('state').notNull().$type<'open' | 'closed'>(),
-  type: text('type').notNull().$type<'bug' | 'feature' | 'task'>(),
+  type: text('type').notNull().$type<'bug' | 'feature' | 'task' | 'none'>(),
   priority: text('priority').notNull().$type<'p1' | 'p2' | 'p3'>(),
   labels: text('labels').notNull(),
   assigneeLogin: text('assigneeLogin'),

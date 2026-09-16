@@ -158,6 +158,7 @@ describe('toGitHubPatch', () => {
     expect(toGitHubPatch({ type: 'bug' })).toEqual({ type: 'Bug' });
     expect(toGitHubPatch({ type: 'feature' })).toEqual({ type: 'Feature' });
     expect(toGitHubPatch({ type: 'task' })).toEqual({ type: 'Task' });
+    expect(toGitHubPatch({ type: 'none' })).toEqual({ type: null });
   });
 });
 

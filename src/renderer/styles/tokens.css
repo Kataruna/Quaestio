@@ -48,6 +48,9 @@
   --color-surface-ink: #0e0f10;
   --color-surface-accent: #c7f24c;
   --color-surface-accent-soft: #f1fbd9;
+
+  --color-background-chip: #fafaf9;
+
   --color-text-strong: #16181a;
   --color-text-body: #232629;
   --color-text-muted: #6e7174;
@@ -124,7 +127,9 @@
     --color-surface-ink: #272a25;
     --color-surface-accent-soft: rgba(199, 242, 76, 0.12);
     --color-surface-overlay: rgba(5, 6, 5, 0.66);
-    --color-surface-chip: #1f211d;
+    --color-surface-chip: #0b0c0b;
+
+    --color-background-chip: #1f211d;
 
     --color-text-strong: #f4f5f0;
     --color-text-body: #dddfd7;

@@ -88,6 +88,7 @@ const TYPE_CHIP: Record<Issue['type'], string> = {
   bug: 'bg-status-hot-bg text-status-hot',
   feature: 'bg-status-info-bg text-status-info',
   task: 'bg-surface-sunken text-text-muted',
+  none: 'bg-surface-sunken text-text-muted',
 };
 
 // Matches Badge's `hot`/`warm`/`neutral` tones — the same colors the
@@ -454,7 +455,7 @@ export function IssueDetailDialog({
           {!editing ? (
             <IconButton icon={Pencil} label="Edit title and body" size="sm" onClick={beginEdit} disabled={disabled} />
           ) : null}
-          {issue.state === 'open' ? (
+          {!editing && issue.state === 'open' ? (
             <>
               <Button variant="secondary" size="sm" onClick={() => setState('closed', 'completed')} disabled={disabled}>
                 Close
@@ -468,11 +469,12 @@ export function IssueDetailDialog({
                 Not planned
               </button>
             </>
-          ) : (
+          ) : null}
+          {!editing && issue.state === 'closed' ? (
             <Button variant="secondary" size="sm" iconLeft={RotateCcw} onClick={() => setState('open', 'reopened')} disabled={disabled}>
               Reopen
             </Button>
-          )}
+          ) : null}
           <IconButton
             icon={ExternalLink}
             label="Open on GitHub"

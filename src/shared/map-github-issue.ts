@@ -81,12 +81,16 @@ function normaliseState(state: string): IssueState {
 
 /**
  * GitHub's Issue Type is independent of labels — an issue's `type.name` is
- * whatever the repo's Issue Types are configured as. This app only has
- * columns for the three built-in names GitHub ships by default; anything
- * else (a custom type, or Issue Types not enabled) falls back to `task`.
+ * whatever the repo's Issue Types are configured as. `null`/`undefined`
+ * (Issue Types not enabled, or none picked) maps to `'none'`, a real,
+ * distinct value rather than being silently counted as `'task'`. This app
+ * only has columns for the three built-in names GitHub ships by default;
+ * an issue given some other custom type name still falls back to `task`
+ * (it does have *a* type, just not one this app has a column for).
  */
 function issueTypeFromGitHub(type: { name: string } | null | undefined): IssueType {
-  const name = type?.name.trim().toLowerCase();
+  if (!type) return 'none';
+  const name = type.name.trim().toLowerCase();
   if (name === 'bug') return 'bug';
   if (name === 'feature') return 'feature';
   return 'task';
@@ -94,13 +98,14 @@ function issueTypeFromGitHub(type: { name: string } | null | undefined): IssueTy
 
 /** The reverse of `issueTypeFromGitHub` — GitHub's default Issue Type names,
  * exactly as it expects them on a write (`PATCH .../issues/{n}`'s `type`
- * field takes the type's name as a plain string). Only the three built-in
- * default type names this app has columns for are supported for writing,
- * matching what it already reads. */
-export const GITHUB_TYPE_NAME: Record<IssueType, string> = {
+ * field takes the type's name as a plain string, or `null` to clear it).
+ * Only the three built-in default type names this app has columns for are
+ * supported for writing, matching what it already reads. */
+export const GITHUB_TYPE_NAME: Record<IssueType, string | null> = {
   bug: 'Bug',
   feature: 'Feature',
   task: 'Task',
+  none: null,
 };
 
 /**
