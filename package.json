@@ -1,7 +1,7 @@
 {
   "name": "quaestio",
   "productName": "Quaestio",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "A simple and clean GitHub issue tracker for developers.",
   "main": ".vite/build/main.js",
   "private": true,
