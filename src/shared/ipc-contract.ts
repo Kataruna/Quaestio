@@ -118,6 +118,12 @@ export type SetActiveRepoInput = z.infer<typeof setActiveRepoInput>;
 export const setTabGroupsEnabledInput = z.object({ enabled: z.boolean() });
 export type SetTabGroupsEnabledInput = z.infer<typeof setTabGroupsEnabledInput>;
 
+export const themeSchema = z.enum(['light', 'dark', 'system']);
+export type Theme = z.infer<typeof themeSchema>;
+
+export const setThemeInput = z.object({ theme: themeSchema });
+export type SetThemeInput = z.infer<typeof setThemeInput>;
+
 export const tabSlotSchema = z.discriminatedUnion('kind', [
   z.object({ kind: z.literal('repo'), fullName: z.string().min(1) }),
   z.object({
@@ -196,8 +202,9 @@ export interface Api {
     fetch(input: FetchImageInput): Promise<string | null>;
   };
   settings: {
-    get(): Promise<{ tabGroupsEnabled: boolean }>;
+    get(): Promise<{ tabGroupsEnabled: boolean; theme: Theme }>;
     setTabGroupsEnabled(input: SetTabGroupsEnabledInput): Promise<void>;
+    setTheme(input: SetThemeInput): Promise<void>;
   };
   tabLayout: {
     get(): Promise<TabSlot[]>;

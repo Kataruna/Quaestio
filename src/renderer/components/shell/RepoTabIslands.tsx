@@ -134,7 +134,7 @@ export function RepoTabIslands({
         return (
           <div
             key={slot.id}
-            className="flex items-center gap-1.5 rounded-[14px] border border-line-hairline bg-white/70 p-1"
+            className="flex items-center gap-1.5 rounded-[14px] border border-line-hairline bg-surface-chip/70 p-1"
             onDragOver={(e) => {
               e.preventDefault();
               e.stopPropagation();

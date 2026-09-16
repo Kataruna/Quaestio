@@ -54,6 +54,12 @@
   --color-text-faint: #b4b5ae;
   --color-line-hairline: #e4e4de;
   --color-line-strong: #d6d6cf;
+  /* Modal/overlay scrim — matches ink-900 at 55% exactly (ink-900 is rgb(14,15,16)). */
+  --color-surface-overlay: rgba(14, 15, 16, 0.55);
+  /* "Chip" surface (e.g. a translucent grouped-tab wrapper) — same as
+     surface-card in light, but distinct from it in dark (see below), so it
+     needs its own token rather than reusing surface-card directly. */
+  --color-surface-chip: #ffffff;
 
   /* ---- type ----
      font-sans uses "Plus Jakarta Sans Variable": the design token file itself
@@ -98,4 +104,51 @@
   /* ---- motion ---- */
   --ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
   --ease-out-soft: cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+/* Dark mode — values from design/Dark Mode/dark.css (Soft Nature's own dark
+   palette), not improvised. Only the semantic layer changes; the raw
+   lime/ink/neutral ramps stay fixed across themes by design ("Semantic
+   aliases only: base ramps stay fixed so component code needs no changes" —
+   confirmed against the design system's own component source, e.g. Switch's
+   off-track is a literal --neutral-300 in both themes).
+   `prefers-color-scheme` here reflects Electron's `nativeTheme.themeSource`
+   (main/index.ts, main/ipc/settings.ts) — set to 'light'/'dark' for an
+   explicit user choice, or 'system' to follow the OS. Renderer needs no
+   attribute, listener, or JS of its own for this. */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-surface-app: #0b0c0b;
+    --color-surface-card: #181a17;
+    --color-surface-sunken: #1f211d;
+    --color-surface-ink: #272a25;
+    --color-surface-accent-soft: rgba(199, 242, 76, 0.12);
+    --color-surface-overlay: rgba(5, 6, 5, 0.66);
+    --color-surface-chip: #1f211d;
+
+    --color-text-strong: #f4f5f0;
+    --color-text-body: #dddfd7;
+    --color-text-muted: #9da096;
+    --color-text-faint: #6f736a;
+
+    --color-line-hairline: rgba(255, 255, 255, 0.1);
+    --color-line-strong: rgba(255, 255, 255, 0.18);
+
+    --color-status-hot: #ff6b62;
+    --color-status-hot-bg: rgba(255, 107, 98, 0.16);
+    --color-status-warm: #ffa45c;
+    --color-status-warm-bg: rgba(255, 164, 92, 0.16);
+    --color-status-due: #ffd760;
+    --color-status-due-bg: rgba(255, 215, 96, 0.16);
+    --color-status-won: #7bda6c;
+    --color-status-won-bg: rgba(123, 218, 108, 0.16);
+    --color-status-info: #6e9bff;
+    --color-status-info-bg: rgba(110, 155, 255, 0.16);
+
+    --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.4);
+    --shadow-card: 0 2px 8px rgba(0, 0, 0, 0.45), inset 0 0 0 1px rgba(255, 255, 255, 0.05);
+    --shadow-card-hover: 0 8px 24px rgba(0, 0, 0, 0.5), inset 0 0 0 1px rgba(255, 255, 255, 0.07);
+    --shadow-floating: 0 16px 44px rgba(0, 0, 0, 0.55), inset 0 0 0 1px rgba(255, 255, 255, 0.07);
+    --shadow-modal: 0 30px 80px rgba(0, 0, 0, 0.65), inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+  }
 }

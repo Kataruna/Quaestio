@@ -1,4 +1,4 @@
-import { app, BrowserWindow, dialog } from 'electron';
+import { app, BrowserWindow, dialog, nativeTheme } from 'electron';
 import squirrelStartup from 'electron-squirrel-startup';
 import { CHANNELS } from '@shared/channels';
 import { createMainWindow } from './window';
@@ -13,6 +13,7 @@ import { registerTabLayoutHandlers } from './ipc/tab-layout';
 import { restoreSession, getAuthenticatedClient } from './github/auth';
 import { runMigrations, getDb } from './db/client';
 import { listRepos } from './db/repos-queries';
+import { getSettings } from './db/settings-queries';
 import { startScheduler } from './sync/scheduler';
 
 // In dev mode the app runs inside the generic Electron.app shell, so without
@@ -29,6 +30,11 @@ if (squirrelStartup) {
 }
 
 function start(): void {
+  // Set before window creation so the very first paint (and the window's
+  // own frame background, see window.ts) already matches — must be read
+  // fresh each call since `activate` can call this again after the theme
+  // setting changed mid-session.
+  nativeTheme.themeSource = getSettings(getDb()).theme;
   const window = createMainWindow();
   applyNavigationPolicy(window);
 }

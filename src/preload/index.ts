@@ -56,6 +56,7 @@ const api: Api = {
   settings: {
     get: () => ipcRenderer.invoke(CHANNELS.settingsGet),
     setTabGroupsEnabled: (input) => ipcRenderer.invoke(CHANNELS.settingsSetTabGroupsEnabled, input),
+    setTheme: (input) => ipcRenderer.invoke(CHANNELS.settingsSetTheme, input),
   },
   tabLayout: {
     get: () => ipcRenderer.invoke(CHANNELS.tabLayoutGet),

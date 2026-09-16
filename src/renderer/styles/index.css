@@ -45,3 +45,12 @@
     color: var(--color-ink-900);
   }
 }
+
+/* Dark-mode focus ring — value from design/Dark Mode/dark.css's
+   --shadow-focus. Not a CSS variable above because it's used in exactly one
+   place. */
+@media (prefers-color-scheme: dark) {
+  :focus-visible {
+    box-shadow: 0 0 0 3px rgba(199, 242, 76, 0.38);
+  }
+}

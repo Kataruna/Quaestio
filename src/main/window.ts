@@ -1,4 +1,4 @@
-import { BrowserWindow } from 'electron';
+import { BrowserWindow, nativeTheme } from 'electron';
 import path from 'node:path';
 import { setWindowFocused } from './sync/scheduler';
 
@@ -11,7 +11,10 @@ export function createMainWindow(): BrowserWindow {
     // The board is a 3-column grid; below this it stops being readable.
     minWidth: 960,
     minHeight: 640,
-    backgroundColor: '#F4F4F1',
+    // Matches --color-surface-app in tokens.css (light/dark) — visible for a
+    // frame before the page paints, so it must already match the resolved
+    // theme (nativeTheme.themeSource is set before this runs, see index.ts).
+    backgroundColor: nativeTheme.shouldUseDarkColors ? '#0B0C0B' : '#F4F4F1',
     // macOS keeps its traffic lights; the design's drawn dots are mockup-only.
     titleBarStyle: isMac ? 'hiddenInset' : 'default',
     show: false,

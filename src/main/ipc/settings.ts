@@ -1,8 +1,8 @@
-import { ipcMain } from 'electron';
-import { setTabGroupsEnabledInput } from '@shared/ipc-contract';
+import { ipcMain, nativeTheme } from 'electron';
+import { setTabGroupsEnabledInput, setThemeInput } from '@shared/ipc-contract';
 import { CHANNELS } from '@shared/channels';
 import { getDb } from '../db/client';
-import { getSettings, setTabGroupsEnabled } from '../db/settings-queries';
+import { getSettings, setTabGroupsEnabled, setTheme } from '../db/settings-queries';
 
 export function registerSettingsHandlers(): void {
   ipcMain.handle(CHANNELS.settingsGet, () => getSettings(getDb()));
@@ -10,5 +10,11 @@ export function registerSettingsHandlers(): void {
   ipcMain.handle(CHANNELS.settingsSetTabGroupsEnabled, (_event, rawInput: unknown) => {
     const { enabled } = setTabGroupsEnabledInput.parse(rawInput);
     setTabGroupsEnabled(getDb(), enabled);
+  });
+
+  ipcMain.handle(CHANNELS.settingsSetTheme, (_event, rawInput: unknown) => {
+    const { theme } = setThemeInput.parse(rawInput);
+    setTheme(getDb(), theme);
+    nativeTheme.themeSource = theme;
   });
 }

@@ -49,7 +49,7 @@ export function BoardColumn({
         ))}
 
         {issues.length === 0 ? (
-          <div className="rounded-[22px] bg-ink-900/[0.035] p-[18px] text-center font-sans text-micro text-text-faint">
+          <div className="rounded-[22px] bg-surface-sunken p-[18px] text-center font-sans text-micro text-text-faint">
             Nothing here
           </div>
         ) : null}

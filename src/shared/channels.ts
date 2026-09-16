@@ -35,6 +35,7 @@ export const CHANNELS = {
   imagesFetch: 'images:fetch',
   settingsGet: 'settings:get',
   settingsSetTabGroupsEnabled: 'settings:set-tab-groups-enabled',
+  settingsSetTheme: 'settings:set-theme',
   tabLayoutGet: 'tab-layout:get',
   tabLayoutSet: 'tab-layout:set',
 } as const;

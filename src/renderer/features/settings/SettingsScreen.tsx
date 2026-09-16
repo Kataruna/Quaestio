@@ -1,12 +1,18 @@
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { RefreshCw } from 'lucide-react';
+import type { Theme } from '@shared/ipc-contract';
 import { Button } from '@/components/ui/button';
 import { SelectPill } from '@/components/ui/select-pill';
 import { Switch } from '@/components/ui/switch';
 import { showToast } from '@/components/ui/toast';
 
 const INTERVAL_OPTIONS = ['Every 5 min', 'Every 15 min', 'Hourly', 'Manual only'] as const;
+
+const THEME_OPTIONS = ['Light', 'Dark', 'System'] as const;
+type ThemeOptionLabel = (typeof THEME_OPTIONS)[number];
+const THEME_LABEL: Record<Theme, ThemeOptionLabel> = { light: 'Light', dark: 'Dark', system: 'System' };
+const THEME_FROM_LABEL: Record<ThemeOptionLabel, Theme> = { Light: 'light', Dark: 'dark', System: 'system' };
 
 interface Row {
   id: string;
@@ -42,10 +48,26 @@ export function SettingsScreen() {
   const queryClient = useQueryClient();
   const settingsQuery = useQuery({ queryKey: ['settings'], queryFn: () => window.api.settings.get() });
   const tabGroupsEnabled = settingsQuery.data?.tabGroupsEnabled ?? false;
+  const theme = settingsQuery.data?.theme ?? 'system';
   const setTabGroupsMutation = useMutation({
     mutationFn: (enabled: boolean) => window.api.settings.setTabGroupsEnabled({ enabled }),
     onSuccess: (_data, enabled) => {
-      queryClient.setQueryData(['settings'], { tabGroupsEnabled: enabled });
+      queryClient.setQueryData(['settings'], (current: { tabGroupsEnabled: boolean; theme: Theme } | undefined) => ({
+        tabGroupsEnabled: enabled,
+        theme: current?.theme ?? 'system',
+      }));
+    },
+    onError: (error) => {
+      showToast(`Failed to save setting: ${error instanceof Error ? error.message : 'unknown error'}`, 'error');
+    },
+  });
+  const setThemeMutation = useMutation({
+    mutationFn: (next: Theme) => window.api.settings.setTheme({ theme: next }),
+    onSuccess: (_data, next) => {
+      queryClient.setQueryData(['settings'], (current: { tabGroupsEnabled: boolean; theme: Theme } | undefined) => ({
+        tabGroupsEnabled: current?.tabGroupsEnabled ?? false,
+        theme: next,
+      }));
     },
     onError: (error) => {
       showToast(`Failed to save setting: ${error instanceof Error ? error.message : 'unknown error'}`, 'error');
@@ -62,6 +84,20 @@ export function SettingsScreen() {
       </p>
 
       <div className="flex flex-col gap-0.5">
+        <div className="flex items-center gap-3.5 border-b border-line-hairline py-3.5">
+          <span className="flex flex-col gap-0.5">
+            <span className="font-sans text-label font-medium text-text-strong">Appearance</span>
+            <span className="font-sans text-micro text-text-muted">Light, dark, or match the system</span>
+          </span>
+          <SelectPill
+            className="ml-auto"
+            options={THEME_OPTIONS}
+            aria-label="Appearance"
+            value={THEME_LABEL[theme]}
+            onChange={(event) => setThemeMutation.mutate(THEME_FROM_LABEL[event.target.value as ThemeOptionLabel])}
+          />
+        </div>
+
         <div className="flex items-center gap-3.5 border-b border-line-hairline py-3.5">
           <span className="flex flex-col gap-0.5">
             <span className="font-sans text-label font-medium text-text-strong">Pull interval</span>

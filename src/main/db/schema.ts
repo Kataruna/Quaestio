@@ -34,6 +34,7 @@ export const repos = sqliteTable('repos', {
 export const settings = sqliteTable('settings', {
   id: integer('id').primaryKey(),
   tabGroupsEnabled: integer('tabGroupsEnabled', { mode: 'boolean' }).notNull().default(false),
+  theme: text('theme', { enum: ['light', 'dark', 'system'] }).notNull().default('system'),
 });
 
 /**
