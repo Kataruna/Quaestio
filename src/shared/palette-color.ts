@@ -1,5 +1,5 @@
 /** Every override this app ever stores is one of these two shapes. */
-const RGBA_PATTERN = /^rgba\((\d+),\s*(\d+),\s*(\d+),\s*([\d.]+)\)$/;
+export const RGBA_PATTERN = /^rgba\((\d+),\s*(\d+),\s*(\d+),\s*([\d.]+)\)$/;
 
 function toHexByte(n: number): string {
   return n.toString(16).padStart(2, '0');

@@ -21,6 +21,21 @@ describe('validatePaletteImport', () => {
     expect(validatePaletteImport(input)).toEqual({ light: {}, dark: {} });
   });
 
+  it('drops string values that are not a real color, like a named color', () => {
+    const input = { light: { 'surface-app': 'blue' }, dark: { 'surface-app': 'not-a-color' } };
+    expect(validatePaletteImport(input)).toEqual({ light: {}, dark: {} });
+  });
+
+  it('accepts a 6-digit hex color', () => {
+    const input = { light: { 'surface-app': '#ff0000' }, dark: {} };
+    expect(validatePaletteImport(input)).toEqual({ light: { 'surface-app': '#ff0000' }, dark: {} });
+  });
+
+  it('accepts an rgba() color in the exact format withAlpha produces', () => {
+    const input = { light: { 'surface-app': 'rgba(255, 0, 0, 0.5)' }, dark: {} };
+    expect(validatePaletteImport(input)).toEqual({ light: { 'surface-app': 'rgba(255, 0, 0, 0.5)' }, dark: {} });
+  });
+
   it('ignores a non-object light/dark value instead of throwing', () => {
     const input = { light: 'not an object', dark: null };
     expect(validatePaletteImport(input)).toEqual({ light: {}, dark: {} });

@@ -122,15 +122,33 @@ export function ColorCustomizationScreen({ onBack }: { onBack: () => void }) {
               <div className="flex flex-col gap-1">
                 {group.tokens.map((token) => {
                   const value = effectiveValue(mode, token);
+                  const hex = parseColor(value).hex;
                   const hasOverride = overrides[mode][token] !== undefined;
                   return (
                     <div key={token} className="flex items-center gap-2.5 py-1">
                       <span className="flex-1 font-sans text-label text-text-body">{token}</span>
                       <input
+                        // Keyed on the committed hex so the DOM node remounts (picking up a
+                        // fresh `defaultValue`) whenever the effective value changes from
+                        // outside this input's own drag — a reset, an import, or this row's
+                        // own commit landing in the query cache. Uncontrolled otherwise, so
+                        // the OS color panel can update the swatch live while dragging
+                        // without React fighting it on every tick.
+                        key={hex}
                         type="color"
                         aria-label={`${mode} ${token}`}
-                        value={parseColor(value).hex}
-                        onChange={(event) => handlePick(mode, token, event.target.value)}
+                        defaultValue={hex}
+                        ref={(node) => {
+                          if (!node) return;
+                          const onCommit = (event: Event) => {
+                            handlePick(mode, token, (event.target as HTMLInputElement).value);
+                          };
+                          // Native `change` fires once, on commit — not React's `onChange`
+                          // prop, which for a color input maps to the native `input` event
+                          // and would fire continuously while dragging in the OS picker.
+                          node.addEventListener('change', onCommit);
+                          return () => node.removeEventListener('change', onCommit);
+                        }}
                         className="h-7 w-10 cursor-pointer rounded-xs border border-line-hairline bg-transparent p-0"
                       />
                       {hasOverride ? (
