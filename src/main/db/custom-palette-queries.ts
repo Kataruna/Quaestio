@@ -1,6 +1,6 @@
 import { eq } from 'drizzle-orm';
 import type { BetterSQLite3Database } from 'drizzle-orm/better-sqlite3';
-import type { PaletteMode, PaletteOverrides, PaletteToken } from '@shared/palette-tokens';
+import type { PaletteMode, PaletteOverrides, AnyPaletteToken } from '@shared/palette-tokens';
 import { customPalette } from './schema';
 
 const ROW_ID = 1;
@@ -34,7 +34,7 @@ export function getPaletteOverrides(db: BetterSQLite3Database): PaletteOverrides
 export function setPaletteOverride(
   db: BetterSQLite3Database,
   mode: PaletteMode,
-  token: PaletteToken,
+  token: AnyPaletteToken,
   value: string | null,
 ): void {
   const current = readRow(db);

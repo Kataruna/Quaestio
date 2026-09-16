@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import type { Comment, Issue, Repo, SyncStatus, TabSlot, User } from './types';
-import { PALETTE_TOKENS, type PaletteOverrides } from './palette-tokens';
+import { ALL_TOKENS, type PaletteOverrides } from './palette-tokens';
 
 // Re-exported so every existing `import { CHANNELS } from '.../ipc-contract'`
 // keeps working. The definitions live in the zod-free `./channels` module, which
@@ -125,7 +125,7 @@ export type Theme = z.infer<typeof themeSchema>;
 export const setThemeInput = z.object({ theme: themeSchema });
 export type SetThemeInput = z.infer<typeof setThemeInput>;
 
-export const paletteTokenSchema = z.enum(PALETTE_TOKENS);
+export const paletteTokenSchema = z.enum(ALL_TOKENS);
 
 export const setPaletteOverrideInput = z.object({
   mode: z.enum(['light', 'dark']),
