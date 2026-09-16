@@ -25,11 +25,14 @@ export const PALETTE_TOKENS = [
   'status-info-bg',
 ] as const;
 
+import type { RampToken } from './ramp-tokens';
+
 export type PaletteToken = (typeof PALETTE_TOKENS)[number];
 export type PaletteMode = 'light' | 'dark';
+export type OverrideToken = PaletteToken | RampToken;
 export type PaletteOverrides = {
-  light: Partial<Record<PaletteToken, string>>;
-  dark: Partial<Record<PaletteToken, string>>;
+  light: Partial<Record<OverrideToken, string>>;
+  dark: Partial<Record<OverrideToken, string>>;
 };
 
 export const PALETTE_GROUPS: { label: string; tokens: PaletteToken[] }[] = [
