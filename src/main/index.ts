@@ -9,6 +9,7 @@ import { registerIssuesHandlers } from './ipc/issues';
 import { registerImagesHandlers } from './ipc/images';
 import { registerSyncHandlers } from './ipc/sync';
 import { registerSettingsHandlers } from './ipc/settings';
+import { registerThemeHandlers } from './ipc/theme';
 import { registerTabLayoutHandlers } from './ipc/tab-layout';
 import { restoreSession, getAuthenticatedClient } from './github/auth';
 import { runMigrations, getDb } from './db/client';
@@ -55,6 +56,7 @@ async function bootstrap(): Promise<void> {
   registerImagesHandlers();
   registerSyncHandlers();
   registerSettingsHandlers();
+  registerThemeHandlers();
   registerTabLayoutHandlers();
   // One scheduler for the whole app, independent of window lifecycle — same
   // reasoning as the handlers above (macOS `activate` can recreate a window
