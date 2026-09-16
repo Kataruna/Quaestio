@@ -46,4 +46,14 @@ describe('validatePaletteImport', () => {
     expect(() => validatePaletteImport(null)).toThrow('Palette file must be a JSON object.');
     expect(() => validatePaletteImport([1, 2, 3])).not.toThrow(); // arrays are objects; light/dark just come back empty
   });
+
+  it('accepts ramp tokens with a valid hex value', () => {
+    const input = { light: { 'ramp-accent': '#ff0000', 'ramp-ink': '#000000' }, dark: {} };
+    expect(validatePaletteImport(input)).toEqual(input);
+  });
+
+  it('drops surface-accent and surface-accent-soft now that they are no longer known tokens', () => {
+    const input = { light: { 'surface-accent': '#ff0000', 'surface-app': '#123456' }, dark: {} };
+    expect(validatePaletteImport(input)).toEqual({ light: { 'surface-app': '#123456' }, dark: {} });
+  });
 });
