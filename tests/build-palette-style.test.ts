@@ -6,9 +6,9 @@ describe('buildPaletteStyleTag', () => {
     expect(buildPaletteStyleTag({ light: {}, dark: {} })).toBe('');
   });
 
-  it('emits a plain :root rule for light overrides', () => {
+  it('wraps light overrides in a prefers-color-scheme: light media query', () => {
     const css = buildPaletteStyleTag({ light: { 'surface-app': '#ff0000' }, dark: {} });
-    expect(css).toBe(':root{--color-surface-app:#ff0000;}');
+    expect(css).toBe('@media (prefers-color-scheme: light){:root{--color-surface-app:#ff0000;}}');
   });
 
   it('wraps dark overrides in a prefers-color-scheme media query', () => {
@@ -22,7 +22,7 @@ describe('buildPaletteStyleTag', () => {
       dark: { 'surface-app': '#0b0c0b' },
     });
     expect(css).toBe(
-      ':root{--color-surface-app:#ff0000;}@media (prefers-color-scheme: dark){:root{--color-surface-app:#0b0c0b;}}',
+      '@media (prefers-color-scheme: light){:root{--color-surface-app:#ff0000;}}@media (prefers-color-scheme: dark){:root{--color-surface-app:#0b0c0b;}}',
     );
   });
 
@@ -31,6 +31,6 @@ describe('buildPaletteStyleTag', () => {
       light: { 'surface-app': '#ff0000', 'text-strong': '#000000' },
       dark: {},
     });
-    expect(css).toBe(':root{--color-surface-app:#ff0000;--color-text-strong:#000000;}');
+    expect(css).toBe('@media (prefers-color-scheme: light){:root{--color-surface-app:#ff0000;--color-text-strong:#000000;}}');
   });
 });
