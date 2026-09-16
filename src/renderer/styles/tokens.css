@@ -46,7 +46,7 @@
   --color-surface-card: #ffffff;
   --color-surface-sunken: #eeeeea;
   --color-surface-ink: #0e0f10;
-  --color-surface-accent: #c7f24c;
+  --color-surface-accent: var(--color-lime-400);
   --color-surface-accent-soft: #f1fbd9;
 
   --color-background-chip: #fafaf9;

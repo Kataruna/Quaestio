@@ -46,4 +46,24 @@ describe('validatePaletteImport', () => {
     expect(() => validatePaletteImport(null)).toThrow('Palette file must be a JSON object.');
     expect(() => validatePaletteImport([1, 2, 3])).not.toThrow(); // arrays are objects; light/dark just come back empty
   });
+
+  it('accepts ramp tokens with a valid hex value', () => {
+    const input = { light: { 'ramp-accent': '#ff0000', 'ramp-ink': '#000000' }, dark: {} };
+    expect(validatePaletteImport(input)).toEqual(input);
+  });
+
+  it('drops surface-accent and surface-accent-soft now that they are no longer known tokens', () => {
+    const input = { light: { 'surface-accent': '#ff0000', 'surface-app': '#123456' }, dark: {} };
+    expect(validatePaletteImport(input)).toEqual({ light: { 'surface-app': '#123456' }, dark: {} });
+  });
+
+  it('drops an rgba() value on a ramp token, since ramp math only parses hex', () => {
+    const input = { light: { 'ramp-accent': 'rgba(255, 0, 0, 0.5)' }, dark: {} };
+    expect(validatePaletteImport(input)).toEqual({ light: {}, dark: {} });
+  });
+
+  it('still accepts an rgba() value on a semantic token', () => {
+    const input = { light: { 'surface-app': 'rgba(255, 0, 0, 0.5)' }, dark: {} };
+    expect(validatePaletteImport(input)).toEqual({ light: { 'surface-app': 'rgba(255, 0, 0, 0.5)' }, dark: {} });
+  });
 });

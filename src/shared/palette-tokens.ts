@@ -1,10 +1,10 @@
+import { RAMP_TOKENS, type RampToken } from './ramp-tokens';
+
 export const PALETTE_TOKENS = [
   'surface-app',
   'surface-card',
   'surface-sunken',
   'surface-ink',
-  'surface-accent',
-  'surface-accent-soft',
   'surface-overlay',
   'surface-chip',
   'text-strong',
@@ -27,24 +27,17 @@ export const PALETTE_TOKENS = [
 
 export type PaletteToken = (typeof PALETTE_TOKENS)[number];
 export type PaletteMode = 'light' | 'dark';
+export type AnyPaletteToken = PaletteToken | RampToken;
+export const ALL_TOKENS: readonly AnyPaletteToken[] = [...PALETTE_TOKENS, ...RAMP_TOKENS];
 export type PaletteOverrides = {
-  light: Partial<Record<PaletteToken, string>>;
-  dark: Partial<Record<PaletteToken, string>>;
+  light: Partial<Record<AnyPaletteToken, string>>;
+  dark: Partial<Record<AnyPaletteToken, string>>;
 };
 
 export const PALETTE_GROUPS: { label: string; tokens: PaletteToken[] }[] = [
   {
     label: 'Surfaces',
-    tokens: [
-      'surface-app',
-      'surface-card',
-      'surface-sunken',
-      'surface-ink',
-      'surface-accent',
-      'surface-accent-soft',
-      'surface-overlay',
-      'surface-chip',
-    ],
+    tokens: ['surface-app', 'surface-card', 'surface-sunken', 'surface-ink', 'surface-overlay', 'surface-chip'],
   },
   { label: 'Text', tokens: ['text-strong', 'text-body', 'text-muted', 'text-faint'] },
   { label: 'Lines', tokens: ['line-hairline', 'line-strong'] },
@@ -71,8 +64,6 @@ export const PALETTE_DEFAULTS: Record<PaletteMode, Record<PaletteToken, string>>
     'surface-card': '#ffffff',
     'surface-sunken': '#eeeeea',
     'surface-ink': '#0e0f10',
-    'surface-accent': '#c7f24c',
-    'surface-accent-soft': '#f1fbd9',
     'surface-overlay': 'rgba(14, 15, 16, 0.55)',
     'surface-chip': '#ffffff',
     'text-strong': '#16181a',
@@ -97,8 +88,6 @@ export const PALETTE_DEFAULTS: Record<PaletteMode, Record<PaletteToken, string>>
     'surface-card': '#181a17',
     'surface-sunken': '#1f211d',
     'surface-ink': '#272a25',
-    'surface-accent': '#c7f24c',
-    'surface-accent-soft': 'rgba(199, 242, 76, 0.12)',
     'surface-overlay': 'rgba(5, 6, 5, 0.66)',
     'surface-chip': '#1f211d',
     'text-strong': '#f4f5f0',

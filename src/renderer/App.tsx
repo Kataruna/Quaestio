@@ -5,6 +5,7 @@ import { quickTransition } from '@/lib/motion';
 import type { DeviceFlowStarted } from '@shared/ipc-contract';
 import type { Repo, SyncStatus, User } from '@shared/types';
 import { buildPaletteStyleTag } from '@shared/build-palette-style';
+import { expandRampOverrides } from '@shared/expand-ramp-overrides';
 import { TitleBar } from '@/components/shell/TitleBar';
 import { SidebarRail, type ScreenId } from '@/components/shell/SidebarRail';
 import { RepoTabs } from '@/components/shell/RepoTabs';
@@ -107,7 +108,7 @@ export function App() {
       styleEl.id = 'custom-palette-overrides';
       document.head.appendChild(styleEl);
     }
-    styleEl.textContent = buildPaletteStyleTag(overrides);
+    styleEl.textContent = buildPaletteStyleTag(expandRampOverrides(overrides));
   }, [customPaletteQuery.data]);
 
   useEffect(() => {
